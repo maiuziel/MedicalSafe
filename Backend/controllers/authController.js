@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const AuditLog = require('../models/AuditLog');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
@@ -22,13 +23,22 @@ const register = async (req, res) => {
       password: hashedPassword,
     });
 
-    res.status(201).json({
+    // ✅ AUDIT LOG – REGISTER
+    await AuditLog.create({
+      userId: user._id,
+      action: 'USER_REGISTER',
+      resource: 'auth',
+      ipAddress: req.ip,
+      userAgent: req.headers['user-agent'],
+    });
+
+    return res.status(201).json({
       message: 'User registered successfully',
       userId: user._id,
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Server error' });
+    return res.status(500).json({ message: 'Server error' });
   }
 };
 
@@ -47,15 +57,30 @@ const login = async (req, res) => {
     }
 
     const token = jwt.sign(
-      { userId: user._id },
+      {
+        userId: user._id,
+        role: user.role,
+      },
       process.env.JWT_SECRET,
       { expiresIn: '1h' }
     );
 
-    res.json({ token });
+    // ✅ AUDIT LOG – LOGIN
+    await AuditLog.create({
+      userId: user._id,
+      action: 'USER_LOGIN',
+      resource: 'auth',
+      ipAddress: req.ip,
+      userAgent: req.headers['user-agent'],
+    });
+
+    return res.json({
+      token,
+      role: user.role,
+    });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Server error' });
+    return res.status(500).json({ message: 'Server error' });
   }
 };
 

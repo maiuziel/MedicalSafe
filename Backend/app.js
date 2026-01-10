@@ -10,6 +10,9 @@ app.use(express.json());
 const authRoutes = require('./routes/authRoutes');
 app.use('/api/auth', authRoutes);
 
+const rbacTestRoutes = require('./routes/rbacTestRoutes');
+app.use('/api/rbac-test', rbacTestRoutes);
+
 // 🔹 route בדיקה
 app.get('/', (req, res) => {
   res.send('MedicalSafe API is running');
