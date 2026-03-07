@@ -8,6 +8,7 @@ const {
   getMyProfile,
   updateMyProfile,
   getDoctorAppointments,
+  setAvailability,
   getDoctors
 } = require('../controllers/doctorController');
 
@@ -52,6 +53,12 @@ router.get(
   authMiddleware,
   authorizeRoles('doctor'),
   getDoctorAppointments
+);
+router.put(
+  '/availability',
+  authMiddleware,
+  authorizeRoles('doctor'),
+  setAvailability
 );
 
 module.exports = router;

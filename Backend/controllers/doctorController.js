@@ -79,11 +79,32 @@ const getDoctors = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
+// הגדרת זמינות רופא
+const setAvailability = async (req, res) => {
+  try {
 
+    const { availability } = req.body;
+
+    const doctor = await User.findByIdAndUpdate(
+      req.user.userId,
+      { availability },
+      { new: true }
+    ).select('-password');
+
+    res.json({
+      message: 'Availability updated successfully',
+      availability: doctor.availability
+    });
+
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+};
 
 module.exports = {
   getMyProfile,
   updateMyProfile,
   getDoctorAppointments,
-  getDoctors
+  getDoctors,
+  setAvailability
 };

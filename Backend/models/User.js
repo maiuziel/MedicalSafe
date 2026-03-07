@@ -31,7 +31,22 @@ const userSchema = new mongoose.Schema(
 
   specialization: {
     type: String
-  }
+  },
+
+  // זמינות הרופא לקבלת מטופלים
+  availability: [
+    {
+      day: {
+        type: String
+      },
+      startTime: {
+        type: String
+      },
+      endTime: {
+        type: String
+      }
+    }
+  ]
 
 },
 { timestamps: true }
