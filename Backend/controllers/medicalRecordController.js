@@ -53,9 +53,26 @@ const getMyMedicalRecords = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
+// רופא רואה רשומות רפואיות של מטופל
+const getPatientMedicalRecords = async (req, res) => {
+  try {
+
+    const { patientId } = req.params;
+
+    const records = await MedicalRecord.find({
+      patient: patientId
+    }).populate('doctor', 'email');
+
+    res.json(records);
+
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+};
 
 
 module.exports = {
   createMedicalRecord,
+  getPatientMedicalRecords,
   getMyMedicalRecords
 };

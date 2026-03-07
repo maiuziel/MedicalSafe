@@ -6,7 +6,8 @@ const authorize = require('../middleware/authorize');
 
 const {
   createMedicalRecord,
-  getMyMedicalRecords
+  getMyMedicalRecords,
+  getPatientMedicalRecords
 } = require('../controllers/medicalRecordController');
 
 
@@ -27,5 +28,10 @@ router.get(
   getMyMedicalRecords
 );
 
-
+router.get(
+  '/patient/:patientId',
+  authMiddleware,
+  authorize('doctor'),
+  getPatientMedicalRecords
+);
 module.exports = router;
