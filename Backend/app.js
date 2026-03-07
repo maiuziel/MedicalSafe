@@ -17,13 +17,14 @@ const doctorRoutes = require('./routes/doctorRoutes');
 const secretaryRoutes = require('./routes/secretaryRoutes');
 const appointmentRoutes = require('./routes/appointmentRoutes');
 const medicalRecordRoutes = require('./routes/medicalRecordRoutes');
+const adminRoutes = require('./routes/adminRoutes');
 
 app.use('/api/medical-records', medicalRecordRoutes);
 app.use('/api/appointments', appointmentRoutes);
 app.use('/api/secretary', secretaryRoutes);
 app.use('/api/patient', patientRoutes);
 app.use('/api/doctor', doctorRoutes);
-
+app.use('/api/admin', adminRoutes);
 // 🔹 route בדיקה
 app.get('/', (req, res) => {
   res.send('MedicalSafe API is running');

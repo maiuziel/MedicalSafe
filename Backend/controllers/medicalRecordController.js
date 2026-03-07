@@ -1,4 +1,5 @@
 const MedicalRecord = require('../models/MedicalRecord');
+const auditLogger = require('../utils/auditLogger');
 
 
 // רופא יוצר תיק רפואי
@@ -13,6 +14,14 @@ const createMedicalRecord = async (req, res) => {
       diagnosis,
       treatment,
       notes
+    });
+
+    // ✅ Audit Log
+    await auditLogger({
+      req,
+      action: 'CREATE_MEDICAL_RECORD',
+      resource: 'medical_record',
+      resourceId: record._id
     });
 
     res.status(201).json(record);
@@ -30,6 +39,13 @@ const getMyMedicalRecords = async (req, res) => {
     const records = await MedicalRecord.find({
       patient: req.user.userId
     }).populate('doctor', 'email');
+
+    // ✅ Audit Log
+    await auditLogger({
+      req,
+      action: 'VIEW_MEDICAL_RECORD',
+      resource: 'medical_record'
+    });
 
     res.json(records);
 

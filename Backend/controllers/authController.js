@@ -5,13 +5,22 @@ const jwt = require('jsonwebtoken');
 
 const register = async (req, res) => {
   try {
-    const { email, password } = req.body;
+
+    const { email, password, role } = req.body;
 
     if (!email || !password) {
       return res.status(400).json({ message: 'Email and password are required' });
     }
 
+    // בדיקת role חוקי
+    const allowedRoles = ['patient', 'doctor', 'secretary', 'admin'];
+
+    const userRole = role && allowedRoles.includes(role)
+      ? role
+      : 'patient';
+
     const existingUser = await User.findOne({ email });
+
     if (existingUser) {
       return res.status(409).json({ message: 'User already exists' });
     }
@@ -21,6 +30,7 @@ const register = async (req, res) => {
     const user = await User.create({
       email,
       password: hashedPassword,
+      role: userRole
     });
 
     // ✅ AUDIT LOG – REGISTER
@@ -35,7 +45,9 @@ const register = async (req, res) => {
     return res.status(201).json({
       message: 'User registered successfully',
       userId: user._id,
+      role: user.role
     });
+
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: 'Server error' });
@@ -44,14 +56,17 @@ const register = async (req, res) => {
 
 const login = async (req, res) => {
   try {
+
     const { email, password } = req.body;
 
     const user = await User.findOne({ email });
+
     if (!user) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
+
     if (!isMatch) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
@@ -78,6 +93,7 @@ const login = async (req, res) => {
       token,
       role: user.role,
     });
+
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: 'Server error' });

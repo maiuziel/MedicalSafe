@@ -1,4 +1,6 @@
 const User = require('../models/User');
+const Appointment = require('../models/Appointment');
+const auditLogger = require('../utils/auditLogger');
 
 /**
  * GET /api/secretary/me
@@ -12,11 +14,20 @@ const getMyProfile = async (req, res) => {
       return res.status(404).json({ message: 'Secretary not found' });
     }
 
+    // ✅ Audit Log
+    await auditLogger({
+      req,
+      action: 'VIEW_PROFILE',
+      resource: 'secretary_profile',
+      resourceId: req.user.userId
+    });
+
     res.json(secretary);
   } catch (err) {
     res.status(500).json({ message: 'Server error' });
   }
 };
+
 
 /**
  * PUT /api/secretary/me
@@ -32,11 +43,20 @@ const updateMyProfile = async (req, res) => {
       { new: true, runValidators: true }
     ).select('-password');
 
+    // ✅ Audit Log
+    await auditLogger({
+      req,
+      action: 'UPDATE_PROFILE',
+      resource: 'secretary_profile',
+      resourceId: req.user.userId
+    });
+
     res.json(updatedSecretary);
   } catch (err) {
     res.status(500).json({ message: 'Server error' });
   }
 };
+
 
 /**
  * GET /api/secretary/doctors
@@ -45,16 +65,24 @@ const updateMyProfile = async (req, res) => {
 const getDoctors = async (req, res) => {
   try {
     const doctors = await User.find({ role: 'doctor' }).select('-password');
+
+    // ✅ Audit Log
+    await auditLogger({
+      req,
+      action: 'VIEW_DOCTORS',
+      resource: 'user'
+    });
+
     res.json(doctors);
   } catch (err) {
     res.status(500).json({ message: 'Server error' });
   }
 };
 
+
 /**
  * GET /api/secretary/patients
  * חיפוש / צפייה במטופלים
- * ?q=שם או ת"ז
  */
 const getPatients = async (req, res) => {
   try {
@@ -71,15 +99,51 @@ const getPatients = async (req, res) => {
       : { role: 'patient' };
 
     const patients = await User.find(filter).select('-password');
+
+    // ✅ Audit Log
+    await auditLogger({
+      req,
+      action: 'VIEW_PATIENTS',
+      resource: 'user'
+    });
+
     res.json(patients);
   } catch (err) {
     res.status(500).json({ message: 'Server error' });
   }
 };
 
+
+/**
+ * GET /api/secretary/appointments
+ * צפייה בכל התורים במערכת
+ */
+const getAllAppointments = async (req, res) => {
+  try {
+
+    const appointments = await Appointment.find()
+      .populate('doctor', 'fullName email')
+      .populate('patient', 'fullName email');
+
+    // ✅ Audit Log
+    await auditLogger({
+      req,
+      action: 'VIEW_ALL_APPOINTMENTS',
+      resource: 'appointment'
+    });
+
+    res.json(appointments);
+
+  } catch (err) {
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+
 module.exports = {
   getMyProfile,
   updateMyProfile,
   getDoctors,
   getPatients,
+  getAllAppointments,
 };

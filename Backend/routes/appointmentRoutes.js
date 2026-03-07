@@ -8,6 +8,7 @@ const {
   createAppointment,
   getMyAppointments,
   cancelAppointment,
+  updateAppointment
 } = require('../controllers/appointmentController');
 
 // קביעת תור
@@ -32,6 +33,14 @@ router.put(
   authMiddleware,
   authorize('patient'),
   cancelAppointment
+);
+
+// שינוי תור (מזכירה)
+router.patch(
+  '/:id',
+  authMiddleware,
+  authorize('secretary'),
+  updateAppointment
 );
 
 module.exports = router;

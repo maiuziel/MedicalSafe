@@ -9,6 +9,7 @@ const {
   updateMyProfile,
   getDoctors,
   getPatients,
+  getAllAppointments,
 } = require('../controllers/secretaryController');
 
 // כל הראוטים דורשים:
@@ -50,5 +51,10 @@ router.get(
   authorizeRoles('secretary'),
   getPatients
 );
-
+router.get(
+  '/appointments',
+  authMiddleware,
+  authorizeRoles('secretary'),
+  getAllAppointments
+);
 module.exports = router;
