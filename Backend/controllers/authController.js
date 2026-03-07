@@ -6,7 +6,7 @@ const jwt = require('jsonwebtoken');
 const register = async (req, res) => {
   try {
 
-    const { email, password, role } = req.body;
+    const { email, password, role, specialization } = req.body;
 
     if (!email || !password) {
       return res.status(400).json({ message: 'Email and password are required' });
@@ -27,13 +27,15 @@ const register = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    // יצירת המשתמש
     const user = await User.create({
       email,
       password: hashedPassword,
-      role: userRole
+      role: userRole,
+      specialization: userRole === 'doctor' ? specialization : undefined
     });
 
-    // ✅ AUDIT LOG – REGISTER
+    // AUDIT LOG – REGISTER
     await AuditLog.create({
       userId: user._id,
       action: 'USER_REGISTER',
@@ -53,6 +55,8 @@ const register = async (req, res) => {
     return res.status(500).json({ message: 'Server error' });
   }
 };
+
+
 
 const login = async (req, res) => {
   try {
@@ -80,7 +84,7 @@ const login = async (req, res) => {
       { expiresIn: '1h' }
     );
 
-    // ✅ AUDIT LOG – LOGIN
+    // AUDIT LOG – LOGIN
     await AuditLog.create({
       userId: user._id,
       action: 'USER_LOGIN',
@@ -99,5 +103,6 @@ const login = async (req, res) => {
     return res.status(500).json({ message: 'Server error' });
   }
 };
+
 
 module.exports = { register, login };

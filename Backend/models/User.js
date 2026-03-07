@@ -21,13 +21,16 @@ const userSchema = new mongoose.Schema(
     default: 'patient',
   },
 
-  // תחום התמחות של רופא
+  fullName: {
+    type: String
+  },
+
+  phone: {
+    type: String
+  },
+
   specialization: {
-    type: String,
-    required: function () {
-      return this.role === 'doctor';
-    },
-    trim: true
+    type: String
   }
 
 },
