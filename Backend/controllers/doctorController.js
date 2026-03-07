@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const Appointment = require('../models/Appointment');
 
 // GET /api/doctor/me
 // צפייה בפרטי הרופא המחובר
@@ -37,7 +38,23 @@ const updateMyProfile = async (req, res) => {
   }
 };
 
+// GET /api/doctor/appointments
+// הרופא רואה את כל התורים שלו
+const getDoctorAppointments = async (req, res) => {
+  try {
+    const appointments = await Appointment.find({
+      doctor: req.user.userId
+    }).populate('patient', 'email');
+
+    res.json(appointments);
+
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
 module.exports = {
   getMyProfile,
   updateMyProfile,
+  getDoctorAppointments
 };
