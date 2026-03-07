@@ -7,12 +7,28 @@ const authorizeRoles = require('../middleware/roles');
 const {
   getMyProfile,
   updateMyProfile,
-  getDoctorAppointments
+  getDoctorAppointments,
+  getDoctors
 } = require('../controllers/doctorController');
 
-// כל הראוטים כאן:
-// ✔️ דורשים התחברות
-// ✔️ מוגבלים לרופא בלבד
+
+// ----------------------------------------------------
+// צפייה ברשימת הרופאים (מטופל או מזכירה)
+// GET /api/doctor
+// GET /api/doctor?specialization=cardiology
+// ----------------------------------------------------
+
+router.get(
+  '/',
+  authMiddleware,
+  authorizeRoles('patient', 'secretary'),
+  getDoctors
+);
+
+
+// ----------------------------------------------------
+// ראוטים לרופא עצמו
+// ----------------------------------------------------
 
 // רופא רואה את הפרופיל שלו
 router.get(
@@ -30,6 +46,7 @@ router.put(
   updateMyProfile
 );
 
+// רופא רואה את התורים שלו
 router.get(
   '/appointments',
   authMiddleware,
