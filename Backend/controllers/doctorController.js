@@ -101,10 +101,29 @@ const setAvailability = async (req, res) => {
   }
 };
 
+const uploadMedicalFile = async (req, res) => {
+  try {
+    const { patientId } = req.params;
+
+    if (!req.file) {
+      return res.status(400).json({ message: 'No file uploaded' });
+    }
+
+    res.status(201).json({
+      message: 'File uploaded successfully',
+      file: req.file.filename,
+      patientId
+    });
+
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+};
 module.exports = {
   getMyProfile,
   updateMyProfile,
   getDoctorAppointments,
   getDoctors,
-  setAvailability
+  setAvailability,
+  uploadMedicalFile
 };

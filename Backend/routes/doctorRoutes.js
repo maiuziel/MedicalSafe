@@ -3,13 +3,15 @@ const router = express.Router();
 
 const authMiddleware = require('../middleware/authMiddleware');
 const authorizeRoles = require('../middleware/roles');
+const upload = require('../middleware/upload');
 
 const {
   getMyProfile,
   updateMyProfile,
   getDoctorAppointments,
   setAvailability,
-  getDoctors
+  getDoctors,
+  uploadMedicalFile
 } = require('../controllers/doctorController');
 
 
@@ -59,6 +61,13 @@ router.put(
   authMiddleware,
   authorizeRoles('doctor'),
   setAvailability
+);
+router.post(
+  '/patient/:patientId/files',
+  authMiddleware,
+  authorizeRoles('doctor'),
+  upload.single('file'),
+  uploadMedicalFile
 );
 
 module.exports = router;
