@@ -1,8 +1,8 @@
 const User = require('../models/User');
 const Appointment = require('../models/Appointment');
+const Feedback = require('../models/Feedback');
 
 // GET /api/doctor/me
-// צפייה בפרטי הרופא המחובר
 const getMyProfile = async (req, res) => {
   try {
     const userId = req.user.userId;
@@ -22,7 +22,6 @@ const getMyProfile = async (req, res) => {
 
 
 // PUT /api/doctor/me
-// עדכון פרטים אישיים של הרופא
 const updateMyProfile = async (req, res) => {
   try {
 
@@ -44,7 +43,6 @@ const updateMyProfile = async (req, res) => {
 
 
 // GET /api/doctor/appointments
-// הרופא רואה את כל התורים שלו
 const getDoctorAppointments = async (req, res) => {
   try {
 
@@ -61,7 +59,6 @@ const getDoctorAppointments = async (req, res) => {
 
 
 // GET /api/doctor
-// צפייה ברשימת הרופאים (עם אפשרות סינון לפי תחום התמחות)
 const getDoctors = async (req, res) => {
   try {
 
@@ -79,7 +76,6 @@ const getDoctors = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
-// הגדרת זמינות רופא
 const setAvailability = async (req, res) => {
   try {
 
@@ -119,11 +115,53 @@ const uploadMedicalFile = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
+
+const getDoctorFeedbacks = async (req, res) => {
+  try {
+    const doctorId = req.user.userId;
+
+    const { startDate, endDate, patientId } = req.query;
+
+    let filter = { doctor: doctorId };
+
+    if (patientId) {
+      filter.patient = patientId;
+    }
+
+    if (startDate && endDate) {
+      filter.createdAt = {
+        $gte: new Date(startDate),
+        $lte: new Date(endDate)
+      };
+    }
+
+    const feedbacks = await Feedback.find(filter)
+      .populate('patient', 'email')
+      .populate('appointment')
+      .sort({ createdAt: -1 });
+
+    const avgRating =
+      feedbacks.length > 0
+        ? feedbacks.reduce((sum, f) => sum + f.rating, 0) / feedbacks.length
+        : 0;
+
+    res.json({
+      total: feedbacks.length,
+      averageRating: avgRating,
+      feedbacks
+    });
+
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
 module.exports = {
   getMyProfile,
   updateMyProfile,
   getDoctorAppointments,
   getDoctors,
   setAvailability,
-  uploadMedicalFile
+  uploadMedicalFile,
+  getDoctorFeedbacks
 };

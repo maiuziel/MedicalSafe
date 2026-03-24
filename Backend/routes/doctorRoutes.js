@@ -4,6 +4,7 @@ const router = express.Router();
 const authMiddleware = require('../middleware/authMiddleware');
 const authorizeRoles = require('../middleware/roles');
 const upload = require('../middleware/upload');
+const { getDoctorFeedbacks } = require('../controllers/doctorController');
 
 const {
   getMyProfile,
@@ -14,24 +15,12 @@ const {
   uploadMedicalFile
 } = require('../controllers/doctorController');
 
-
-// ----------------------------------------------------
-// צפייה ברשימת הרופאים (מטופל או מזכירה)
-// GET /api/doctor
-// GET /api/doctor?specialization=cardiology
-// ----------------------------------------------------
-
 router.get(
   '/',
   authMiddleware,
   authorizeRoles('patient', 'secretary'),
   getDoctors
 );
-
-
-// ----------------------------------------------------
-// ראוטים לרופא עצמו
-// ----------------------------------------------------
 
 // רופא רואה את הפרופיל שלו
 router.get(
@@ -68,6 +57,13 @@ router.post(
   authorizeRoles('doctor'),
   upload.single('file'),
   uploadMedicalFile
+);
+
+router.get(
+  '/feedbacks',
+  authMiddleware,
+  authorizeRoles('doctor'),
+  getDoctorFeedbacks
 );
 
 module.exports = router;
