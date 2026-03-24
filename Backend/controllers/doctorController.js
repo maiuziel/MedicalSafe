@@ -45,10 +45,34 @@ const updateMyProfile = async (req, res) => {
 // GET /api/doctor/appointments
 const getDoctorAppointments = async (req, res) => {
   try {
+    const { status, sortBy } = req.query;
 
-    const appointments = await Appointment.find({
+    let filter = {
       doctor: req.user.userId
-    }).populate('patient', 'email');
+    };
+
+    // 🔹 סינון לפי סטטוס
+    if (status) {
+      filter.status = status;
+    }
+
+    let query = Appointment.find(filter)
+      .populate('patient', 'email fullName');
+
+    // 🔹 מיון
+    if (sortBy === 'date') {
+      query = query.sort({ date: 1 }); // מהקרוב לרחוק
+    }
+
+    if (sortBy === 'dateDesc') {
+      query = query.sort({ date: -1 });
+    }
+
+    if (sortBy === 'patient') {
+      query = query.sort({ 'patient.fullName': 1 });
+    }
+
+    const appointments = await query;
 
     res.json(appointments);
 
