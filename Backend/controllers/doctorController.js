@@ -102,8 +102,14 @@ const getDoctors = async (req, res) => {
 };
 const setAvailability = async (req, res) => {
   try {
-
     const { availability } = req.body;
+
+    // 🔴 ולידציה
+    if (!availability || !Array.isArray(availability)) {
+      return res.status(400).json({
+        message: 'Availability must be an array'
+      });
+    }
 
     const doctor = await User.findByIdAndUpdate(
       req.user.userId,
@@ -111,12 +117,17 @@ const setAvailability = async (req, res) => {
       { new: true }
     ).select('-password');
 
+    if (!doctor) {
+      return res.status(404).json({ message: 'Doctor not found' });
+    }
+
     res.json({
       message: 'Availability updated successfully',
       availability: doctor.availability
     });
 
   } catch (error) {
+    console.error(error);
     res.status(500).json({ message: 'Server error' });
   }
 };

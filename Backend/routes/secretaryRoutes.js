@@ -10,7 +10,8 @@ const {
   getDoctors,
   getPatients,
   getAllAppointments,
-  updateAppointment
+  updateAppointment,
+  getDoctorsAvailability
 } = require('../controllers/secretaryController');
 
 
@@ -64,4 +65,10 @@ router.put(
   updateAppointment
 );
 
+router.get(
+  '/doctors/availability',
+  authMiddleware,
+  authorizeRoles('secretary'),
+  getDoctorsAvailability
+);
 module.exports = router;

@@ -21,7 +21,6 @@ const secretaryRoutes = require('./routes/secretaryRoutes');
 const appointmentRoutes = require('./routes/appointmentRoutes');
 const medicalRecordRoutes = require('./routes/medicalRecordRoutes');
 const adminRoutes = require('./routes/adminRoutes');
-
 app.use('/api/medical-records', medicalRecordRoutes);
 app.use('/api/appointments', appointmentRoutes);
 app.use('/api/secretary', secretaryRoutes);

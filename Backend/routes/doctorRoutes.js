@@ -73,6 +73,7 @@ router.put(
   authMiddleware,
   authorizeRoles('doctor'),
   setAvailability
+  
 );
 
 // ----------------------------------------------------

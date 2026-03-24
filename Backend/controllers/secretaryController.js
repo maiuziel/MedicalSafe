@@ -111,14 +111,24 @@ const getPatients = async (req, res) => {
  */
 const getAllAppointments = async (req, res) => {
   try {
-    const { doctorId, startDate, endDate } = req.query;
+    const { doctorId, startDate, endDate, patientId } = req.query;
 
     let filter = {};
 
+    // 🔹 סינון לפי רופא
     if (doctorId) {
       filter.doctor = doctorId;
     }
 
+    // 🔹 סינון לפי מטופל (היסטוריה)
+    if (patientId) {
+      filter.patient = patientId;
+
+      // רק תורים בעבר
+      filter.date = { $lt: new Date() };
+    }
+
+    // 🔹 סינון לפי תאריכים (אם קיים)
     if (startDate && endDate) {
       filter.date = {
         $gte: new Date(startDate),
@@ -127,7 +137,7 @@ const getAllAppointments = async (req, res) => {
     }
 
     const appointments = await Appointment.find(filter)
-      .populate('doctor', 'fullName email')
+      .populate('doctor', 'fullName email specialization') 
       .populate('patient', 'fullName email')
       .sort({ date: 1 });
 
@@ -150,7 +160,6 @@ const getAllAppointments = async (req, res) => {
   }
 };
 
-
 /**
  * PUT /api/secretary/appointments/:id
  * עדכון תור
@@ -160,12 +169,10 @@ const updateAppointment = async (req, res) => {
     const { id } = req.params;
     const { date } = req.body;
 
-    // 🔴 הרשאות
     if (req.user.role !== 'secretary') {
       return res.status(403).json({ message: 'Access denied' });
     }
 
-    // 🔴 ולידציה
     if (!date) {
       return res.status(400).json({ message: 'Date is required' });
     }
@@ -184,12 +191,10 @@ const updateAppointment = async (req, res) => {
       return res.status(404).json({ message: 'Appointment not found' });
     }
 
-    // 🔴 בדיקה שלא אותו תאריך
     if (appointment.date.getTime() === new Date(date).getTime()) {
       return res.status(400).json({ message: 'Same date as current' });
     }
 
-    // 🔴 בדיקת זמינות
     const existingAppointment = await Appointment.findOne({
       doctor: appointment.doctor,
       date: new Date(date),
@@ -202,19 +207,15 @@ const updateAppointment = async (req, res) => {
       });
     }
 
-    // 🔴 עדכון
     appointment.date = new Date(date);
     await appointment.save();
 
-    // 🔴 populate אחרי עדכון
     const updatedAppointment = await Appointment.findById(id)
       .populate('doctor', 'fullName email')
       .populate('patient', 'fullName email');
 
-    // 🔴 התראה למטופל (מינימום)
     console.log(`Notification sent to patient ${updatedAppointment.patient._id}`);
 
-    // 🔴 Audit
     await auditLogger({
       req,
       action: 'UPDATE_APPOINTMENT',
@@ -231,7 +232,46 @@ const updateAppointment = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
+const getDoctorsAvailability = async (req, res) => {
+  try {
+    const { doctorId, specialization } = req.query;
 
+    let filter = { role: 'doctor' };
+
+    if (doctorId) {
+      filter._id = doctorId;
+    }
+
+    if (specialization) {
+      filter.specialization = specialization;
+    }
+
+    const doctors = await User.find(filter).select('-password');
+
+    const result = doctors.map((doctor) => {
+      return {
+        doctorId: doctor._id,
+        fullName: doctor.fullName,
+        specialization: doctor.specialization,
+        availability: doctor.availability,
+
+        // 🔥 התיקון החשוב
+        isAvailable: doctor.availability && doctor.availability.length > 0
+      };
+    });
+
+    await auditLogger({
+      req,
+      action: 'VIEW_DOCTORS_AVAILABILITY',
+      resource: 'doctor'
+    });
+
+    res.json(result);
+
+  } catch (err) {
+    res.status(500).json({ message: 'Server error' });
+  }
+};
 
 module.exports = {
   getMyProfile,
@@ -239,5 +279,6 @@ module.exports = {
   getDoctors,
   getPatients,
   getAllAppointments,
-  updateAppointment
+  updateAppointment,
+  getDoctorsAvailability
 };
