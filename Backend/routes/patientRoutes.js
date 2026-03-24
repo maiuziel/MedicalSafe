@@ -3,15 +3,13 @@ const router = express.Router();
 
 const authMiddleware = require('../middleware/authMiddleware');
 const authorizeRoles = require('../middleware/roles');
+const { createFeedback } = require('../controllers/patientController');
 
 const {
   getMyProfile,
   updateMyProfile,
 } = require('../controllers/patientController');
 
-// כל הראוטים כאן:
-// ✔️ דורשים התחברות
-// ✔️ מוגבלים למטופל בלבד
 
 router.get(
   '/me',
@@ -25,6 +23,13 @@ router.put(
   authMiddleware,
   authorizeRoles('patient'),
   updateMyProfile
+);
+
+router.post(
+  '/feedback',
+  authMiddleware,
+  authorizeRoles('patient'),
+  createFeedback
 );
 
 module.exports = router;

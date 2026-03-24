@@ -1,8 +1,9 @@
 const User = require('../models/User');
 const auditLogger = require('../utils/auditLogger');
+const Feedback = require('../models/Feedback');
+const Appointment = require('../models/Appointment');
 
 // GET /api/patient/me
-// צפייה בפרטי המטופל המחובר
 const getMyProfile = async (req, res) => {
   try {
     const userId = req.user.userId;
@@ -13,7 +14,7 @@ const getMyProfile = async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    // ✅ Audit Log
+    // Audit Log
     await auditLogger({
       req,
       action: 'VIEW_PROFILE',
@@ -30,7 +31,6 @@ const getMyProfile = async (req, res) => {
 
 
 // PUT /api/patient/me
-// עדכון פרטים אישיים של המטופל
 const updateMyProfile = async (req, res) => {
   try {
 
@@ -43,7 +43,7 @@ const updateMyProfile = async (req, res) => {
       { new: true, runValidators: true }
     ).select('-password');
 
-    // ✅ Audit Log
+    //Audit Log
     await auditLogger({
       req,
       action: 'UPDATE_PROFILE',
@@ -58,7 +58,40 @@ const updateMyProfile = async (req, res) => {
   }
 };
 
+const createFeedback = async (req, res) => {
+  try {
+    const { appointmentId, rating, comment } = req.body;
+
+    if (!appointmentId || !rating) {
+      return res.status(400).json({ message: 'Missing required fields' });
+    }
+
+    const appointment = await Appointment.findById(appointmentId);
+
+    if (!appointment || appointment.patient.toString() !== req.user.userId) {
+      return res.status(403).json({ message: 'Not authorized' });
+    }
+
+    const feedback = await Feedback.create({
+      patient: req.user.userId,
+      doctor: appointment.doctor,
+      appointment: appointmentId,
+      rating,
+      comment
+    });
+
+    res.status(201).json({
+      message: 'Feedback submitted successfully',
+      feedback
+    });
+
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
 module.exports = {
   getMyProfile,
   updateMyProfile,
+  createFeedback
 };
