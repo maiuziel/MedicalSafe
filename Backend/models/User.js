@@ -14,6 +14,11 @@ const userSchema = new mongoose.Schema(
     type: String,
     required: true,
   },
+  
+  isUnderFollowUp: {
+    type: Boolean,
+    default: false
+  },
 
   role: {
     type: String,
@@ -33,7 +38,6 @@ const userSchema = new mongoose.Schema(
     type: String
   },
 
-  // זמינות הרופא לקבלת מטופלים
   availability: [
     {
       day: {

@@ -179,6 +179,66 @@ const getDoctorFeedbacks = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
+const markPatientForFollowUp = async (req, res) => {
+  try {
+    const { patientId } = req.params;
+
+    const patient = await User.findByIdAndUpdate(
+      patientId,
+      { isUnderFollowUp: true },
+      { new: true }
+    ).select('-password');
+
+    if (!patient) {
+      return res.status(404).json({ message: 'Patient not found' });
+    }
+
+    res.json({
+      message: 'Patient marked for follow-up',
+      patient
+    });
+
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+const unmarkPatientFromFollowUp = async (req, res) => {
+  try {
+    const { patientId } = req.params;
+
+    const patient = await User.findByIdAndUpdate(
+      patientId,
+      { isUnderFollowUp: false },
+      { new: true }
+    ).select('-password');
+
+    if (!patient) {
+      return res.status(404).json({ message: 'Patient not found' });
+    }
+
+    res.json({
+      message: 'Patient removed from follow-up',
+      patient
+    });
+
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+const getFollowUpPatients = async (req, res) => {
+  try {
+    const patients = await User.find({
+      role: 'patient',
+      isUnderFollowUp: true
+    }).select('-password');
+
+    res.json(patients);
+
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+};
 
 module.exports = {
   getMyProfile,
@@ -187,5 +247,8 @@ module.exports = {
   getDoctors,
   setAvailability,
   uploadMedicalFile,
-  getDoctorFeedbacks
+  getDoctorFeedbacks,
+  markPatientForFollowUp,
+  unmarkPatientFromFollowUp,
+  getFollowUpPatients
 };

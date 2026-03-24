@@ -4,15 +4,17 @@ const router = express.Router();
 const authMiddleware = require('../middleware/authMiddleware');
 const authorizeRoles = require('../middleware/roles');
 const upload = require('../middleware/upload');
-const { getDoctorFeedbacks } = require('../controllers/doctorController');
-
 const {
   getMyProfile,
   updateMyProfile,
   getDoctorAppointments,
   setAvailability,
   getDoctors,
-  uploadMedicalFile
+  uploadMedicalFile,
+  getDoctorFeedbacks,
+  markPatientForFollowUp,
+  unmarkPatientFromFollowUp,
+  getFollowUpPatients
 } = require('../controllers/doctorController');
 
 router.get(
@@ -64,6 +66,29 @@ router.get(
   authMiddleware,
   authorizeRoles('doctor'),
   getDoctorFeedbacks
+);
+// סימון מטופל למעקב
+router.put(
+  '/patients/:patientId/follow',
+  authMiddleware,
+  authorizeRoles('doctor'),
+  markPatientForFollowUp
+);
+
+// הסרת מעקב
+router.put(
+  '/patients/:patientId/unfollow',
+  authMiddleware,
+  authorizeRoles('doctor'),
+  unmarkPatientFromFollowUp
+);
+
+// קבלת רשימת מטופלים במעקב
+router.get(
+  '/patients/follow',
+  authMiddleware,
+  authorizeRoles('doctor'),
+  getFollowUpPatients
 );
 
 module.exports = router;
