@@ -4,6 +4,8 @@ const router = express.Router();
 const authMiddleware = require('../middleware/authMiddleware');
 const authorizeRoles = require('../middleware/roles');
 const upload = require('../middleware/upload');
+
+// 🔹 doctor controller
 const {
   getMyProfile,
   updateMyProfile,
@@ -17,6 +19,18 @@ const {
   getFollowUpPatients
 } = require('../controllers/doctorController');
 
+// 🔹 request controller (פניות)
+const {
+  getDoctorRequests,
+  getDoctorRequestById,
+  replyToRequest,
+  updateRequestStatus
+} = require('../controllers/requestController');
+
+
+// ----------------------------------------------------
+// רשימת רופאים (למטופל/מזכירה)
+// ----------------------------------------------------
 router.get(
   '/',
   authMiddleware,
@@ -24,7 +38,9 @@ router.get(
   getDoctors
 );
 
-// רופא רואה את הפרופיל שלו
+// ----------------------------------------------------
+// רופא - פרופיל
+// ----------------------------------------------------
 router.get(
   '/me',
   authMiddleware,
@@ -32,7 +48,6 @@ router.get(
   getMyProfile
 );
 
-// רופא מעדכן את הפרופיל שלו
 router.put(
   '/me',
   authMiddleware,
@@ -40,19 +55,29 @@ router.put(
   updateMyProfile
 );
 
-// רופא רואה את התורים שלו
+// ----------------------------------------------------
+// רופא - תורים
+// ----------------------------------------------------
 router.get(
   '/appointments',
   authMiddleware,
   authorizeRoles('doctor'),
   getDoctorAppointments
 );
+
+// ----------------------------------------------------
+// זמינות רופא
+// ----------------------------------------------------
 router.put(
   '/availability',
   authMiddleware,
   authorizeRoles('doctor'),
   setAvailability
 );
+
+// ----------------------------------------------------
+// העלאת קבצים למטופל
+// ----------------------------------------------------
 router.post(
   '/patient/:patientId/files',
   authMiddleware,
@@ -61,13 +86,19 @@ router.post(
   uploadMedicalFile
 );
 
+// ----------------------------------------------------
+// משובים
+// ----------------------------------------------------
 router.get(
   '/feedbacks',
   authMiddleware,
   authorizeRoles('doctor'),
   getDoctorFeedbacks
 );
-// סימון מטופל למעקב
+
+// ----------------------------------------------------
+// מטופלים במעקב
+// ----------------------------------------------------
 router.put(
   '/patients/:patientId/follow',
   authMiddleware,
@@ -75,7 +106,6 @@ router.put(
   markPatientForFollowUp
 );
 
-// הסרת מעקב
 router.put(
   '/patients/:patientId/unfollow',
   authMiddleware,
@@ -83,12 +113,49 @@ router.put(
   unmarkPatientFromFollowUp
 );
 
-// קבלת רשימת מטופלים במעקב
 router.get(
   '/patients/follow',
   authMiddleware,
   authorizeRoles('doctor'),
   getFollowUpPatients
 );
+
+// ----------------------------------------------------
+// פניות (Requests)
+// ----------------------------------------------------
+
+// קבלת כל הפניות לרופא
+router.get(
+  '/requests',
+  authMiddleware,
+  authorizeRoles('doctor'),
+  getDoctorRequests
+);
+
+// קבלת פנייה לפי ID
+router.get(
+  '/requests/:requestId',
+  authMiddleware,
+  authorizeRoles('doctor'),
+  getDoctorRequestById
+);
+
+// מענה לפנייה (עם אפשרות לקובץ)
+router.put(
+  '/requests/:requestId/reply',
+  authMiddleware,
+  authorizeRoles('doctor'),
+  upload.single('file'),
+  replyToRequest
+);
+
+// שינוי סטטוס פנייה
+router.put(
+  '/requests/:requestId/status',
+  authMiddleware,
+  authorizeRoles('doctor'),
+  updateRequestStatus
+);
+
 
 module.exports = router;

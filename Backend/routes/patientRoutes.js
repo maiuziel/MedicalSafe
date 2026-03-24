@@ -3,14 +3,21 @@ const router = express.Router();
 
 const authMiddleware = require('../middleware/authMiddleware');
 const authorizeRoles = require('../middleware/roles');
-const { createFeedback } = require('../controllers/patientController');
 
 const {
   getMyProfile,
   updateMyProfile,
+  createFeedback
 } = require('../controllers/patientController');
 
+const {
+  createRequest,
+  getPatientRequests,
+  getPatientRequestById
+} = require('../controllers/requestController');
 
+
+// 🔹 פרופיל מטופל
 router.get(
   '/me',
   authMiddleware,
@@ -25,11 +32,39 @@ router.put(
   updateMyProfile
 );
 
+// 🔹 משוב
 router.post(
   '/feedback',
   authMiddleware,
   authorizeRoles('patient'),
   createFeedback
 );
+
+// 🔹 פניות למטופל
+
+// יצירת פנייה
+router.post(
+  '/requests',
+  authMiddleware,
+  authorizeRoles('patient'),
+  createRequest
+);
+
+// קבלת כל הפניות של המטופל
+router.get(
+  '/requests',
+  authMiddleware,
+  authorizeRoles('patient'),
+  getPatientRequests
+);
+
+// קבלת פנייה לפי ID
+router.get(
+  '/requests/:requestId',
+  authMiddleware,
+  authorizeRoles('patient'),
+  getPatientRequestById
+);
+
 
 module.exports = router;
