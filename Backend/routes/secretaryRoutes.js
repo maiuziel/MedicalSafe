@@ -10,11 +10,10 @@ const {
   getDoctors,
   getPatients,
   getAllAppointments,
+  updateAppointment
 } = require('../controllers/secretaryController');
 
-// כל הראוטים דורשים:
-// ✔️ התחברות
-// ✔️ role = secretary
+
 console.log({
   authMiddleware,
   authorizeRoles,
@@ -57,4 +56,12 @@ router.get(
   authorizeRoles('secretary'),
   getAllAppointments
 );
+
+router.put(
+  '/appointments/:id',
+  authMiddleware,
+  authorizeRoles('secretary'),
+  updateAppointment
+);
+
 module.exports = router;
