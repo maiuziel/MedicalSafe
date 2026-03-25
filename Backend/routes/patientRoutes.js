@@ -40,7 +40,6 @@ router.post(
   createFeedback
 );
 
-// 🔹 פניות למטופל
 
 // יצירת פנייה
 router.post(

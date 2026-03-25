@@ -1,25 +1,69 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { FaShieldAlt } from "react-icons/fa"; // 🔥 הוספה
 import doctorImg from "../assets/doctor2.png";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  const navigate = useNavigate();
+
+  const handleLogin = async () => {
+    try {
+      const res = await fetch("http://localhost:5001/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await res.json();
+
+      console.log("SERVER RESPONSE:", data);
+
+      if (res.ok) {
+        localStorage.setItem("token", data.token);
+
+        const role = data.role;
+
+        if (role === "patient") {
+          navigate("/patient");
+        } else if (role === "doctor") {
+          navigate("/doctor");
+        } else if (role === "secretary") {
+          navigate("/secretary");
+        } else {
+          navigate("/");
+        }
+
+      } else {
+        alert(data.message || "Login failed ");
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Server error ");
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#eef2f7]">
 
-      {/* רקע חיצוני */}
       <div className="w-[1200px] h-[700px] bg-[#e3e9f2] rounded-[30px] shadow-inner flex items-center justify-center">
 
-        {/* קונטיינר פנימי */}
         <div className="w-[1000px] h-[600px] bg-white rounded-[25px] shadow-xl flex overflow-hidden">
 
           {/* צד שמאל */}
           <div className="w-1/2 p-10 flex flex-col justify-center">
 
-            <h1 className="text-2xl font-bold text-blue-600 mb-6">
-              MedicalSafe
-            </h1>
+            {/* 🔥 לוגו חדש במקום הטקסט */}
+            <div className="flex items-center gap-2 mb-6">
+              <FaShieldAlt className="text-[#5d95f7] text-2xl" />
+              <h1 className="text-[22px] font-semibold text-[#1f2a44]">
+                Medical<span className="text-[#5d95f7]">Safe</span>
+              </h1>
+            </div>
 
             <h2 className="text-xl font-semibold mb-2 text-gray-800">
               Login
@@ -29,7 +73,6 @@ export default function Login() {
               Welcome back! Please login to your account.
             </p>
 
-            {/* Email */}
             <input
               type="email"
               placeholder="example@medicalsafe.com"
@@ -38,7 +81,6 @@ export default function Login() {
               onChange={(e) => setEmail(e.target.value)}
             />
 
-            {/* Password */}
             <div className="relative mb-4">
               <input
                 type="password"
@@ -53,17 +95,17 @@ export default function Login() {
               </span>
             </div>
 
-            {/* Forgot */}
             <p className="text-xs text-gray-400 mb-4 text-right cursor-pointer">
               Forgot password?
             </p>
 
-            {/* Button */}
-            <button className="w-full bg-gradient-to-r from-blue-400 to-blue-600 text-white p-3 rounded-lg text-sm shadow-md hover:opacity-90 transition">
+            <button
+              onClick={handleLogin}
+              className="w-full bg-gradient-to-r from-blue-400 to-blue-600 text-white p-3 rounded-lg text-sm shadow-md hover:opacity-90 transition"
+            >
               Login
             </button>
 
-            {/* Register */}
             <p className="text-xs text-gray-400 mt-5 text-center">
               Don’t have an account?{" "}
               <span className="text-blue-500 cursor-pointer">
@@ -79,23 +121,18 @@ export default function Login() {
           {/* צד ימין */}
           <div className="w-1/2 relative flex items-center justify-center bg-[#eaf1fb] overflow-hidden">
 
-            {/* גרדיאנט רקע */}
             <div className="absolute inset-0 bg-gradient-to-br from-blue-100 via-blue-200 to-blue-300 opacity-40"></div>
 
-            {/* כתם blur */}
             <div className="absolute w-[500px] h-[500px] bg-blue-200 rounded-full blur-3xl opacity-30"></div>
 
-            {/* תוכן */}
             <div className="relative z-10 flex flex-col items-center text-center px-6">
 
-              {/* תמונה */}
               <img
                 src={doctorImg}
                 alt="doctor"
                 className="w-[420px] mb-6 drop-shadow-2xl object-contain"
-                />
+              />
 
-              {/* טקסטים */}
               <div className="space-y-3 text-gray-600 text-sm">
 
                 <div className="flex items-center gap-2 justify-center">
