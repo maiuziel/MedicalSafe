@@ -32,7 +32,7 @@ export default function Register() {
     /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
   const validatePassword = (password) =>
-    /^(?=.*[A-Z])(?=.*[!@#$%&*])[A-Za-z!@#$%&*]{6,12}$/.test(password);
+    /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%&*])[A-Za-z\d!@#$%&*]{6,12}$/.test(password);
 
   const handleRegister = async () => {
     let newErrors = {};
