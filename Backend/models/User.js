@@ -15,6 +15,13 @@ const userSchema = new mongoose.Schema(
     required: true,
   },
   
+  resetPasswordToken: {
+    type: String
+  },
+  resetPasswordExpires: {
+    type: Date
+  },
+  
   isUnderFollowUp: {
     type: Boolean,
     default: false

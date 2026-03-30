@@ -2,7 +2,8 @@ const User = require('../models/User');
 const AuditLog = require('../models/AuditLog');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-
+const crypto = require("crypto");
+const sendResetEmail = require("../utils/mailer");
 // 🔥 REGISTER
 const register = async (req, res) => {
   try {
@@ -100,6 +101,69 @@ const login = async (req, res) => {
     return res.status(500).json({ message: 'Server error' });
   }
 };
+// 🔥 FORGOT PASSWORD
+const forgotPassword = async (req, res) => {
+  const { email } = req.body;
 
-// 🔥 EXPORT
-module.exports = { register, login };
+  try {
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // 🔐 יצירת token
+    const token = crypto.randomBytes(32).toString("hex");
+
+    // 💾 שמירה ב-DB
+    user.resetPasswordToken = token;
+    user.resetPasswordExpires = Date.now() + 15 * 60 * 1000;
+
+    await user.save();
+
+    // 📧 שליחת מייל
+    await sendResetEmail(email, token);
+
+    res.json({ message: "Reset email sent" });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+// 🔥 RESET PASSWORD
+const resetPassword = async (req, res) => {
+  const { token } = req.params;
+  const { password } = req.body;
+
+  try {
+    const user = await User.findOne({
+      resetPasswordToken: token,
+      resetPasswordExpires: { $gt: Date.now() },
+    });
+
+    if (!user) {
+      return res.status(400).json({ message: "Token invalid or expired" });
+    }
+
+    user.password = await bcrypt.hash(password, 10);
+
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpires = undefined;
+
+    await user.save();
+
+    res.json({ message: "Password updated successfully" });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+module.exports = {
+  register,
+  login,
+  forgotPassword,
+  resetPassword,
+};
