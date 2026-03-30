@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import Sidebar from "../components/patient/Sidebar";
-
+import { useNavigate } from "react-router-dom";
 export default function PatientDashboard() {
   const [user, setUser] = useState(null);
   const [appointments, setAppointments] = useState([]);
@@ -10,12 +10,22 @@ export default function PatientDashboard() {
   const [selectedTime, setSelectedTime] = useState("");
   const [specialization, setSpecialization] = useState("");
   const [availableDoctors, setAvailableDoctors] = useState([]);
-
+  const navigate = useNavigate();
   useEffect(() => {
     fetchProfile();
     fetchAppointments();
   }, []);
-
+  
+  const handleLogout = () => {
+    const confirmLogout = window.confirm(
+      "Are you sure you want to log out?"
+    );
+  
+    if (confirmLogout) {
+      localStorage.removeItem("token");
+      navigate("/");
+    }
+  };
   const fetchProfile = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -152,17 +162,9 @@ export default function PatientDashboard() {
 
   return (
     <div className="flex bg-[#eef2f7] min-h-screen">
-      <Sidebar />
+      <Sidebar onLogout={handleLogout} />
 
       <div className="flex-1 p-8">
-        <div className="flex justify-end mb-4 gap-3">
-          <div className="bg-white px-4 py-2 rounded-lg shadow text-sm text-gray-600">
-            👤 Patient
-          </div>
-          <div className="bg-white px-4 py-2 rounded-lg shadow text-sm text-gray-600 cursor-pointer hover:bg-gray-100">
-            Log Out
-          </div>
-        </div>
 
         <div className="bg-white rounded-xl p-6 flex justify-between items-center shadow-sm mb-6">
           <div>

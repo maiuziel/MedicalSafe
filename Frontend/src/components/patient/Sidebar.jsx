@@ -1,7 +1,7 @@
 import { Home, CalendarDays, FileText, MessageSquare, LogOut } from "lucide-react";
 import { FaShieldAlt } from "react-icons/fa";
 
-export default function Sidebar() {
+export default function Sidebar({ onLogout }) {
   return (
     <div className="w-[230px] min-h-screen bg-[#f8fbff] border-r border-[#e6edf5] px-5 py-6 flex flex-col">
 
@@ -36,7 +36,10 @@ export default function Sidebar() {
       </div>
 
       <div className="mt-auto pt-8 border-t border-[#e6edf5]">
-        <button className="flex items-center gap-3 text-[#6b7a90] px-2 py-2 text-sm font-medium hover:text-red-500 transition">
+        <button
+          onClick={onLogout} // 🔥 זה השינוי היחיד
+          className="flex items-center gap-3 text-[#6b7a90] px-2 py-2 text-sm font-medium hover:text-red-500 transition"
+        >
           <LogOut size={18} />
           Log Out
         </button>
