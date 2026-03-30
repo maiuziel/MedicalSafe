@@ -16,7 +16,8 @@ const {
   getDoctorFeedbacks,
   markPatientForFollowUp,
   unmarkPatientFromFollowUp,
-  getFollowUpPatients
+  getFollowUpPatients,
+  getAvailableDoctors // וודאי שהפונקציה הזו מיוצאת מהקונטרולר!
 } = require('../controllers/doctorController');
 
 // 🔹 request controller (פניות)
@@ -27,9 +28,18 @@ const {
   updateRequestStatus
 } = require('../controllers/requestController');
 
+// ----------------------------------------------------
+// חיפוש רופאים זמינים (למטופל) - חשוב שיהיה למעלה
+// ----------------------------------------------------
+router.get(
+  '/availability',
+  authMiddleware,
+  authorizeRoles('patient'),
+  getAvailableDoctors
+);
 
 // ----------------------------------------------------
-// רשימת רופאים (למטופל/מזכירה)
+// רשימת כל הרופאים (למטופל/מזכירה)
 // ----------------------------------------------------
 router.get(
   '/',
@@ -66,14 +76,13 @@ router.get(
 );
 
 // ----------------------------------------------------
-// זמינות רופא
+// זמינות רופא (עדכון על ידי הרופא)
 // ----------------------------------------------------
 router.put(
   '/availability',
   authMiddleware,
   authorizeRoles('doctor'),
   setAvailability
-  
 );
 
 // ----------------------------------------------------
@@ -125,7 +134,6 @@ router.get(
 // פניות (Requests)
 // ----------------------------------------------------
 
-// קבלת כל הפניות לרופא
 router.get(
   '/requests',
   authMiddleware,
@@ -133,7 +141,6 @@ router.get(
   getDoctorRequests
 );
 
-// קבלת פנייה לפי ID
 router.get(
   '/requests/:requestId',
   authMiddleware,
@@ -141,7 +148,6 @@ router.get(
   getDoctorRequestById
 );
 
-// מענה לפנייה (עם אפשרות לקובץ)
 router.put(
   '/requests/:requestId/reply',
   authMiddleware,
@@ -150,13 +156,11 @@ router.put(
   replyToRequest
 );
 
-// שינוי סטטוס פנייה
 router.put(
   '/requests/:requestId/status',
   authMiddleware,
   authorizeRoles('doctor'),
   updateRequestStatus
 );
-
 
 module.exports = router;

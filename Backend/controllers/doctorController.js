@@ -251,6 +251,40 @@ const getFollowUpPatients = async (req, res) => {
   }
 };
 
+const getAvailableDoctors = async (req, res) => {
+  try {
+    const { date, time, specialization } = req.query;
+
+    if (!date || !time || !specialization) {
+      return res.status(400).json({ message: "Missing search criteria" });
+    }
+
+    const doctors = await User.find({
+      role: 'doctor',
+      specialization: specialization
+    }).select('-password');
+
+    const selectedDateTime = new Date(`${date}T${time}`);
+    const oneHourBefore = new Date(selectedDateTime.getTime() - 60 * 60 * 1000);
+    const oneHourAfter = new Date(selectedDateTime.getTime() + 60 * 60 * 1000);
+
+    const busyAppointments = await Appointment.find({
+      date: { $gte: oneHourBefore, $lte: oneHourAfter },
+      status: { $ne: 'cancelled' }
+    });
+
+    const busyDoctorIds = busyAppointments.map(a => a.doctor.toString());
+
+    const availableDoctors = doctors.filter(doc => !busyDoctorIds.includes(doc._id.toString()));
+
+    res.json(availableDoctors);
+
+  } catch (error) {
+    console.error("Error in getAvailableDoctors:", error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
 module.exports = {
   getMyProfile,
   updateMyProfile,
@@ -261,5 +295,6 @@ module.exports = {
   getDoctorFeedbacks,
   markPatientForFollowUp,
   unmarkPatientFromFollowUp,
-  getFollowUpPatients
+  getFollowUpPatients,
+  getAvailableDoctors
 };
