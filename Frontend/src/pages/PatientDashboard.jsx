@@ -46,7 +46,7 @@ export default function PatientDashboard() {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
-      setAppointments(data);
+      setAppointments(Array.isArray(data) ? data : data.appointments || []);
     } catch (err) {
       console.error(err);
     }

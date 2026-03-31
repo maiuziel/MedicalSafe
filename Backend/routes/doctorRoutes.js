@@ -17,7 +17,8 @@ const {
   markPatientForFollowUp,
   unmarkPatientFromFollowUp,
   getFollowUpPatients,
-  getAvailableDoctors // וודאי שהפונקציה הזו מיוצאת מהקונטרולר!
+  getAvailableDoctors ,
+  getSpecializations
 } = require('../controllers/doctorController');
 
 // 🔹 request controller (פניות)
@@ -37,7 +38,15 @@ router.get(
   authorizeRoles('patient'),
   getAvailableDoctors
 );
-
+// ----------------------------------------------------
+// 🔥 התמחויות (חשוב לפני "/")
+// ----------------------------------------------------
+router.get(
+  "/specializations",
+  authMiddleware,
+  authorizeRoles("patient"),
+  getSpecializations
+);
 // ----------------------------------------------------
 // רשימת כל הרופאים (למטופל/מזכירה)
 // ----------------------------------------------------
@@ -162,5 +171,10 @@ router.put(
   authorizeRoles('doctor'),
   updateRequestStatus
 );
-
+router.get(
+  "/specializations",
+  authMiddleware,
+  authorizeRoles("patient"),
+  getSpecializations
+);
 module.exports = router;

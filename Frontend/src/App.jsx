@@ -5,6 +5,8 @@ import PatientDashboard from "./pages/PatientDashboard";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import EditProfile from "./pages/EditProfile";
+import PatientRequests from "./pages/PatientRequests";
+
 function App() {
   return (
     <Router>
@@ -16,6 +18,7 @@ function App() {
         {/* לפי role */}
         <Route path="/patient" element={<PatientDashboard />} />
         <Route path="/edit-profile" element={<EditProfile />} />
+        <Route path="/requests" element={<PatientRequests />} />
       </Routes>
     </Router>
   );

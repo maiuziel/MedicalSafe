@@ -1,11 +1,17 @@
+const mongoose = require("mongoose");
 const Request = require('../models/Request');
 const Appointment = require('../models/Appointment');
 const User = require('../models/User');
 
+
 const createRequest = async (req, res) => {
+  console.log("BODY:", req.body);
+console.log("USER:", req.user);
   try {
     const { doctorId, subject, description, reason, serviceType, urgency, appointmentId } = req.body;
-
+    if (!mongoose.Types.ObjectId.isValid(doctorId)) {
+      return res.status(400).json({ message: "Invalid doctor ID" });
+    }
     if (!doctorId || !subject || !description || !reason || !serviceType) {
       return res.status(400).json({ message: 'Missing required fields' });
     }

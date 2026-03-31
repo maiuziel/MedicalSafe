@@ -284,6 +284,17 @@ const getAvailableDoctors = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
+const getSpecializations = async (req, res) => {
+  try {
+    const specializations = await User.distinct("specialization", {
+      role: "doctor",
+    });
+
+    res.json(specializations);
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
+};
 
 module.exports = {
   getMyProfile,
@@ -296,5 +307,6 @@ module.exports = {
   markPatientForFollowUp,
   unmarkPatientFromFollowUp,
   getFollowUpPatients,
-  getAvailableDoctors
+  getAvailableDoctors,
+  getSpecializations
 };
