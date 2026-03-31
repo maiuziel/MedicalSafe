@@ -252,6 +252,8 @@ const getFollowUpPatients = async (req, res) => {
 };
 
 const getAvailableDoctors = async (req, res) => {
+  console.log("🔥 getAvailableDoctors CALLED");
+
   try {
     const { date, time, specialization } = req.query;
 
@@ -260,9 +262,35 @@ const getAvailableDoctors = async (req, res) => {
     }
 
     const doctors = await User.find({
-      role: 'doctor',
-      specialization: specialization
-    }).select('-password');
+      role: "doctor",
+      specialization: specialization,
+    }).select("-password");
+
+    const selectedDateObj = new Date(date);
+    const selectedDay = selectedDateObj.toLocaleDateString("en-US", {
+      weekday: "long",
+    });
+
+    const selectedTime = time;
+
+    console.log("Selected day:", selectedDay);
+    console.log("Selected time:", selectedTime);
+
+    // 🔥 סינון לפי זמינות אמיתית
+    const availableBySchedule = doctors.filter((doc) => {
+      // ❌ אם אין זמינות בכלל → לא להציג
+      if (!doc.availability || doc.availability.length === 0) {
+        return false;
+      }
+
+      return doc.availability.some((slot) => {
+        return (
+          slot.day.toLowerCase() === selectedDay.toLowerCase() &&
+          selectedTime >= slot.startTime &&
+          selectedTime <= slot.endTime
+        );
+      });
+    });
 
     const selectedDateTime = new Date(`${date}T${time}`);
     const oneHourBefore = new Date(selectedDateTime.getTime() - 60 * 60 * 1000);
@@ -270,18 +298,26 @@ const getAvailableDoctors = async (req, res) => {
 
     const busyAppointments = await Appointment.find({
       date: { $gte: oneHourBefore, $lte: oneHourAfter },
-      status: { $ne: 'cancelled' }
+      status: { $ne: "cancelled" },
     });
 
-    const busyDoctorIds = busyAppointments.map(a => a.doctor.toString());
+    const busyDoctorIds = busyAppointments.map((a) =>
+      a.doctor.toString()
+    );
 
-    const availableDoctors = doctors.filter(doc => !busyDoctorIds.includes(doc._id.toString()));
+    const finalAvailableDoctors = availableBySchedule.filter(
+      (doc) => !busyDoctorIds.includes(doc._id.toString())
+    );
 
-    res.json(availableDoctors);
+    console.log(
+      "FINAL AVAILABLE:",
+      finalAvailableDoctors.map((d) => d.fullName)
+    );
 
+    res.json(finalAvailableDoctors);
   } catch (error) {
     console.error("Error in getAvailableDoctors:", error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: "Server error" });
   }
 };
 const getSpecializations = async (req, res) => {

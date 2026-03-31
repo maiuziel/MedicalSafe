@@ -59,7 +59,7 @@ export default function PatientDashboard() {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
-      setDoctors(data);
+      setDoctors(Array.isArray(data) ? data : data.doctors || []);
     } catch (err) {
       console.error(err);
     }
@@ -119,7 +119,7 @@ export default function PatientDashboard() {
     try {
       const token = localStorage.getItem("token");
       const res = await fetch(
-        `http://localhost:5001/api/doctor/availability?date=${selectedDate}&time=${selectedTime}&specialization=${specialization}`,
+        `http://localhost:5001/api/doctor/availability?date=${selectedDate}&time=${selectedTime}&specialization=${encodeURIComponent(specialization)}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
