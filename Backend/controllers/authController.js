@@ -7,11 +7,11 @@ const sendResetEmail = require("../utils/mailer");
 // 🔥 REGISTER
 const register = async (req, res) => {
   try {
-    const { fullName, email, password, role, specialization } = req.body;
+    const { fullName, email, password, role, specialization, phone } = req.body;
 
-    if (!fullName || !email || !password) {
+    if (!fullName || !email || !password || !phone) {
       return res.status(400).json({
-        message: 'Full name, email and password are required'
+        message: 'Full name, email, password and phone are required'
       });
     }
 
@@ -34,6 +34,7 @@ const register = async (req, res) => {
       email,
       password: hashedPassword,
       role: userRole,
+      phone, // 🔥 זה הכי חשוב
       specialization: userRole === 'doctor' ? specialization : undefined
     });
 

@@ -12,6 +12,7 @@ export default function Register() {
     password: "",
     confirmPassword: "",
     idNumber: "",
+    phone: "", 
   });
 
   const [showNameInfo, setShowNameInfo] = useState(false);
@@ -19,6 +20,7 @@ export default function Register() {
   const [showEmailInfo, setShowEmailInfo] = useState(false);
   const [showPasswordInfo, setShowPasswordInfo] = useState(false);
   const [showConfirmInfo, setShowConfirmInfo] = useState(false);
+  const [showPhoneInfo, setShowPhoneInfo] = useState(false);
 
   const [errors, setErrors] = useState({});
 
@@ -33,6 +35,7 @@ export default function Register() {
 
   const validatePassword = (password) =>
     /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%&*])[A-Za-z\d!@#$%&*]{6,12}$/.test(password);
+  const validatePhone = (phone) => /^05\d{8}$/.test(phone);
 
   const handleRegister = async () => {
     let newErrors = {};
@@ -58,6 +61,9 @@ export default function Register() {
     if (form.password !== form.confirmPassword) {
       newErrors.confirmPassword = "Passwords do not match";
     }
+    if (!validatePhone(form.phone)) {
+        newErrors.phone = "Phone must be a valid Israeli number (10 digits starting with 05)";
+      }
 
     setErrors(newErrors);
 
@@ -200,7 +206,38 @@ export default function Register() {
                   {errors.email}
                 </p>
               )}
+              
             </div>
+            {/* PHONE */}
+                <div className="relative mb-4">
+                <input
+                    type="text"
+                    placeholder="Phone Number"
+                    className="w-full p-3 border border-gray-200 rounded-lg"
+                    onChange={(e) =>
+                    setForm({
+                        ...form,
+                        phone: e.target.value.replace(/\D/g, ""), // רק מספרים
+                    })
+                    }
+                />
+
+                <FaInfoCircle
+                onClick={() => setShowPhoneInfo(!showPhoneInfo)}
+                className="absolute right-3 top-3 text-gray-400 cursor-pointer"
+                />
+                {showPhoneInfo && (
+                <div className="absolute right-0 top-12 bg-white text-xs text-gray-600 p-3 rounded shadow-md w-[280px] z-10">
+                    Please enter a valid Israeli phone number starting with 05 and containing 10 digits only.
+                </div>
+                )}
+
+                {errors.phone && (
+                    <p className="text-red-500 text-xs mt-1">
+                    {errors.phone}
+                    </p>
+                )}
+                </div>
 
             {/* PASSWORD */}
             <div className="relative mb-4">
