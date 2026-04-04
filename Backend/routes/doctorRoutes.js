@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 
-// ✅ תיקון import
 const { authenticate, authorizeRoles } = require('../middleware/authMiddleware');
 const upload = require('../middleware/upload');
 
@@ -40,17 +39,17 @@ router.get(
 );
 
 // ----------------------------------------------------
-// 🔥 התמחויות
+// התמחויות
 // ----------------------------------------------------
 router.get(
-  "/specializations",
+  '/specializations',
   authenticate,
-  authorizeRoles("patient"),
+  authorizeRoles('patient'),
   getSpecializations
 );
 
 // ----------------------------------------------------
-// רשימת כל הרופאים (למטופל/מזכירה)
+// רשימת רופאים
 // ----------------------------------------------------
 router.get(
   '/',
@@ -60,7 +59,7 @@ router.get(
 );
 
 // ----------------------------------------------------
-// רופא - פרופיל
+// פרופיל רופא
 // ----------------------------------------------------
 router.get(
   '/me',
@@ -77,7 +76,7 @@ router.put(
 );
 
 // ----------------------------------------------------
-// רופא - תורים
+// תורים
 // ----------------------------------------------------
 router.get(
   '/appointments',
@@ -87,7 +86,7 @@ router.get(
 );
 
 // ----------------------------------------------------
-// זמינות רופא
+// זמינות
 // ----------------------------------------------------
 router.put(
   '/availability',
@@ -97,7 +96,7 @@ router.put(
 );
 
 // ----------------------------------------------------
-// העלאת קבצים
+// העלאת קובץ למטופל
 // ----------------------------------------------------
 router.post(
   '/patient/:patientId/files',
@@ -142,7 +141,7 @@ router.get(
 );
 
 // ----------------------------------------------------
-// פניות
+// 🔥 פניות
 // ----------------------------------------------------
 router.get(
   '/requests',
@@ -158,19 +157,7 @@ router.get(
   getDoctorRequestById
 );
 
-router.put(
-  '/requests/:requestId/reply',
-  authenticate,
-  authorizeRoles('doctor'),
-  upload.single('file'),
-  replyToRequest
-);
 
-router.put(
-  '/requests/:requestId/status',
-  authenticate,
-  authorizeRoles('doctor'),
-  updateRequestStatus
-);
+
 
 module.exports = router;

@@ -161,10 +161,40 @@ const resetPassword = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+const createDoctor = async (req, res) => {
+  try {
+    const { fullName, email, password, phone, specialization } = req.body;
+
+    if (!fullName || !email || !password || !phone || !specialization) {
+      return res.status(400).json({ message: "Missing fields" });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const doctor = await User.create({
+      fullName,
+      email,
+      password: hashedPassword,
+      phone,
+      role: "doctor",
+      specialization
+    });
+
+    res.status(201).json({
+      message: "Doctor created successfully",
+      doctor
+    });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
 
 module.exports = {
   register,
   login,
   forgotPassword,
   resetPassword,
+  createDoctor
 };

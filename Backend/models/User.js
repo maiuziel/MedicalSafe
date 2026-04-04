@@ -42,28 +42,25 @@ const userSchema = new mongoose.Schema(
     required: true,
   },
 
-  phone: {
-    type: String
-  },
-
   specialization: {
-    type: String
+    type: String,
+    required: function () {
+      return this.role === "doctor";
+    }
   },
 
   availability: [
     {
       day: {
-        type: String
+        type: String,
+        required: true
       },
-      startTime: {
-        type: String
-      },
-      endTime: {
-        type: String
+      slots: {
+        type: [String],
+        default: []   // 🔥 זה החלק הקריטי
       }
     }
   ]
-
 },
 { timestamps: true }
 );

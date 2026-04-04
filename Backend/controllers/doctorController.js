@@ -1,6 +1,7 @@
 const User = require('../models/User');
 const Appointment = require('../models/Appointment');
 const Feedback = require('../models/Feedback');
+const Request = require('../models/Request'); // אם אין - תוסיפי
 
 // GET /api/doctor/me
 const getMyProfile = async (req, res) => {
@@ -101,34 +102,35 @@ const getDoctors = async (req, res) => {
   }
 };
 const setAvailability = async (req, res) => {
+  console.log(req.body);
   try {
     const { availability } = req.body;
 
-    // 🔴 ולידציה
-    if (!availability || !Array.isArray(availability)) {
+    if (!Array.isArray(availability)) {
       return res.status(400).json({
-        message: 'Availability must be an array'
+        message: "Availability must be an array"
       });
     }
 
-    const doctor = await User.findByIdAndUpdate(
-      req.user.userId,
-      { availability },
-      { new: true }
-    ).select('-password');
+    const doctor = await User.findById(req.user.userId);
 
     if (!doctor) {
-      return res.status(404).json({ message: 'Doctor not found' });
+      return res.status(404).json({ message: "Doctor not found" });
     }
 
+    // 🔥 זה השינוי הקריטי
+    doctor.availability = availability;
+
+    await doctor.save();
+
     res.json({
-      message: 'Availability updated successfully',
+      message: "Availability updated successfully",
       availability: doctor.availability
     });
 
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Server error' });
+    console.error("Error:", error);
+    res.status(500).json({ message: "Server error" });
   }
 };
 
@@ -250,7 +252,6 @@ const getFollowUpPatients = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
-
 const getAvailableDoctors = async (req, res) => {
   console.log("🔥 getAvailableDoctors CALLED");
 
@@ -261,52 +262,108 @@ const getAvailableDoctors = async (req, res) => {
       return res.status(400).json({ message: "Missing search criteria" });
     }
 
-    const doctors = await User.find({
-      role: "doctor",
-      specialization: specialization,
-    }).select("-password");
+    // תומך גם ב-YYYY-MM-DD וגם ב-DD/MM/YYYY
+    let normalizedDate = String(date).trim();
 
-    const selectedDateObj = new Date(date);
+    if (normalizedDate.includes("/")) {
+      const [day, month, year] = normalizedDate.split("/");
+      normalizedDate = `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+    }
+
+    const selectedDateObj = new Date(`${normalizedDate}T00:00:00`);
+
+    if (isNaN(selectedDateObj.getTime())) {
+      return res.status(400).json({ message: "Invalid date format" });
+    }
+
     const selectedDay = selectedDateObj.toLocaleDateString("en-US", {
       weekday: "long",
     });
 
-    const selectedTime = time;
+    const selectedTime = String(time).trim().slice(0, 5);
+    const normalizedSpecialization = specialization.trim();
 
+    console.log("Selected date:", normalizedDate);
     console.log("Selected day:", selectedDay);
     console.log("Selected time:", selectedTime);
+    console.log("Selected specialization:", normalizedSpecialization);
 
-    // 🔥 סינון לפי זמינות אמיתית
+    const doctors = await User.find({
+      role: "doctor",
+      specialization: {
+        $regex: `^${normalizedSpecialization}$`,
+        $options: "i",
+      },
+    })
+      .select("-password")
+      .lean();
+
+    console.log("DOCTORS FOUND:", doctors.map((d) => d.fullName));
+
     const availableBySchedule = doctors.filter((doc) => {
-      // ❌ אם אין זמינות בכלל → לא להציג
-      if (!doc.availability || doc.availability.length === 0) {
+      if (!Array.isArray(doc.availability) || doc.availability.length === 0) {
+        console.log(`❌ ${doc.fullName} has no availability`);
         return false;
       }
 
-      return doc.availability.some((slot) => {
-        return (
-          slot.day.toLowerCase() === selectedDay.toLowerCase() &&
-          selectedTime >= slot.startTime &&
-          selectedTime <= slot.endTime
+      const hasMatchingSlot = doc.availability.some((slot) => {
+        console.log("FULL SLOT OBJECT:", slot);
+
+        const slotDay = String(slot.day || "").trim().toLowerCase();
+
+        const rawSlots = Array.isArray(slot.slots)
+          ? slot.slots
+          : Array.isArray(slot.times)
+          ? slot.times
+          : Array.isArray(slot.availableSlots)
+          ? slot.availableSlots
+          : Array.isArray(slot.hours)
+          ? slot.hours
+          : [];
+
+        const normalizedSlots = rawSlots.map((s) =>
+          String(s).trim().slice(0, 5)
         );
+
+        const dayMatches = slotDay === selectedDay.toLowerCase();
+        const timeMatches = normalizedSlots.includes(selectedTime);
+
+        console.log(
+          `${doc.fullName} | day=${slot.day} | slots=${JSON.stringify(
+            normalizedSlots
+          )} | dayMatches=${dayMatches} | timeMatches=${timeMatches}`
+        );
+
+        return dayMatches && timeMatches;
       });
+
+      if (!hasMatchingSlot) {
+        console.log(`❌ ${doc.fullName} does not match selected day/time`);
+      }
+
+      return hasMatchingSlot;
     });
 
-    const selectedDateTime = new Date(`${date}T${time}`);
-    const oneHourBefore = new Date(selectedDateTime.getTime() - 60 * 60 * 1000);
-    const oneHourAfter = new Date(selectedDateTime.getTime() + 60 * 60 * 1000);
-
-    const busyAppointments = await Appointment.find({
-      date: { $gte: oneHourBefore, $lte: oneHourAfter },
-      status: { $ne: "cancelled" },
-    });
-
-    const busyDoctorIds = busyAppointments.map((a) =>
-      a.doctor.toString()
+    console.log(
+      "AFTER SCHEDULE:",
+      availableBySchedule.map((d) => d.fullName)
     );
 
+    const selectedDateTime = new Date(`${normalizedDate}T${selectedTime}:00`);
+
+    if (isNaN(selectedDateTime.getTime())) {
+      return res.status(400).json({ message: "Invalid date/time format" });
+    }
+
+    const busyAppointments = await Appointment.find({
+      date: selectedDateTime,
+      status: { $ne: "cancelled" },
+    }).lean();
+
+    const busyDoctorIds = busyAppointments.map((a) => String(a.doctor));
+
     const finalAvailableDoctors = availableBySchedule.filter(
-      (doc) => !busyDoctorIds.includes(doc._id.toString())
+      (doc) => !busyDoctorIds.includes(String(doc._id))
     );
 
     console.log(
@@ -314,10 +371,10 @@ const getAvailableDoctors = async (req, res) => {
       finalAvailableDoctors.map((d) => d.fullName)
     );
 
-    res.json(finalAvailableDoctors);
+    return res.json(finalAvailableDoctors);
   } catch (error) {
     console.error("Error in getAvailableDoctors:", error);
-    res.status(500).json({ message: "Server error" });
+    return res.status(500).json({ message: "Server error" });
   }
 };
 const getSpecializations = async (req, res) => {
@@ -332,6 +389,7 @@ const getSpecializations = async (req, res) => {
   }
 };
 
+
 module.exports = {
   getMyProfile,
   updateMyProfile,
@@ -344,5 +402,5 @@ module.exports = {
   unmarkPatientFromFollowUp,
   getFollowUpPatients,
   getAvailableDoctors,
-  getSpecializations
+  getSpecializations,
 };

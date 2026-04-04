@@ -138,7 +138,7 @@ const replyToRequest = async (req, res) => {
     const { requestId } = req.params;
     const { reply } = req.body;
 
-    if (!reply || !reply.trim()) {
+    if (!reply || reply.trim() === "") {
       return res.status(400).json({ message: 'Reply is required' });
     }
 
@@ -151,9 +151,10 @@ const replyToRequest = async (req, res) => {
       return res.status(404).json({ message: 'Request not found' });
     }
 
-    requestItem.reply = reply;
+    requestItem.reply = reply.trim();
     requestItem.repliedAt = new Date();
     requestItem.repliedBy = req.user.userId;
+    requestItem.status = "resolved"; // 🔥 מוסיף אוטומטית סיום
 
     if (req.file) {
       requestItem.replyFile = req.file.filename;
@@ -165,11 +166,12 @@ const replyToRequest = async (req, res) => {
       message: 'Reply sent successfully',
       request: requestItem
     });
+
   } catch (error) {
+    console.error("❌ ERROR IN replyToRequest:", error);
     res.status(500).json({ message: 'Server error' });
   }
 };
-
 const updateRequestStatus = async (req, res) => {
   try {
     const { requestId } = req.params;
