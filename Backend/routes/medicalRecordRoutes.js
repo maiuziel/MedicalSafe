@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
 
-const authMiddleware = require('../middleware/authMiddleware');
-const authorize = require('../middleware/authorize');
+// ✅ תיקון import
+const { authenticate, authorizeRoles } = require('../middleware/authMiddleware');
 
 const {
   createMedicalRecord,
@@ -14,8 +14,8 @@ const {
 // רופא יוצר רשומה רפואית
 router.post(
   '/',
-  authMiddleware,
-  authorize('doctor'),
+  authenticate,
+  authorizeRoles('doctor'),
   createMedicalRecord
 );
 
@@ -23,15 +23,16 @@ router.post(
 // מטופל רואה את הרשומות שלו
 router.get(
   '/my',
-  authMiddleware,
-  authorize('patient'),
+  authenticate,
+  authorizeRoles('patient'),
   getMyMedicalRecords
 );
 
 router.get(
   '/patient/:patientId',
-  authMiddleware,
-  authorize('doctor'),
+  authenticate,
+  authorizeRoles('doctor'),
   getPatientMedicalRecords
 );
+
 module.exports = router;

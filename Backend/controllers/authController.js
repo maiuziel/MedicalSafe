@@ -4,6 +4,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const crypto = require("crypto");
 const sendResetEmail = require("../utils/mailer");
+
 // 🔥 REGISTER
 const register = async (req, res) => {
   try {
@@ -15,11 +16,8 @@ const register = async (req, res) => {
       });
     }
 
-    const allowedRoles = ['patient', 'doctor', 'secretary', 'admin'];
-
-    const userRole = role && allowedRoles.includes(role)
-      ? role
-      : 'patient';
+    // ❗ תיקון: לא מאפשרים לבחור role מהבקשה
+    const userRole = 'patient';
 
     const existingUser = await User.findOne({ email });
 
@@ -34,7 +32,7 @@ const register = async (req, res) => {
       email,
       password: hashedPassword,
       role: userRole,
-      phone, // 🔥 זה הכי חשוב
+      phone,
       specialization: userRole === 'doctor' ? specialization : undefined
     });
 
@@ -102,6 +100,7 @@ const login = async (req, res) => {
     return res.status(500).json({ message: 'Server error' });
   }
 };
+
 // 🔥 FORGOT PASSWORD
 const forgotPassword = async (req, res) => {
   const { email } = req.body;
@@ -132,6 +131,7 @@ const forgotPassword = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
 // 🔥 RESET PASSWORD
 const resetPassword = async (req, res) => {
   const { token } = req.params;

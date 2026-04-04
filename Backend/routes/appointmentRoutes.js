@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
 
-const authMiddleware = require('../middleware/authMiddleware');
-const authorize = require('../middleware/authorize');
+// ✅ תיקון import
+const { authenticate, authorizeRoles } = require('../middleware/authMiddleware');
 
 const {
   createAppointment,
@@ -14,32 +14,32 @@ const {
 // קביעת תור
 router.post(
   '/',
-  authMiddleware,
-  authorize('patient'),
+  authenticate,
+  authorizeRoles('patient'),
   createAppointment
 );
 
 // צפייה בתורים שלי
 router.get(
   '/my',
-  authMiddleware,
-  authorize('patient'),
+  authenticate,
+  authorizeRoles('patient'),
   getMyAppointments
 );
 
 // ביטול תור
 router.put(
   '/cancel/:id',
-  authMiddleware,
-  authorize('patient'),
+  authenticate,
+  authorizeRoles('patient'),
   cancelAppointment
 );
 
 // שינוי תור (מזכירה)
 router.patch(
   '/:id',
-  authMiddleware,
-  authorize('secretary'),
+  authenticate,
+  authorizeRoles('secretary'),
   updateAppointment
 );
 

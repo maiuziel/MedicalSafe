@@ -25,6 +25,7 @@ export default function Login() {
 
       if (res.ok) {
         localStorage.setItem("token", data.token);
+        localStorage.setItem("role", data.role); // ✅ הוספה
 
         const role = data.role;
 

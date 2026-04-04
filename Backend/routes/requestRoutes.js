@@ -1,8 +1,8 @@
 const express = require("express");
 const router = express.Router();
 
-const authMiddleware = require("../middleware/authMiddleware");
-const authorizeRoles = require("../middleware/roles");
+// ✅ תיקון import
+const { authenticate, authorizeRoles } = require("../middleware/authMiddleware");
 
 const {
   createRequest,
@@ -13,7 +13,7 @@ const {
 // 🔥 יצירת פנייה
 router.post(
   "/patient/requests",
-  authMiddleware,
+  authenticate,
   authorizeRoles("patient"),
   createRequest
 );
@@ -21,7 +21,7 @@ router.post(
 // 🔥 כל הפניות של המטופל
 router.get(
   "/patient/requests",
-  authMiddleware,
+  authenticate,
   authorizeRoles("patient"),
   getPatientRequests
 );
@@ -29,7 +29,7 @@ router.get(
 // 🔥 פנייה לפי ID
 router.get(
   "/patient/requests/:requestId",
-  authMiddleware,
+  authenticate,
   authorizeRoles("patient"),
   getPatientRequestById
 );

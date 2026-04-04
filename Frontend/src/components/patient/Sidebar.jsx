@@ -1,23 +1,30 @@
 import { Home, CalendarDays, FileText, MessageSquare, LogOut } from "lucide-react";
 import { FaShieldAlt, FaEdit } from "react-icons/fa";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Mail } from "lucide-react";
 
 export default function Sidebar({ onLogout }) {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const isDashboard = location.pathname === "/patient";
-  const isEditProfile = location.pathname === "/edit-profile";
-  const isRequests = location.pathname === "/requests"; // ✅ נוסף
+  const role = localStorage.getItem("role"); // 🔥 חשוב
 
-  // 🔥 fallback אם לא הועבר onLogout
+  // 🔥 routes דינמיים
+  const dashboardRoute = role === "doctor" ? "/doctor" : "/patient";
+  const appointmentsRoute =
+    role === "doctor" ? "/doctor/appointments" : "/patient/appointments";
+
+  // 🔥 בדיקות active
+  const isDashboard = location.pathname === dashboardRoute;
+  const isAppointments = location.pathname === appointmentsRoute;
+  const isEditProfile = location.pathname === "/edit-profile";
+
   const handleLogout = () => {
     if (onLogout) return onLogout();
 
     const confirmLogout = window.confirm("Are you sure you want to log out?");
     if (confirmLogout) {
       localStorage.removeItem("token");
+      localStorage.removeItem("role");
       navigate("/");
     }
   };
@@ -25,7 +32,7 @@ export default function Sidebar({ onLogout }) {
   return (
     <div className="w-[230px] min-h-screen bg-[#f8fbff] border-r border-[#e6edf5] px-5 py-6 flex flex-col">
 
-      {/* 🔥 לוגו */}
+      {/* לוגו */}
       <div className="flex items-center gap-2 mb-8">
         <FaShieldAlt className="text-[#5d95f7] text-2xl" />
         <h1 className="text-[20px] font-semibold text-[#1f2a44]">
@@ -35,71 +42,97 @@ export default function Sidebar({ onLogout }) {
 
       <div className="flex flex-col gap-2">
 
+        {/* Dashboard */}
         <button
-          onClick={() => navigate("/patient")}
+          onClick={() => navigate(dashboardRoute)}
           className={`flex items-center gap-3 px-4 py-3 rounded-xl shadow-sm text-sm font-medium transition
-            ${
-              isDashboard
-                ? "bg-gradient-to-r from-[#4f8df7] to-[#5d95f7] text-white"
-                : "text-[#3e4c66] hover:bg-white"
+            ${isDashboard
+              ? "bg-gradient-to-r from-[#4f8df7] to-[#5d95f7] text-white"
+              : "text-[#3e4c66] hover:bg-white"
             }`}
         >
           <Home size={18} />
           Dashboard
         </button>
 
-        <button className="flex items-center gap-3 text-[#3e4c66] px-4 py-3 rounded-xl hover:bg-white text-sm font-medium transition">
-          <CalendarDays size={18} />
-          Appointments
-        </button>
+       {/* Appointments - רק לרופא */}
+{role === "doctor" && (
+  <button
+    onClick={() => navigate(appointmentsRoute)}
+    className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition
+      ${isAppointments
+        ? "bg-gradient-to-r from-[#4f8df7] to-[#5d95f7] text-white"
+        : "text-[#3e4c66] hover:bg-white"
+      }`}
+  >
+    <CalendarDays size={18} />
+    Appointments
+  </button>
+)}
 
-        <button className="flex items-center gap-3 text-[#3e4c66] px-4 py-3 rounded-xl hover:bg-white text-sm font-medium transition">
-          <FileText size={18} />
-          Medical Record
-        </button>
+        {/* 🔥 תפריט למטופל */}
+        {role === "patient" && (
+          <>
+            <button className="flex items-center gap-3 text-[#3e4c66] px-4 py-3 rounded-xl hover:bg-white text-sm font-medium transition">
+              <FileText size={18} />
+              Medical Record
+            </button>
 
-        <button className="flex items-center gap-3 text-[#3e4c66] px-4 py-3 rounded-xl hover:bg-white text-sm font-medium transition">
-          <MessageSquare size={18} />
-          Messages
-        </button>
+            <button className="flex items-center gap-3 text-[#3e4c66] px-4 py-3 rounded-xl hover:bg-white text-sm font-medium transition">
+              <MessageSquare size={18} />
+              Messages
+            </button>
+            <button
+  onClick={() => navigate("/patient/requests")}
+  className="flex items-center gap-3 text-[#3e4c66] px-4 py-3 rounded-xl hover:bg-white text-sm font-medium transition"
+>
+  <MessageSquare size={18} />
+  Requests
+</button>
+          </>
+        )}
 
+        {/* 🔥 תפריט לרופא */}
+        {role === "doctor" && (
+          <>
+            <button className="flex items-center gap-3 text-[#3e4c66] px-4 py-3 rounded-xl hover:bg-white text-sm font-medium transition">
+              <FileText size={18} />
+              Patient Records
+            </button>
+
+            <button className="flex items-center gap-3 text-[#3e4c66] px-4 py-3 rounded-xl hover:bg-white text-sm font-medium transition">
+              <MessageSquare size={18} />
+              Requests
+            </button>
+          </>
+        )}
+
+        {/* Edit Profile */}
         <button
           onClick={() => navigate("/edit-profile")}
           className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition
-            ${
-              isEditProfile
-                ? "bg-gradient-to-r from-[#4f8df7] to-[#5d95f7] text-white"
-                : "text-[#3e4c66] hover:bg-white"
+            ${isEditProfile
+              ? "bg-gradient-to-r from-[#4f8df7] to-[#5d95f7] text-white"
+              : "text-[#3e4c66] hover:bg-white"
             }`}
         >
           <FaEdit />
           Edit Profile
         </button>
 
-        <button
-          onClick={() => navigate("/requests")}
-          className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition
-            ${
-              isRequests
-                ? "bg-gradient-to-r from-[#4f8df7] to-[#5d95f7] text-white"
-                : "text-[#3e4c66] hover:bg-white"
-            }`}
-        >
-          <Mail size={18} />
-          Send Request
-        </button>
-
       </div>
 
+      {/* Logout */}
       <div className="mt-auto pt-8 border-t border-[#e6edf5]">
         <button
-          onClick={handleLogout} 
+          onClick={handleLogout}
           className="flex items-center gap-3 text-[#6b7a90] px-2 py-2 text-sm font-medium hover:text-red-500 transition"
         >
           <LogOut size={18} />
           Log Out
         </button>
       </div>
+
     </div>
   );
 }

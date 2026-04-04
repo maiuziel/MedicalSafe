@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
 
-const authMiddleware = require('../middleware/authMiddleware');
-const authorizeRoles = require('../middleware/roles');
+// ✅ תיקון import
+const { authenticate, authorizeRoles } = require('../middleware/authMiddleware');
 
 const {
   getMyProfile,
@@ -16,7 +16,7 @@ const {
 
 
 console.log({
-  authMiddleware,
+  authenticate,
   authorizeRoles,
   getMyProfile,
   updateMyProfile,
@@ -26,49 +26,51 @@ console.log({
 
 router.get(
   '/me',
-  authMiddleware,
+  authenticate,
   authorizeRoles('secretary'),
   getMyProfile
 );
 
 router.put(
   '/me',
-  authMiddleware,
+  authenticate,
   authorizeRoles('secretary'),
   updateMyProfile
 );
 
 router.get(
   '/doctors',
-  authMiddleware,
+  authenticate,
   authorizeRoles('secretary'),
   getDoctors
 );
 
 router.get(
   '/patients',
-  authMiddleware,
+  authenticate,
   authorizeRoles('secretary'),
   getPatients
 );
+
 router.get(
   '/appointments',
-  authMiddleware,
+  authenticate,
   authorizeRoles('secretary'),
   getAllAppointments
 );
 
 router.put(
   '/appointments/:id',
-  authMiddleware,
+  authenticate,
   authorizeRoles('secretary'),
   updateAppointment
 );
 
 router.get(
   '/doctors/availability',
-  authMiddleware,
+  authenticate,
   authorizeRoles('secretary'),
   getDoctorsAvailability
 );
+
 module.exports = router;

@@ -18,4 +18,18 @@ const authenticate = (req, res, next) => {
   }
 };
 
-module.exports = authenticate;
+// 🔥 הוספה חדשה - הרשאות לפי role
+const authorizeRoles = (...roles) => {
+  return (req, res, next) => {
+    if (!req.user || !roles.includes(req.user.role)) {
+      return res.status(403).json({ message: "Access denied" });
+    }
+    next();
+  };
+};
+
+// ❗ שימי לב - שינוי ב-export
+module.exports = {
+  authenticate,
+  authorizeRoles
+};

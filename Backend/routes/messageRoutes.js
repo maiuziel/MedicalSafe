@@ -8,34 +8,34 @@ const {
   getSentMessages
 } = require('../controllers/messageController');
 
-const authMiddleware = require('../middleware/authMiddleware');
-const authorize = require('../middleware/authorize');
+// ✅ תיקון import
+const { authenticate, authorizeRoles } = require('../middleware/authMiddleware');
 
 router.post(
   '/',
-  authMiddleware,
-  authorize('secretary'),
+  authenticate,
+  authorizeRoles('secretary'),
   sendMessageToDoctor
 );
 
 router.get(
   '/doctor',
-  authMiddleware,
-  authorize('doctor'),
+  authenticate,
+  authorizeRoles('doctor'),
   getDoctorMessages
 );
 
 router.patch(
   '/:id/read',
-  authMiddleware,
-  authorize('doctor'),
+  authenticate,
+  authorizeRoles('doctor'),
   markAsRead
 );
 
 router.get(
   '/sent',
-  authMiddleware,
-  authorize('secretary'),
+  authenticate,
+  authorizeRoles('secretary'),
   getSentMessages
 );
 

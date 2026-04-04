@@ -62,15 +62,18 @@ export default function PatientRequests() {
   const fetchRequests = async () => {
     try {
       const token = localStorage.getItem("token");
-
+  
       const res = await fetch("http://localhost:5001/api/patient/requests", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-
+  
       const data = await res.json();
-      setRequests(Array.isArray(data) ? data : data.requests || []);
+  
+      console.log("REQUESTS RESPONSE:", data); // 🔥 חשוב לבדיקה
+  
+      setRequests(data.requests || []);
     } catch (err) {
       console.error(err);
       setRequests([]);

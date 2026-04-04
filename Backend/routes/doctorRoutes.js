@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
 
-const authMiddleware = require('../middleware/authMiddleware');
-const authorizeRoles = require('../middleware/roles');
+// ✅ תיקון import
+const { authenticate, authorizeRoles } = require('../middleware/authMiddleware');
 const upload = require('../middleware/upload');
 
 // 🔹 doctor controller
@@ -17,7 +17,7 @@ const {
   markPatientForFollowUp,
   unmarkPatientFromFollowUp,
   getFollowUpPatients,
-  getAvailableDoctors ,
+  getAvailableDoctors,
   getSpecializations
 } = require('../controllers/doctorController');
 
@@ -30,29 +30,31 @@ const {
 } = require('../controllers/requestController');
 
 // ----------------------------------------------------
-// חיפוש רופאים זמינים (למטופל) - חשוב שיהיה למעלה
+// חיפוש רופאים זמינים (למטופל)
 // ----------------------------------------------------
 router.get(
   '/availability',
-  authMiddleware,
+  authenticate,
   authorizeRoles('patient'),
   getAvailableDoctors
 );
+
 // ----------------------------------------------------
-// 🔥 התמחויות (חשוב לפני "/")
+// 🔥 התמחויות
 // ----------------------------------------------------
 router.get(
   "/specializations",
-  authMiddleware,
+  authenticate,
   authorizeRoles("patient"),
   getSpecializations
 );
+
 // ----------------------------------------------------
 // רשימת כל הרופאים (למטופל/מזכירה)
 // ----------------------------------------------------
 router.get(
   '/',
-  authMiddleware,
+  authenticate,
   authorizeRoles('patient', 'secretary'),
   getDoctors
 );
@@ -62,14 +64,14 @@ router.get(
 // ----------------------------------------------------
 router.get(
   '/me',
-  authMiddleware,
+  authenticate,
   authorizeRoles('doctor'),
   getMyProfile
 );
 
 router.put(
   '/me',
-  authMiddleware,
+  authenticate,
   authorizeRoles('doctor'),
   updateMyProfile
 );
@@ -79,27 +81,27 @@ router.put(
 // ----------------------------------------------------
 router.get(
   '/appointments',
-  authMiddleware,
+  authenticate,
   authorizeRoles('doctor'),
   getDoctorAppointments
 );
 
 // ----------------------------------------------------
-// זמינות רופא (עדכון על ידי הרופא)
+// זמינות רופא
 // ----------------------------------------------------
 router.put(
   '/availability',
-  authMiddleware,
+  authenticate,
   authorizeRoles('doctor'),
   setAvailability
 );
 
 // ----------------------------------------------------
-// העלאת קבצים למטופל
+// העלאת קבצים
 // ----------------------------------------------------
 router.post(
   '/patient/:patientId/files',
-  authMiddleware,
+  authenticate,
   authorizeRoles('doctor'),
   upload.single('file'),
   uploadMedicalFile
@@ -110,7 +112,7 @@ router.post(
 // ----------------------------------------------------
 router.get(
   '/feedbacks',
-  authMiddleware,
+  authenticate,
   authorizeRoles('doctor'),
   getDoctorFeedbacks
 );
@@ -120,46 +122,45 @@ router.get(
 // ----------------------------------------------------
 router.put(
   '/patients/:patientId/follow',
-  authMiddleware,
+  authenticate,
   authorizeRoles('doctor'),
   markPatientForFollowUp
 );
 
 router.put(
   '/patients/:patientId/unfollow',
-  authMiddleware,
+  authenticate,
   authorizeRoles('doctor'),
   unmarkPatientFromFollowUp
 );
 
 router.get(
   '/patients/follow',
-  authMiddleware,
+  authenticate,
   authorizeRoles('doctor'),
   getFollowUpPatients
 );
 
 // ----------------------------------------------------
-// פניות (Requests)
+// פניות
 // ----------------------------------------------------
-
 router.get(
   '/requests',
-  authMiddleware,
+  authenticate,
   authorizeRoles('doctor'),
   getDoctorRequests
 );
 
 router.get(
   '/requests/:requestId',
-  authMiddleware,
+  authenticate,
   authorizeRoles('doctor'),
   getDoctorRequestById
 );
 
 router.put(
   '/requests/:requestId/reply',
-  authMiddleware,
+  authenticate,
   authorizeRoles('doctor'),
   upload.single('file'),
   replyToRequest
@@ -167,14 +168,9 @@ router.put(
 
 router.put(
   '/requests/:requestId/status',
-  authMiddleware,
+  authenticate,
   authorizeRoles('doctor'),
   updateRequestStatus
 );
-router.get(
-  "/specializations",
-  authMiddleware,
-  authorizeRoles("patient"),
-  getSpecializations
-);
+
 module.exports = router;

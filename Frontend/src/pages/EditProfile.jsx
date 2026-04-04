@@ -15,8 +15,14 @@ export default function EditProfile() {
   const fetchProfile = async () => {
     try {
       const token = localStorage.getItem("token");
+      const role = localStorage.getItem("role");
 
-      const res = await fetch("http://localhost:5001/api/patient/me", {
+      const endpoint =
+        role === "doctor"
+          ? "http://localhost:5001/api/doctor/me"
+          : "http://localhost:5001/api/patient/me";
+
+      const res = await fetch(endpoint, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -37,18 +43,21 @@ export default function EditProfile() {
   const handleUpdate = async () => {
     try {
       const token = localStorage.getItem("token");
+      const role = localStorage.getItem("role");
 
-      const res = await fetch(
-        "http://localhost:5001/api/patient/me",
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(form),
-        }
-      );
+      const endpoint =
+        role === "doctor"
+          ? "http://localhost:5001/api/doctor/me"
+          : "http://localhost:5001/api/patient/me";
+
+      const res = await fetch(endpoint, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(form),
+      });
 
       const data = await res.json();
 
@@ -68,7 +77,6 @@ export default function EditProfile() {
 
       <div className="flex-1 p-8 bg-[#eef2f7] min-h-screen">
 
-        {/* 🔥 כותרת כמו אצלך */}
         <div className="bg-white p-6 rounded-2xl shadow-sm mb-6">
           <h1 className="text-xl font-semibold text-gray-800">
             Edit Your Personal Details
@@ -78,7 +86,6 @@ export default function EditProfile() {
           </p>
         </div>
 
-        {/* 🔥 טופס */}
         <div className="bg-white p-6 rounded-2xl shadow-sm max-w-xl">
 
           <div className="mb-4">

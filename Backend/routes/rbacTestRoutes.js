@@ -1,6 +1,7 @@
 const express = require('express');
-const authenticate = require('../middleware/authMiddleware');
-const authorize = require('../middleware/authorize');
+
+// ✅ תיקון import
+const { authenticate, authorizeRoles } = require('../middleware/authMiddleware');
 
 const router = express.Router();
 
@@ -10,17 +11,17 @@ router.get('/me', authenticate, (req, res) => {
 });
 
 // רק רופא
-router.get('/doctor-only', authenticate, authorize('doctor'), (req, res) => {
+router.get('/doctor-only', authenticate, authorizeRoles('doctor'), (req, res) => {
   res.json({ message: 'Doctor access granted' });
 });
 
 // רק מזכירה
-router.get('/secretary-only', authenticate, authorize('secretary'), (req, res) => {
+router.get('/secretary-only', authenticate, authorizeRoles('secretary'), (req, res) => {
   res.json({ message: 'Secretary access granted' });
 });
 
 // רק admin
-router.get('/admin-only', authenticate, authorize('admin'), (req, res) => {
+router.get('/admin-only', authenticate, authorizeRoles('admin'), (req, res) => {
   res.json({ message: 'Admin access granted' });
 });
 
