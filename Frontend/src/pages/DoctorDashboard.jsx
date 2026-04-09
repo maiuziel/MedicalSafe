@@ -12,7 +12,6 @@ export default function DoctorDashboard() {
 
   const [scheduleAlert, setScheduleAlert] = useState("");
 
-  // 🔥 NEW STATE
   const [requests, setRequests] = useState([]);
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [responseText, setResponseText] = useState("");
@@ -26,14 +25,14 @@ export default function DoctorDashboard() {
   useEffect(() => {
     fetchProfile();
     fetchAppointments(true);
-    fetchRequests(true); // 🔥 NEW
+    fetchRequests(true);
 
     const interval = setInterval(() => {
       fetchAppointments(false);
     }, 10000);
 
     const interval2 = setInterval(() => {
-      fetchRequests(false); // 🔥 NEW
+      fetchRequests(false);
     }, 10000);
 
     return () => {
@@ -101,7 +100,6 @@ export default function DoctorDashboard() {
     }
   };
 
-  // 🔥 NEW
   const fetchRequests = async (isFirstLoad = false) => {
     try {
       const token = localStorage.getItem("token");
@@ -126,7 +124,6 @@ export default function DoctorDashboard() {
     }
   };
 
-  // 🔥 NEW
   const detectNewRequests = (oldList, newList) => {
     const newRequests = newList.filter(r => r.status === "new");
 
@@ -171,7 +168,6 @@ export default function DoctorDashboard() {
     }
   };
 
-  // 🔥 NEW
   const handleSendResponse = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -201,7 +197,6 @@ export default function DoctorDashboard() {
     }
   };
 
-  // 🔥 NEW
   const updateStatus = async (status) => {
     try {
       const token = localStorage.getItem("token");
@@ -219,6 +214,40 @@ export default function DoctorDashboard() {
       );
 
       fetchRequests(true);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  // 🔥 REMOVE AVAILABILITY
+  const removeAvailability = async (dayToRemove, slotToRemove) => {
+    try {
+      const token = localStorage.getItem("token");
+
+      const updatedAvailability = user.availability
+        .map((day) => {
+          if (day.day === dayToRemove) {
+            return {
+              ...day,
+              slots: day.slots.filter((s) => s !== slotToRemove),
+            };
+          }
+          return day;
+        })
+        .filter((day) => day.slots.length > 0);
+
+      const res = await fetch("http://localhost:5001/api/doctor/availability", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ availability: updatedAvailability }),
+      });
+
+      if (res.ok) {
+        fetchProfile();
+      }
     } catch (err) {
       console.error(err);
     }
@@ -249,6 +278,8 @@ export default function DoctorDashboard() {
       <Sidebar onLogout={handleLogout} />
 
       <div className="flex-1 p-8">
+
+        {/* HEADER */}
         <div className="bg-white rounded-xl p-6 shadow-sm mb-6">
           <h2 className="text-xl font-semibold text-gray-800">
             Welcome, Dr. {user?.fullName || user?.email}
@@ -258,19 +289,20 @@ export default function DoctorDashboard() {
           </p>
         </div>
 
+        {/* ALERTS */}
         {scheduleAlert && (
           <div className="bg-blue-50 border border-blue-200 text-blue-700 rounded-xl p-4 mb-6 text-sm">
             {scheduleAlert}
           </div>
         )}
 
-        {/* 🔔 REQUEST ALERT */}
         {requestAlert && (
           <div className="bg-yellow-50 border border-yellow-200 text-yellow-700 rounded-xl p-4 mb-6 text-sm">
             {requestAlert}
           </div>
         )}
 
+        {/* FILTERS */}
         <div className="bg-white p-5 rounded-xl shadow-sm mb-6 grid grid-cols-3 gap-3">
           <input type="date" value={filterDate} onChange={(e) => setFilterDate(e.target.value)} className="border p-2 rounded-lg text-sm" />
           <input type="text" placeholder="Search patient..." value={searchPatient} onChange={(e) => setSearchPatient(e.target.value)} className="border p-2 rounded-lg text-sm" />
@@ -302,7 +334,40 @@ export default function DoctorDashboard() {
           )}
         </div>
 
-        {/* 🔥 REQUESTS LIST */}
+        {/* 🔥 MY AVAILABILITY */}
+        <div className="bg-white p-5 rounded-xl shadow-sm mt-6">
+          <h3 className="font-semibold mb-4">My Availability</h3>
+
+          {user?.availability && user.availability.length > 0 ? (
+            user.availability.map((day, i) => (
+              <div key={i} className="mb-3">
+                <p className="font-medium">{day.day}</p>
+
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {day.slots.map((slot, j) => (
+                    <div
+                      key={j}
+                      className="bg-gray-100 px-3 py-1 rounded-lg text-sm flex items-center gap-2"
+                    >
+                      {slot}
+
+                      <button
+                        onClick={() => removeAvailability(day.day, slot)}
+                        className="text-red-500"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))
+          ) : (
+            <p className="text-gray-400 text-sm">No availability set</p>
+          )}
+        </div>
+
+        {/* REQUESTS */}
         <div className="bg-white p-5 rounded-xl shadow-sm mt-6">
           <h3 className="font-semibold mb-4">Patient Requests</h3>
 
@@ -315,7 +380,7 @@ export default function DoctorDashboard() {
           ))}
         </div>
 
-        {/* 🔥 REQUEST DETAILS */}
+        {/* REQUEST DETAILS */}
         {selectedRequest && (
           <div className="bg-white p-6 rounded-xl shadow-sm mt-6">
             <h3 className="font-semibold">{selectedRequest.subject}</h3>
@@ -339,6 +404,7 @@ export default function DoctorDashboard() {
             </button>
           </div>
         )}
+
       </div>
     </div>
   );

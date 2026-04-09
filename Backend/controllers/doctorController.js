@@ -102,9 +102,10 @@ const getDoctors = async (req, res) => {
   }
 };
 const setAvailability = async (req, res) => {
-  console.log(req.body);
+  console.log("BODY:", req.body);
+
   try {
-    const { availability } = req.body;
+    let { availability } = req.body;
 
     if (!Array.isArray(availability)) {
       return res.status(400).json({
@@ -112,13 +113,26 @@ const setAvailability = async (req, res) => {
       });
     }
 
+    // 🔥 ניקוי נתונים
+    availability = availability
+      .map(day => ({
+        day: String(day.day || "").trim(),
+        slots: Array.isArray(day.slots)
+          ? day.slots
+              .map(s => String(s).trim())
+              .filter(s => s !== "")
+          : []
+      }))
+      .filter(day => day.day && day.slots.length > 0);
+
+    console.log("CLEANED:", availability);
+
     const doctor = await User.findById(req.user.userId);
 
     if (!doctor) {
       return res.status(404).json({ message: "Doctor not found" });
     }
 
-    // 🔥 זה השינוי הקריטי
     doctor.availability = availability;
 
     await doctor.save();
@@ -129,11 +143,10 @@ const setAvailability = async (req, res) => {
     });
 
   } catch (error) {
-    console.error("Error:", error);
+    console.error("🔥 ERROR HERE:", error); // 🔥 חשוב!!
     res.status(500).json({ message: "Server error" });
   }
 };
-
 const uploadMedicalFile = async (req, res) => {
   try {
     const { patientId } = req.params;

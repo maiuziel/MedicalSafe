@@ -8,6 +8,8 @@ import ResetPassword from "./pages/ResetPassword";
 import EditProfile from "./pages/EditProfile";
 import PatientRequests from "./pages/PatientRequests";
 import DoctorAppointments from "./pages/DoctorAppointments";
+import DoctorAvailability from "./pages/DoctorAvailability";
+
 function App() {
   const role = localStorage.getItem("role");
 
@@ -23,6 +25,8 @@ function App() {
         {/* Dashboards */}
         <Route path="/patient" element={<PatientDashboard />} />
         <Route path="/doctor" element={<DoctorDashboard />} />
+        <Route path="/doctor/availability" element={<DoctorAvailability />} />
+
 
         {/* Edit Profile - לכולם */}
         <Route path="/edit-profile" element={<EditProfile />} />

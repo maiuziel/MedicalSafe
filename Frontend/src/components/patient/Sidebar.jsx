@@ -6,17 +6,20 @@ export default function Sidebar({ onLogout }) {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const role = localStorage.getItem("role"); // 🔥 חשוב
+  const role = localStorage.getItem("role");
 
-  // 🔥 routes דינמיים
+  // 🔥 routes
   const dashboardRoute = role === "doctor" ? "/doctor" : "/patient";
   const appointmentsRoute =
     role === "doctor" ? "/doctor/appointments" : "/patient/appointments";
 
-  // 🔥 בדיקות active
+  // 🔥 active states
   const isDashboard = location.pathname === dashboardRoute;
   const isAppointments = location.pathname === appointmentsRoute;
   const isEditProfile = location.pathname === "/edit-profile";
+
+  // 🔥 NEW
+  const isAvailability = location.pathname === "/doctor/availability";
 
   const handleLogout = () => {
     if (onLogout) return onLogout();
@@ -55,22 +58,37 @@ export default function Sidebar({ onLogout }) {
           Dashboard
         </button>
 
-       {/* Appointments - רק לרופא */}
-{role === "doctor" && (
-  <button
-    onClick={() => navigate(appointmentsRoute)}
-    className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition
-      ${isAppointments
-        ? "bg-gradient-to-r from-[#4f8df7] to-[#5d95f7] text-white"
-        : "text-[#3e4c66] hover:bg-white"
-      }`}
-  >
-    <CalendarDays size={18} />
-    Appointments
-  </button>
-)}
+        {/* Appointments */}
+        {role === "doctor" && (
+          <button
+            onClick={() => navigate(appointmentsRoute)}
+            className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition
+              ${isAppointments
+                ? "bg-gradient-to-r from-[#4f8df7] to-[#5d95f7] text-white"
+                : "text-[#3e4c66] hover:bg-white"
+              }`}
+          >
+            <CalendarDays size={18} />
+            Appointments
+          </button>
+        )}
 
-        {/* 🔥 תפריט למטופל */}
+        {/* 🔥 Availability (רק לרופא) */}
+        {role === "doctor" && (
+          <button
+            onClick={() => navigate("/doctor/availability")}
+            className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition
+              ${isAvailability
+                ? "bg-gradient-to-r from-[#4f8df7] to-[#5d95f7] text-white"
+                : "text-[#3e4c66] hover:bg-white"
+              }`}
+          >
+            <CalendarDays size={18} />
+            Availability
+          </button>
+        )}
+
+        {/* מטופל */}
         {role === "patient" && (
           <>
             <button className="flex items-center gap-3 text-[#3e4c66] px-4 py-3 rounded-xl hover:bg-white text-sm font-medium transition">
@@ -82,17 +100,18 @@ export default function Sidebar({ onLogout }) {
               <MessageSquare size={18} />
               Messages
             </button>
+
             <button
-  onClick={() => navigate("/patient/requests")}
-  className="flex items-center gap-3 text-[#3e4c66] px-4 py-3 rounded-xl hover:bg-white text-sm font-medium transition"
->
-  <MessageSquare size={18} />
-  Requests
-</button>
+              onClick={() => navigate("/patient/requests")}
+              className="flex items-center gap-3 text-[#3e4c66] px-4 py-3 rounded-xl hover:bg-white text-sm font-medium transition"
+            >
+              <MessageSquare size={18} />
+              Requests
+            </button>
           </>
         )}
 
-        {/* 🔥 תפריט לרופא */}
+        {/* רופא */}
         {role === "doctor" && (
           <>
             <button className="flex items-center gap-3 text-[#3e4c66] px-4 py-3 rounded-xl hover:bg-white text-sm font-medium transition">
