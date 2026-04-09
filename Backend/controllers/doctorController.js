@@ -402,7 +402,52 @@ const getSpecializations = async (req, res) => {
   }
 };
 
+const searchPatients = async (req, res) => {
+  
+  try {
+    const { query } = req.query;
+    const doctorId = req.user.userId;
+    console.log("Doctor from token:", doctorId);
 
+const allAppointments = await Appointment.find();
+console.log("All appointments:", allAppointments);
+
+    // אם אין חיפוש - לא מחזירים כלום
+    if (!query) {
+      return res.json({ patients: [] });
+    }
+
+    // מביא את כל המטופלים של הרופא
+    const doctorAppointments = await Appointment.find({
+      doctor: doctorId,
+    }).select("patient");
+
+    // הסרת כפילויות
+    const patientIds = [
+      ...new Set(
+        doctorAppointments
+          .map(a => a.patient)
+          .filter(p => p) // 🔥 מונע קריסה
+          .map(p => p.toString())
+      )
+    ];
+
+    // חיפוש רק בתוך המטופלים האלה
+    const patients = await User.find({
+      _id: { $in: patientIds },
+      $or: [
+        { fullName: { $regex: query, $options: "i" } },
+        { idNumber: { $regex: query, $options: "i" } },
+      ],
+    }).select("fullName email idNumber birthDate phone");
+    console.log("Patient IDs:", patientIds);
+    res.json({ patients });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
 module.exports = {
   getMyProfile,
   updateMyProfile,
@@ -416,4 +461,5 @@ module.exports = {
   getFollowUpPatients,
   getAvailableDoctors,
   getSpecializations,
+  searchPatients,
 };

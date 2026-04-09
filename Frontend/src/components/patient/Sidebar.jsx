@@ -1,4 +1,4 @@
-import { Home, CalendarDays, FileText, MessageSquare, LogOut } from "lucide-react";
+import { Home, CalendarDays, FileText, MessageSquare, LogOut, Search } from "lucide-react";
 import { FaShieldAlt, FaEdit } from "react-icons/fa";
 import { useNavigate, useLocation } from "react-router-dom";
 
@@ -17,8 +17,8 @@ export default function Sidebar({ onLogout }) {
   const isDashboard = location.pathname === dashboardRoute;
   const isAppointments = location.pathname === appointmentsRoute;
   const isEditProfile = location.pathname === "/edit-profile";
+  const isSearchPatients = location.pathname === "/doctor/search-patients";
 
-  // 🔥 NEW
   const isAvailability = location.pathname === "/doctor/availability";
 
   const handleLogout = () => {
@@ -73,7 +73,7 @@ export default function Sidebar({ onLogout }) {
           </button>
         )}
 
-        {/* 🔥 Availability (רק לרופא) */}
+        {/* 🔥 Availability */}
         {role === "doctor" && (
           <button
             onClick={() => navigate("/doctor/availability")}
@@ -85,6 +85,21 @@ export default function Sidebar({ onLogout }) {
           >
             <CalendarDays size={18} />
             Availability
+          </button>
+        )}
+
+        {/* 🔥 NEW — Search Patients (רק לרופא) */}
+        {role === "doctor" && (
+          <button
+            onClick={() => navigate("/doctor/search-patients")}
+            className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition
+              ${isSearchPatients
+                ? "bg-gradient-to-r from-[#4f8df7] to-[#5d95f7] text-white"
+                : "text-[#3e4c66] hover:bg-white"
+              }`}
+          >
+            <Search size={18} />
+            Search Patients
           </button>
         )}
 

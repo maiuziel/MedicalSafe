@@ -90,8 +90,25 @@ const createFeedback = async (req, res) => {
   }
 };
 
+const getPatientById = async (req, res) => {
+  try {
+    const patient = await User.findById(req.params.id).select(
+      "fullName email idNumber phone"
+    );
+
+    if (!patient) {
+      return res.status(404).json({ message: "Patient not found" });
+    }
+
+    res.json(patient);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
 module.exports = {
   getMyProfile,
   updateMyProfile,
-  createFeedback
+  createFeedback,
+  getPatientById
 };

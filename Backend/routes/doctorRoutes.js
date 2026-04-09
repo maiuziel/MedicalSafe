@@ -17,7 +17,8 @@ const {
   unmarkPatientFromFollowUp,
   getFollowUpPatients,
   getAvailableDoctors,
-  getSpecializations
+  getSpecializations,
+  searchPatients
 } = require('../controllers/doctorController');
 
 // 🔹 request controller (פניות)
@@ -156,7 +157,12 @@ router.get(
   authorizeRoles('doctor'),
   getDoctorRequestById
 );
-
+router.get(
+  "/patients/search",
+  authenticate,
+  authorizeRoles("doctor"),
+  searchPatients
+);
 
 
 

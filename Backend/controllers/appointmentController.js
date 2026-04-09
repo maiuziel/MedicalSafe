@@ -149,9 +149,22 @@ const updateAppointment = async (req, res) => {
 };
 
 
+const getAppointmentsByPatientId = async (req, res) => {
+  try {
+    const appointments = await Appointment.find({
+      patient: req.params.id,
+    });
+
+    res.json(appointments);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
 module.exports = {
   createAppointment,
   getMyAppointments,
   cancelAppointment,
   updateAppointment,
+  getAppointmentsByPatientId
 };

@@ -8,7 +8,8 @@ const {
   createAppointment,
   getMyAppointments,
   cancelAppointment,
-  updateAppointment
+  updateAppointment,
+  getAppointmentsByPatientId
 } = require('../controllers/appointmentController');
 
 // קביעת תור
@@ -42,5 +43,6 @@ router.patch(
   authorizeRoles('secretary'),
   updateAppointment
 );
+router.get("/patient/:id", authenticate, getAppointmentsByPatientId);
 
 module.exports = router;

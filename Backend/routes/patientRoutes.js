@@ -7,7 +7,8 @@ const { authenticate, authorizeRoles } = require('../middleware/authMiddleware')
 const {
   getMyProfile,
   updateMyProfile,
-  createFeedback
+  createFeedback,
+  getPatientById
 } = require('../controllers/patientController');
 
 const {
@@ -56,7 +57,7 @@ router.get(
   authorizeRoles('patient'),
   getPatientRequests
 );
-
+router.get("/:id", authenticate, getPatientById);
 // קבלת פנייה לפי ID
 router.get(
   '/requests/:requestId',

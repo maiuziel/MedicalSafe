@@ -17,8 +17,9 @@ export default function DoctorDashboard() {
   const [responseText, setResponseText] = useState("");
   const [requestAlert, setRequestAlert] = useState("");
   const [notifications, setNotifications] = useState([]);
-const [showNotifications, setShowNotifications] = useState(false);
-const unreadCount = notifications.filter(n => !n.isRead).length;
+  const [showNotifications, setShowNotifications] = useState(false);
+  const unreadCount = notifications.filter(n => !n.isRead).length;
+  const [patientResults, setPatientResults] = useState([]);
   const previousAppointmentsRef = useRef([]);
   const previousRequestsRef = useRef([]);
 
@@ -68,6 +69,25 @@ const unreadCount = notifications.filter(n => !n.isRead).length;
 
       const data = await res.json();
       setUser(data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+  const searchPatients = async (value) => {
+    try {
+      const token = localStorage.getItem("token");
+  
+      const res = await fetch(
+        `http://localhost:5001/api/doctor/patients/search?query=${value}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+  
+      const data = await res.json();
+      setPatientResults(data.patients || []);
     } catch (err) {
       console.error(err);
     }
@@ -390,17 +410,7 @@ const unreadCount = notifications.filter(n => !n.isRead).length;
           </div>
         )}
 
-        {/* FILTERS */}
-        <div className="bg-white p-5 rounded-xl shadow-sm mb-6 grid grid-cols-3 gap-3">
-          <input type="date" value={filterDate} onChange={(e) => setFilterDate(e.target.value)} className="border p-2 rounded-lg text-sm" />
-          <input type="text" placeholder="Search patient..." value={searchPatient} onChange={(e) => setSearchPatient(e.target.value)} className="border p-2 rounded-lg text-sm" />
-          <select value={filterSpecialization} onChange={(e) => setFilterSpecialization(e.target.value)} className="border p-2 rounded-lg text-sm">
-            <option value="">All Specializations</option>
-            {specializations.map((s) => (
-              <option key={s}>{s}</option>
-            ))}
-          </select>
-        </div>
+       
 
         {/* APPOINTMENTS */}
         <div className="bg-white p-5 rounded-xl shadow-sm">
