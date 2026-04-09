@@ -45,6 +45,7 @@ const updateMyProfile = async (req, res) => {
 
 // GET /api/doctor/appointments
 const getDoctorAppointments = async (req, res) => {
+  console.log("appointments:", appointments);
   try {
     const { status, sortBy } = req.query;
 

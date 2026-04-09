@@ -5,13 +5,14 @@ import { useNavigate } from "react-router-dom";
 export default function DoctorDashboard() {
   const [user, setUser] = useState(null);
   const [appointments, setAppointments] = useState([]);
-
+  const [filterTime, setFilterTime] = useState("");
   const [filterDate, setFilterDate] = useState("");
   const [searchPatient, setSearchPatient] = useState("");
   const [filterSpecialization, setFilterSpecialization] = useState("");
 
   const [scheduleAlert, setScheduleAlert] = useState("");
-
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [sortBy, setSortBy] = useState("date");
   const [requests, setRequests] = useState([]);
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [responseText, setResponseText] = useState("");
@@ -276,6 +277,12 @@ export default function DoctorDashboard() {
       console.error(err);
     }
   };
+  const handleResetFilters = () => {
+    setSearchPatient("");
+    setFilterDate("");
+    setFilterTime("");
+    setStatusFilter("all");
+  };
 
   // 🔥 REMOVE AVAILABILITY
   const removeAvailability = async (dayToRemove, slotToRemove) => {
@@ -313,23 +320,36 @@ export default function DoctorDashboard() {
 
   const filteredAppointments = appointments.filter((a) => {
     const date = new Date(a.date).toISOString().slice(0, 10);
-
+  
     const matchDate = filterDate ? date === filterDate : true;
-
+  
     const matchPatient = searchPatient
       ? a.patient?.fullName?.toLowerCase().includes(searchPatient.toLowerCase())
       : true;
+  
+      const matchStatus =
+      statusFilter === "all"
+        ? true
+        : (a.status || "").toLowerCase() === statusFilter;
 
-    const matchSpec = filterSpecialization
-      ? (a.specialization || "").toLowerCase() === filterSpecialization.toLowerCase()
-      : true;
-
-    return matchDate && matchPatient && matchSpec;
+        const matchTime = filterTime
+  ? new Date(a.date).toTimeString().slice(0,5) === filterTime
+  : true;
+  
+  return matchDate && matchPatient && matchStatus && matchTime;
+  });
+  const sortedAppointments = [...filteredAppointments].sort((a, b) => {
+    if (sortBy === "date") {
+      return new Date(a.date) - new Date(b.date);
+    }
+  
+    if (sortBy === "name") {
+      return a.patient?.fullName?.localeCompare(b.patient?.fullName);
+    }
+  
+    return 0;
   });
 
-  const specializations = [
-    ...new Set(appointments.map((a) => a.specialization).filter(Boolean)),
-  ];
 
   return (
     <div className="flex bg-[#eef2f7] min-h-screen">
@@ -415,21 +435,75 @@ export default function DoctorDashboard() {
         {/* APPOINTMENTS */}
         <div className="bg-white p-5 rounded-xl shadow-sm">
           <h3 className="font-semibold mb-4">My Schedule</h3>
+          <div className="flex flex-wrap gap-3 mb-4 items-center">
 
-          {filteredAppointments.length > 0 ? (
-            filteredAppointments.map((a) => (
-              <div key={a._id} className="flex justify-between items-center bg-gray-50 p-4 rounded-lg mb-3">
-                <div>
-                  <p className="font-medium">{a.patient?.fullName || "Patient"}</p>
-                  <p className="text-xs text-gray-400">{new Date(a.date).toLocaleString()}</p>
-                  <p className="text-xs text-blue-500">{a.specialization}</p>
-                </div>
-                <span className="text-xs">{a.status || "scheduled"}</span>
-              </div>
-            ))
-          ) : (
-            <p className="text-gray-400 text-sm">No appointments found</p>
-          )}
+            {/* 🔍 Search by name */}
+            <div className="flex items-center border rounded px-2">
+              <span>🔍</span>
+              <input
+                type="text"
+                placeholder="Search patient..."
+                value={searchPatient}
+                onChange={(e) => setSearchPatient(e.target.value)}
+                className="outline-none px-2 py-1"
+              />
+            </div>
+
+            {/* 📅 Date */}
+            <input
+              type="date"
+              value={filterDate}
+              onChange={(e) => setFilterDate(e.target.value)}
+              className="border rounded px-2 py-1"
+            />
+
+            {/* ⏰ Time */}
+            <input
+              type="time"
+              value={filterTime}
+              onChange={(e) => setFilterTime(e.target.value)}
+              className="border rounded px-2 py-1"
+            />
+
+            {/* 📊 Status */}
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="border rounded px-2 py-1"
+            >
+              <option value="all">All Statuses</option>
+              <option value="scheduled">Scheduled</option>
+              <option value="completed">Completed</option>
+              <option value="cancelled">Cancelled</option>
+            </select>
+            <button
+          onClick={handleResetFilters}
+          className="bg-gray-200 hover:bg-gray-300 px-3 py-1 rounded"
+        >
+          Reset
+        </button>
+
+          </div>
+
+          {sortedAppointments.length > 0 ? (
+  sortedAppointments.map((a) => {
+    console.log("appointment:", a);
+    return (
+      <div key={a._id} className="flex justify-between items-center bg-gray-50 p-4 rounded-lg mb-3">
+        <div>
+          <p className="font-medium">{a.patient?.fullName || "Patient"}</p>
+          <p className="text-xs text-gray-400">{new Date(a.date).toLocaleString()}</p>
+          <p className="text-xs text-blue-500">{a.specialization}</p>
+        </div>
+        <span className="text-xs">
+  {a.status ? a.status : "NO STATUS"}
+</span>
+      </div>
+    );
+  })
+) : (
+  <p className="text-gray-400 text-sm">No appointments found</p>
+)}
         </div>
 
         {/* 🔥 MY AVAILABILITY */}
