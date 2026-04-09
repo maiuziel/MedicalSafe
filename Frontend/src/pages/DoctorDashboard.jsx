@@ -16,7 +16,9 @@ export default function DoctorDashboard() {
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [responseText, setResponseText] = useState("");
   const [requestAlert, setRequestAlert] = useState("");
-
+  const [notifications, setNotifications] = useState([]);
+const [showNotifications, setShowNotifications] = useState(false);
+const unreadCount = notifications.filter(n => !n.isRead).length;
   const previousAppointmentsRef = useRef([]);
   const previousRequestsRef = useRef([]);
 
@@ -25,7 +27,11 @@ export default function DoctorDashboard() {
   useEffect(() => {
     fetchProfile();
     fetchAppointments(true);
-    fetchRequests(true);
+    fetchRequests(true);fetchNotifications();
+
+    const interval3 = setInterval(() => {
+      fetchNotifications();
+    }, 10000);
 
     const interval = setInterval(() => {
       fetchAppointments(false);
@@ -38,6 +44,7 @@ export default function DoctorDashboard() {
     return () => {
       clearInterval(interval);
       clearInterval(interval2);
+      clearInterval(interval3);
     };
   }, []);
 
@@ -123,13 +130,44 @@ export default function DoctorDashboard() {
       console.error(err);
     }
   };
-
+  const fetchNotifications = async () => {
+    try {
+      const token = localStorage.getItem("token");
+  
+      const res = await fetch("http://localhost:5001/api/notifications", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+  
+      const data = await res.json();
+      setNotifications(data.notifications || []);
+    } catch (err) {
+      console.error(err);
+    }
+  };
   const detectNewRequests = (oldList, newList) => {
     const newRequests = newList.filter(r => r.status === "new");
 
     if (newRequests.length > oldList.length) {
       setRequestAlert("📩 New request received");
       setTimeout(() => setRequestAlert(""), 5000);
+    }
+  };
+  const markNotificationAsRead = async (id) => {
+    try {
+      const token = localStorage.getItem("token");
+  
+      await fetch(`http://localhost:5001/api/notifications/${id}/read`, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+  
+      fetchNotifications(); // רענון
+    } catch (err) {
+      console.error(err);
     }
   };
 
@@ -280,14 +318,64 @@ export default function DoctorDashboard() {
       <div className="flex-1 p-8">
 
         {/* HEADER */}
-        <div className="bg-white rounded-xl p-6 shadow-sm mb-6">
-          <h2 className="text-xl font-semibold text-gray-800">
-            Welcome, Dr. {user?.fullName || user?.email}
-          </h2>
-          <p className="text-sm text-gray-400">
-            Manage your schedule
-          </p>
-        </div>
+<div className="bg-white rounded-xl p-6 shadow-sm mb-6 flex justify-between items-center">
+
+{/* LEFT SIDE */}
+<div>
+  <h2 className="text-xl font-semibold text-gray-800">
+    Welcome, Dr. {user?.fullName || user?.email}
+  </h2>
+  <p className="text-sm text-gray-400">
+    Manage your schedule
+  </p>
+</div>
+
+{/* RIGHT SIDE - 🔔 */}
+<div className="relative">
+  <button
+    onClick={() => setShowNotifications(!showNotifications)}
+    className="text-2xl"
+  >
+    🔔
+  </button>
+
+{/* 🔴 INDICATOR */}
+{unreadCount > 0 && (
+  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs px-1 rounded-full">
+    {unreadCount}
+  </span>
+)}
+
+  {/* DROPDOWN */}
+  {showNotifications && (
+    <div className="absolute right-0 mt-2 w-80 bg-white shadow-lg rounded-xl p-3 z-50">
+      <h4 className="font-semibold mb-2">Notifications</h4>
+
+      {notifications.length > 0 ? (
+        notifications.map((n) => (
+          <div
+            key={n._id}
+            onClick={() => markNotificationAsRead(n._id)}
+            className={`p-2 mb-2 rounded-lg cursor-pointer ${
+              n.isRead ? "bg-gray-100" : "bg-blue-50"
+            }`}
+          >
+            <p className="text-sm">{n.message}</p>
+            <p className="text-xs text-gray-400">
+              {new Date(n.createdAt).toLocaleString()}
+            </p>
+          </div>
+        ))
+      ) : (
+        <p className="text-sm text-gray-400">No notifications</p>
+      )}
+    </div>
+  )}
+</div>
+
+</div>
+
+
 
         {/* ALERTS */}
         {scheduleAlert && (

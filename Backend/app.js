@@ -19,12 +19,13 @@ const medicalRecordRoutes = require('./routes/medicalRecordRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const messageRoutes = require('./routes/messageRoutes');
 const requestRoutes = require("./routes/requestRoutes");
+const notificationRoutes = require("./routes/notificationRoutes");
 
 // ----------------------------------------------------
 // 🔥 סדר חשוב מאוד!
 // ספציפי → כללי
 // ----------------------------------------------------
-
+app.use("/api/notifications", notificationRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/rbac-test', rbacTestRoutes);
 

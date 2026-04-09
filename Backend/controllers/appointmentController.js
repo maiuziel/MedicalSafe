@@ -1,8 +1,11 @@
 const Appointment = require('../models/Appointment');
+const Notification = require('../models/Notification'); // 🔥 NEW
 const auditLogger = require('../utils/auditLogger');
+
 
 // קביעת תור
 const createAppointment = async (req, res) => {
+  console.log("🔥 CREATE APPOINTMENT TRIGGERED");
   try {
     const { doctorId, date } = req.body;
 
@@ -10,6 +13,13 @@ const createAppointment = async (req, res) => {
       patient: req.user.userId,
       doctor: doctorId,
       date,
+    });
+
+    // 🔔 יצירת התראה לרופא
+    await Notification.create({
+      doctor: doctorId,
+      type: "appointment_created",
+      message: "New appointment scheduled",
     });
 
     // ✅ Audit Log
@@ -23,6 +33,7 @@ const createAppointment = async (req, res) => {
     res.status(201).json(appointment);
 
   } catch (error) {
+    console.error(error);
     res.status(500).json({ message: 'Server error' });
   }
 };
@@ -46,6 +57,7 @@ const getMyAppointments = async (req, res) => {
     res.json(appointments);
 
   } catch (error) {
+    console.error(error);
     res.status(500).json({ message: 'Server error' });
   }
 };
@@ -70,6 +82,13 @@ const cancelAppointment = async (req, res) => {
       return res.status(404).json({ message: 'Appointment not found' });
     }
 
+    // 🔔 התראה לרופא על ביטול
+    await Notification.create({
+      doctor: appointment.doctor,
+      type: "appointment_cancelled",
+      message: "Appointment was cancelled",
+    });
+
     // ✅ Audit Log
     await auditLogger({
       req,
@@ -81,6 +100,7 @@ const cancelAppointment = async (req, res) => {
     res.json(appointment);
 
   } catch (error) {
+    console.error(error);
     res.status(500).json({ message: 'Server error' });
   }
 };
@@ -100,8 +120,14 @@ const updateAppointment = async (req, res) => {
     }
 
     appointment.date = date;
-
     await appointment.save();
+
+    // 🔔 התראה לרופא על שינוי
+    await Notification.create({
+      doctor: appointment.doctor,
+      type: "appointment_updated",
+      message: "Appointment time updated",
+    });
 
     // ✅ Audit Log
     await auditLogger({
@@ -117,6 +143,7 @@ const updateAppointment = async (req, res) => {
     });
 
   } catch (error) {
+    console.error(error);
     res.status(500).json({ message: 'Server error' });
   }
 };

@@ -66,6 +66,7 @@ export default function PatientDashboard() {
   };
 
   const handleCreateAppointment = async (doctor) => {
+      console.log("🔥 BOOK BUTTON CLICKED", doctor);
     if (!doctor || !selectedDate || !selectedTime) {
       alert("Please fill all fields");
       return;
