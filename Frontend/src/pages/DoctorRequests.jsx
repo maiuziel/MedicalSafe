@@ -5,8 +5,8 @@ export default function DoctorRequests() {
   const [requests, setRequests] = useState([]);
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [patientHistory, setPatientHistory] = useState([]);
+  const [selectedFile, setSelectedFile] = useState(null);
 
-  // 🔥 NEW
   const [replyText, setReplyText] = useState("");
   const [status, setStatus] = useState("");
 
@@ -48,38 +48,42 @@ export default function DoctorRequests() {
 
       setSelectedRequest(data.request);
       setPatientHistory(data.patientHistory || []);
-
-      // 🔥 NEW
       setStatus(data.request.status);
     } catch (err) {
       console.error(err);
     }
   };
 
-  // 🔥 SEND REPLY
   const handleSendReply = async () => {
     if (!replyText.trim()) {
       return alert("Reply cannot be empty");
     }
-
+  
     try {
       const token = localStorage.getItem("token");
-
+  
+      const formData = new FormData();
+      formData.append("reply", replyText);
+  
+      if (selectedFile) {
+        formData.append("file", selectedFile);
+      }
+  
       const res = await fetch(
         `http://localhost:5001/api/requests/${selectedRequest._id}/reply`,
         {
           method: "POST",
           headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${token}`, // ❗ רק זה
           },
-          body: JSON.stringify({ reply: replyText }),
+          body: formData,
         }
       );
-
+  
       if (res.ok) {
-        alert("Reply sent ✅");
+        alert("Reply sent with file ✅");
         setReplyText("");
+        setSelectedFile(null);
         fetchRequestDetails(selectedRequest._id);
       } else {
         alert("Failed to send reply");
@@ -88,8 +92,6 @@ export default function DoctorRequests() {
       console.error(err);
     }
   };
-
-  // 🔥 UPDATE STATUS
   const handleUpdateStatus = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -136,10 +138,9 @@ export default function DoctorRequests() {
           )}
         </div>
 
-        {/* GRID */}
         <div className={`grid gap-6 ${selectedRequest ? "grid-cols-3" : "grid-cols-1"}`}>
 
-          {/* 🟦 LIST */}
+          {/* LIST */}
           <div className="bg-white p-4 rounded-2xl shadow-sm space-y-3 max-h-[80vh] overflow-y-auto">
             {requests.map((req) => (
               <div
@@ -167,7 +168,7 @@ export default function DoctorRequests() {
             ))}
           </div>
 
-          {/* 🟩 DETAILS */}
+          {/* DETAILS */}
           {selectedRequest && (
             <div className="col-span-2 bg-white p-6 rounded-2xl shadow-sm">
 
@@ -185,51 +186,30 @@ export default function DoctorRequests() {
 
               {/* META */}
               <div className="flex gap-4 text-xs mb-6">
-                <span className="text-blue-500">
-                  {selectedRequest.serviceType}
-                </span>
-                <span className="text-red-400">
-                  {selectedRequest.urgency}
-                </span>
-                <span className="text-gray-500">
-                  {selectedRequest.status}
-                </span>
+                <span className="text-blue-500">{selectedRequest.serviceType}</span>
+                <span className="text-red-400">{selectedRequest.urgency}</span>
+                <span className="text-gray-500">{selectedRequest.status}</span>
               </div>
 
-              {/* PATIENT INFO */}
+              {/* PATIENT */}
               <div className="mb-6">
-                <h3 className="font-semibold text-sm mb-2">
-                  Patient Info
-                </h3>
+                <h3 className="font-semibold text-sm mb-2">Patient Info</h3>
 
-                <p className="text-xs text-gray-600">
-                  {selectedRequest.patient?.fullName}
-                </p>
-                <p className="text-xs text-gray-400">
-                  {selectedRequest.patient?.email}
-                </p>
-                <p className="text-xs text-gray-400">
-                  {selectedRequest.patient?.phone}
-                </p>
+                <p className="text-xs text-gray-600">{selectedRequest.patient?.fullName}</p>
+                <p className="text-xs text-gray-400">{selectedRequest.patient?.email}</p>
+                <p className="text-xs text-gray-400">{selectedRequest.patient?.phone}</p>
               </div>
 
               {/* HISTORY */}
               <div>
-                <h3 className="font-semibold text-sm mb-2">
-                  Patient History
-                </h3>
+                <h3 className="font-semibold text-sm mb-2">Patient History</h3>
 
                 {patientHistory.length === 0 ? (
-                  <p className="text-xs text-gray-400">
-                    No history found
-                  </p>
+                  <p className="text-xs text-gray-400">No history found</p>
                 ) : (
                   <div className="space-y-2 max-h-[200px] overflow-y-auto">
                     {patientHistory.map((appt) => (
-                      <div
-                        key={appt._id}
-                        className="text-xs border p-2 rounded-lg"
-                      >
+                      <div key={appt._id} className="text-xs border p-2 rounded-lg">
                         {new Date(appt.date).toLocaleString()}
                       </div>
                     ))}
@@ -237,15 +217,21 @@ export default function DoctorRequests() {
                 )}
               </div>
 
-              {/* ✉️ REPLY */}
+              {/* REPLY */}
               <div className="mt-6">
                 <h3 className="font-semibold text-sm mb-2">Reply</h3>
 
                 <textarea
                   value={replyText}
                   onChange={(e) => setReplyText(e.target.value)}
-                  placeholder="Write your response..."
                   className="w-full p-3 border rounded-lg text-sm mb-3"
+                />
+
+                {/* 📎 FILE */}
+                <input
+                  type="file"
+                  onChange={(e) => setSelectedFile(e.target.files[0])}
+                  className="mb-3"
                 />
 
                 <button
@@ -256,7 +242,7 @@ export default function DoctorRequests() {
                 </button>
               </div>
 
-              {/* 🔄 STATUS */}
+              {/* STATUS */}
               <div className="mt-6">
                 <h3 className="font-semibold text-sm mb-2">Update Status</h3>
 

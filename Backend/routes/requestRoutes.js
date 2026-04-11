@@ -1,6 +1,7 @@
-console.log("🔥 requestRoutes LOADED");
 const express = require("express");
 const router = express.Router();
+const upload = require("../middleware/upload"); 
+
 router.use((req, res, next) => {
   console.log("👉 REQUEST HIT:", req.method, req.originalUrl);
   next();
@@ -50,10 +51,12 @@ router.get(
 // ----------------------------------------------------
 // 🔥 רופא - תגובה לפנייה
 // ----------------------------------------------------
+
 router.post(
   "/requests/:requestId/reply",
   authenticate,
   authorizeRoles("doctor"),
+  upload.single("file"), // 🔥 זה הקסם
   replyToRequest
 );
 

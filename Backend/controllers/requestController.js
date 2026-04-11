@@ -2,11 +2,12 @@ const mongoose = require("mongoose");
 const Request = require('../models/Request');
 const Appointment = require('../models/Appointment');
 const User = require('../models/User');
-
+const Notification = require('../models/Notification'); // 🔥 NEW
 
 const createRequest = async (req, res) => {
   console.log("BODY:", req.body);
-console.log("USER:", req.user);
+  console.log("USER:", req.user);
+
   try {
     const { doctorId, subject, description, reason, serviceType, urgency, appointmentId } = req.body;
     const senderId = req.user.userId;
@@ -15,6 +16,7 @@ console.log("USER:", req.user);
     if (!mongoose.Types.ObjectId.isValid(doctorId)) {
       return res.status(400).json({ message: "Invalid doctor ID" });
     }
+
     if (!doctorId || !subject || !description || !reason || !serviceType) {
       return res.status(400).json({ message: 'Missing required fields' });
     }
@@ -64,11 +66,22 @@ console.log("USER:", req.user);
       ]
     });
 
+    // 🔔 יצירת התראה לרופא (בלי אייקון)
+    const patientUser = await User.findById(senderId);
+
+    await Notification.create({
+      doctor: doctorId,
+      type: "new_request",
+      message: `New request from ${patientUser.fullName}`,
+    });
+
     res.status(201).json({
       message: 'Request submitted successfully',
       request: newRequest
     });
+
   } catch (error) {
+    console.error("❌ ERROR IN createRequest:", error);
     res.status(500).json({ message: 'Server error' });
   }
 };
@@ -79,17 +92,9 @@ const getDoctorRequests = async (req, res) => {
 
     const filter = { doctor: req.user.userId };
 
-    if (status) {
-      filter.status = status;
-    }
-
-    if (urgency) {
-      filter.urgency = urgency;
-    }
-
-    if (serviceType) {
-      filter.serviceType = serviceType;
-    }
+    if (status) filter.status = status;
+    if (urgency) filter.urgency = urgency;
+    if (serviceType) filter.serviceType = serviceType;
 
     let query = Request.find(filter)
       .populate('patient', 'fullName email role specialization')
@@ -111,6 +116,7 @@ const getDoctorRequests = async (req, res) => {
       total: requests.length,
       requests
     });
+
   } catch (error) {
     res.status(500).json({ message: 'Server error' });
   }
@@ -140,6 +146,7 @@ const getDoctorRequestById = async (req, res) => {
       request: requestItem,
       patientHistory: patientAppointments
     });
+
   } catch (error) {
     res.status(500).json({ message: 'Server error' });
   }
@@ -166,7 +173,7 @@ const replyToRequest = async (req, res) => {
     requestItem.reply = reply.trim();
     requestItem.repliedAt = new Date();
     requestItem.repliedBy = req.user.userId;
-    requestItem.status = "resolved"; // 🔥 מוסיף אוטומטית סיום
+    requestItem.status = "resolved";
 
     if (req.file) {
       requestItem.replyFile = req.file.filename;
@@ -184,6 +191,7 @@ const replyToRequest = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
+
 const updateRequestStatus = async (req, res) => {
   try {
     const { requestId } = req.params;
@@ -217,6 +225,7 @@ const updateRequestStatus = async (req, res) => {
       message: 'Request status updated successfully',
       request: requestItem
     });
+
   } catch (error) {
     res.status(500).json({ message: 'Server error' });
   }
@@ -234,6 +243,7 @@ const getPatientRequests = async (req, res) => {
       total: requests.length,
       requests
     });
+
   } catch (error) {
     res.status(500).json({ message: 'Server error' });
   }
@@ -255,6 +265,7 @@ const getPatientRequestById = async (req, res) => {
     }
 
     res.json(requestItem);
+
   } catch (error) {
     res.status(500).json({ message: 'Server error' });
   }
