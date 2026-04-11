@@ -12,7 +12,9 @@ const {
   getPatientRequests,
   getPatientRequestById,
   replyToRequest,
-  updateRequestStatus
+  updateRequestStatus,
+  getDoctorRequests,
+  getDoctorRequestById
 } = require("../controllers/requestController");
 
 // ----------------------------------------------------
@@ -21,7 +23,7 @@ const {
 router.post(
   "/patient/requests",
   authenticate,
-  authorizeRoles("patient"),
+  authorizeRoles("patient", "doctor"),
   createRequest
 );
 
@@ -63,6 +65,21 @@ router.put(
   authenticate,
   authorizeRoles("doctor"),
   updateRequestStatus
+);
+// 🔥 רופא - כל הפניות
+router.get(
+  "/doctor/requests",
+  authenticate,
+  authorizeRoles("doctor"),
+  getDoctorRequests
+);
+
+// 🔥 רופא - פנייה לפי ID
+router.get(
+  "/doctor/requests/:requestId",
+  authenticate,
+  authorizeRoles("doctor"),
+  getDoctorRequestById
 );
 
 module.exports = router;

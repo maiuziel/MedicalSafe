@@ -47,7 +47,7 @@ router.get(
 router.get(
   '/specializations',
   authenticate,
-  authorizeRoles('patient'),
+  authorizeRoles('patient', 'doctor'),
   getSpecializations
 );
 
@@ -57,7 +57,7 @@ router.get(
 router.get(
   '/',
   authenticate,
-  authorizeRoles('patient', 'secretary'),
+  authorizeRoles('patient', 'doctor', 'secretary'),
   getDoctors
 );
 

@@ -11,6 +11,7 @@ import DoctorAppointments from "./pages/DoctorAppointments";
 import DoctorAvailability from "./pages/DoctorAvailability";
 import DoctorSearchPatients from "./pages/DoctorSearchPatients";
 import PatientDetails from "./pages/PatientDetails";
+import DoctorRequests from "./pages/DoctorRequests";
 
 function App() {
   const role = localStorage.getItem("role");
@@ -25,6 +26,7 @@ function App() {
         <Route path="/reset-password/:token" element={<ResetPassword />} />
         <Route path="/doctor/availability" element={<DoctorAvailability />} />
         <Route path="/doctor/search-patients" element={<DoctorSearchPatients />} />
+        <Route path="/doctor/requests" element={<DoctorRequests />} />
 
         <Route path="/doctor/patient/:id" element={<PatientDetails />} />
 
@@ -37,16 +39,8 @@ function App() {
         <Route path="/edit-profile" element={<EditProfile />} />
         <Route path="/doctor/appointments" element={<DoctorAppointments />} />
 
-        <Route
-  path="/patient/requests"
-  element={
-    role === "patient" ? (
-      <PatientRequests />
-    ) : (
-      <Login />
-    )
-  }
-/>
+        {/* ✅ FIXED */}
+        <Route path="/patient/requests" element={<PatientRequests />} />
 
       </Routes>
     </Router>

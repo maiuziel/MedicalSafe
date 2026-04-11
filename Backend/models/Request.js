@@ -12,6 +12,11 @@ const requestSchema = new mongoose.Schema(
       ref: 'User',
       required: true
     },
+    requesterRole: {
+      type: String,
+      enum: ['patient', 'doctor'],
+      default: 'patient'
+    },
     appointment: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Appointment',

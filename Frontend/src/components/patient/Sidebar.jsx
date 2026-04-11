@@ -102,6 +102,17 @@ export default function Sidebar({ onLogout }) {
             Search Patients
           </button>
         )}
+        <button
+          onClick={() => navigate("/doctor/requests")}
+          className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition
+            ${location.pathname === "/doctor/requests"
+              ? "bg-gradient-to-r from-[#4f8df7] to-[#5d95f7] text-white"
+              : "text-[#3e4c66] hover:bg-white"
+            }`}
+        >
+          <MessageSquare size={18} />
+          Requests
+        </button>
 
         {/* מטופל */}
         {role === "patient" && (

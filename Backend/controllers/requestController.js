@@ -9,6 +9,9 @@ const createRequest = async (req, res) => {
 console.log("USER:", req.user);
   try {
     const { doctorId, subject, description, reason, serviceType, urgency, appointmentId } = req.body;
+    const senderId = req.user.userId;
+    const senderRole = req.user.role;
+
     if (!mongoose.Types.ObjectId.isValid(doctorId)) {
       return res.status(400).json({ message: "Invalid doctor ID" });
     }
@@ -21,6 +24,10 @@ console.log("USER:", req.user);
       return res.status(404).json({ message: 'Doctor not found' });
     }
 
+    if (doctor._id.toString() === senderId) {
+      return res.status(400).json({ message: 'You cannot send a request to yourself' });
+    }
+
     if (appointmentId) {
       const appointment = await Appointment.findById(appointmentId);
 
@@ -28,14 +35,19 @@ console.log("USER:", req.user);
         return res.status(404).json({ message: 'Appointment not found' });
       }
 
-      if (appointment.patient.toString() !== req.user.userId) {
+      if (senderRole !== 'patient') {
+        return res.status(403).json({ message: 'Only patients can send appointment-based requests' });
+      }
+
+      if (appointment.patient.toString() !== senderId) {
         return res.status(403).json({ message: 'Not authorized for this appointment' });
       }
     }
 
     const newRequest = await Request.create({
-      patient: req.user.userId,
+      patient: senderId,
       doctor: doctorId,
+      requesterRole: senderRole,
       appointment: appointmentId || null,
       subject,
       description,
@@ -46,7 +58,7 @@ console.log("USER:", req.user);
       statusHistory: [
         {
           status: 'new',
-          changedBy: req.user.userId,
+          changedBy: senderId,
           reason: 'Request created'
         }
       ]
@@ -80,7 +92,7 @@ const getDoctorRequests = async (req, res) => {
     }
 
     let query = Request.find(filter)
-      .populate('patient', 'fullName email')
+      .populate('patient', 'fullName email role specialization')
       .populate('doctor', 'fullName email specialization');
 
     if (sortBy === 'date') {
@@ -112,7 +124,7 @@ const getDoctorRequestById = async (req, res) => {
       _id: requestId,
       doctor: req.user.userId
     })
-      .populate('patient', 'fullName email phone')
+      .populate('patient', 'fullName email phone role specialization')
       .populate('doctor', 'fullName email specialization')
       .populate('appointment');
 
