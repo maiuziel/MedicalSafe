@@ -18,7 +18,8 @@ const {
   getFollowUpPatients,
   getAvailableDoctors,
   getSpecializations,
-  searchPatients
+  searchPatients,
+  updateAppointmentStatus
 } = require('../controllers/doctorController');
 
 // 🔹 request controller (פניות)
@@ -164,6 +165,11 @@ router.get(
   searchPatients
 );
 
-
+router.put(
+  "/appointments/:id/status",
+  authenticate,
+  authorizeRoles("doctor"),
+  updateAppointmentStatus
+);
 
 module.exports = router;

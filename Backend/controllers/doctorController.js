@@ -45,7 +45,6 @@ const updateMyProfile = async (req, res) => {
 
 // GET /api/doctor/appointments
 const getDoctorAppointments = async (req, res) => {
-  console.log("appointments:", appointments);
   try {
     const { status, sortBy } = req.query;
 
@@ -449,6 +448,45 @@ console.log("All appointments:", allAppointments);
     res.status(500).json({ message: "Server error" });
   }
 };
+const updateAppointmentStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    const allowedStatuses = ["scheduled", "completed", "cancelled"];
+
+    if (!allowedStatuses.includes(status)) {
+      return res.status(400).json({ message: "Invalid status" });
+    }
+
+    const appointment = await Appointment.findOne({
+      _id: id,
+      doctor: req.user.userId,
+    });
+
+    if (!appointment) {
+      return res.status(404).json({ message: "Appointment not found" });
+    }
+
+    appointment.status = status;
+    appointment.statusUpdatedAt = new Date();
+    appointment.statusUpdatedBy = req.user.userId;
+
+    await appointment.save();
+
+    const updatedAppointment = await Appointment.findById(appointment._id)
+      .populate("patient", "fullName email");
+
+    res.json({
+      message: "Status updated",
+      appointment: updatedAppointment,
+    });
+
+  } catch (error) {
+    console.error("ERROR:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
 module.exports = {
   getMyProfile,
   updateMyProfile,
@@ -463,4 +501,5 @@ module.exports = {
   getAvailableDoctors,
   getSpecializations,
   searchPatients,
+  updateAppointmentStatus,
 };

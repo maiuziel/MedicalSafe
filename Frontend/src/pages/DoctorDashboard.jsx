@@ -350,6 +350,34 @@ export default function DoctorDashboard() {
     return 0;
   });
 
+  const updateAppointmentStatus = async (id, status) => {
+    try {
+      const token = localStorage.getItem("token");
+  
+      const res = await fetch(
+        `http://localhost:5001/api/doctor/appointments/${id}/status`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ status }),
+        }
+      );
+  
+      if (res.ok) {
+        fetchAppointments(true); // רענון
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+  const getStatusColor = (status) => {
+    if (status === "completed") return "text-green-500";
+    if (status === "cancelled") return "text-red-500";
+    return "text-blue-500";
+  };
 
   return (
     <div className="flex bg-[#eef2f7] min-h-screen">
@@ -495,9 +523,33 @@ export default function DoctorDashboard() {
           <p className="text-xs text-gray-400">{new Date(a.date).toLocaleString()}</p>
           <p className="text-xs text-blue-500">{a.specialization}</p>
         </div>
-        <span className="text-xs">
-  {a.status ? a.status : "NO STATUS"}
+        <div className="flex items-center gap-3">
+
+{/* STATUS */}
+<span className={`text-xs font-semibold ${getStatusColor(a.status)}`}>
+  {a.status}
 </span>
+
+{/* BUTTONS */}
+{a.status === "scheduled" && (
+  <>
+    <button
+      onClick={() => updateAppointmentStatus(a._id, "completed")}
+      className="bg-green-500 text-white px-2 py-1 rounded text-xs"
+    >
+      ✔ Complete
+    </button>
+
+    <button
+      onClick={() => updateAppointmentStatus(a._id, "cancelled")}
+      className="bg-red-500 text-white px-2 py-1 rounded text-xs"
+    >
+      ✖ Cancel
+    </button>
+  </>
+)}
+
+</div>
       </div>
     );
   })

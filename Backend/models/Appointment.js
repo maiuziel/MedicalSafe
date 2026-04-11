@@ -24,6 +24,14 @@ const appointmentSchema = new mongoose.Schema(
       enum: ['scheduled', 'cancelled', 'completed'],
       default: 'scheduled',
     },
+    statusUpdatedAt: {
+      type: Date,
+    },
+    
+    statusUpdatedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
   },
   { timestamps: true }
 );
