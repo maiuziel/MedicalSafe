@@ -1,7 +1,8 @@
 const User = require('../models/User');
 const Appointment = require('../models/Appointment');
 const Feedback = require('../models/Feedback');
-const Request = require('../models/Request'); // אם אין - תוסיפי
+const Request = require('../models/Request'); 
+const MedicalFile = require('../models/MedicalFile');
 
 // GET /api/doctor/me
 const getMyProfile = async (req, res) => {
@@ -150,19 +151,30 @@ const setAvailability = async (req, res) => {
 const uploadMedicalFile = async (req, res) => {
   try {
     const { patientId } = req.params;
+    const { description } = req.body;
 
     if (!req.file) {
-      return res.status(400).json({ message: 'No file uploaded' });
+      return res.status(400).json({ message: "No file uploaded" });
     }
 
-    res.status(201).json({
-      message: 'File uploaded successfully',
+    // 🔥 שמירה במסד נתונים
+    const newFile = new MedicalFile({
+      patient: patientId,
+      doctor: req.user.userId,
       file: req.file.filename,
-      patientId
+      description: description || "",
+    });
+
+    await newFile.save();
+
+    res.status(201).json({
+      message: "File uploaded successfully",
+      file: newFile,
     });
 
   } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    console.error("ERROR in uploadMedicalFile:", error);
+    res.status(500).json({ message: "Server error" });
   }
 };
 
@@ -487,6 +499,21 @@ const updateAppointmentStatus = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+const getPatientFiles = async (req, res) => {
+  try {
+    const { patientId } = req.params;
+
+    const files = await MedicalFile.find({ patient: patientId })
+      .populate("doctor", "fullName email")
+      .sort({ createdAt: -1 });
+
+    res.json({ files });
+
+  } catch (error) {
+    console.error("ERROR in getPatientFiles:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
 module.exports = {
   getMyProfile,
   updateMyProfile,
@@ -502,4 +529,5 @@ module.exports = {
   getSpecializations,
   searchPatients,
   updateAppointmentStatus,
+  getPatientFiles,
 };

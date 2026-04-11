@@ -2,11 +2,15 @@ console.log("🔥 APP IS RUNNING");
 
 const express = require('express');
 const cors = require('cors');
+const path = require('path'); // 🔥 הוספה
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
+
+// 🔥 הוספה – מאפשר גישה לקבצים שהועלו
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // 🔹 routes
 const authRoutes = require('./routes/authRoutes');

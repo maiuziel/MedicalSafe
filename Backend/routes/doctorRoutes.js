@@ -19,7 +19,8 @@ const {
   getAvailableDoctors,
   getSpecializations,
   searchPatients,
-  updateAppointmentStatus
+  updateAppointmentStatus,
+  getPatientFiles
 } = require('../controllers/doctorController');
 
 // 🔹 request controller (פניות)
@@ -170,6 +171,12 @@ router.put(
   authenticate,
   authorizeRoles("doctor"),
   updateAppointmentStatus
+);
+router.get(
+  "/patient/:patientId/files",
+  authenticate,
+  authorizeRoles("doctor"),
+  getPatientFiles
 );
 
 module.exports = router;
