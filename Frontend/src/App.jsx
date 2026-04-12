@@ -14,6 +14,7 @@ import PatientDetails from "./pages/PatientDetails";
 import DoctorRequests from "./pages/DoctorRequests";
 import PatientFeedback from "./pages/PatientFeedback";
 import DoctorFeedbacks from "./pages/DoctorFeedback";
+import FollowUpPatients from "./pages/FollowUpPatients";
 function App() {
   const role = localStorage.getItem("role");
 
@@ -31,6 +32,7 @@ function App() {
         <Route path="/doctor/feedback" element={<DoctorFeedbacks />} />
 
         <Route path="/doctor/patient/:id" element={<PatientDetails />} />
+        <Route path="/doctor/follow-up" element={<FollowUpPatients />} />
 
         {/* Dashboards */}
         <Route path="/patient" element={<PatientDashboard />} />

@@ -1,5 +1,4 @@
-import { Home, CalendarDays, FileText, MessageSquare, LogOut, Search } from "lucide-react";
-import { FaShieldAlt, FaEdit } from "react-icons/fa";
+import { Home, CalendarDays, FileText, MessageSquare, LogOut, Search, Eye } from "lucide-react";import { FaShieldAlt, FaEdit } from "react-icons/fa";
 import { useNavigate, useLocation } from "react-router-dom";
 
 export default function Sidebar({ onLogout }) {
@@ -20,6 +19,7 @@ export default function Sidebar({ onLogout }) {
   const isSearchPatients = location.pathname === "/doctor/search-patients";
 
   const isAvailability = location.pathname === "/doctor/availability";
+  const isFollowUp = location.pathname === "/doctor/follow-up";
 
   const handleLogout = () => {
     if (onLogout) return onLogout();
@@ -101,7 +101,19 @@ export default function Sidebar({ onLogout }) {
             <Search size={18} />
             Search Patients
           </button>
+          
         )}
+        <button
+  onClick={() => navigate("/doctor/follow-up")}
+  className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition
+    ${isFollowUp
+      ? "bg-gradient-to-r from-[#4f8df7] to-[#5d95f7] text-white"
+      : "text-[#3e4c66] hover:bg-white"
+    }`}
+>
+<Eye size={18} />
+  Follow-Up Patients
+</button>
         <button
           onClick={() => navigate("/doctor/requests")}
           className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition

@@ -4,6 +4,9 @@ const Feedback = require('../models/Feedback');
 const Request = require('../models/Request'); 
 const MedicalFile = require('../models/MedicalFile');
 const Notification = require('../models/Notification');
+const FollowUp = require("../models/FollowUp");
+const FollowUpLog = require("../models/FollowUpLog");
+
 // GET /api/doctor/me
 const getMyProfile = async (req, res) => {
   try {
@@ -166,6 +169,20 @@ const uploadMedicalFile = async (req, res) => {
     });
 
     await newFile.save();
+    // 🔴 בדיקה אם המטופל במעקב אצל הרופא
+      const followUp = await FollowUp.findOne({
+        doctor: req.user.userId,
+        patient: patientId,
+        isActive: true
+      });
+
+      if (followUp) {
+        await Notification.create({
+          user: req.user.userId, // הרופא
+          type: "follow_up_alert",
+          message: `New medical file uploaded for follow-up patient`,
+        });
+      }
     await Notification.create({
       user: patientId,
       type: "file_uploaded",
@@ -225,63 +242,147 @@ const getDoctorFeedbacks = async (req, res) => {
 const markPatientForFollowUp = async (req, res) => {
   try {
     const { patientId } = req.params;
+    const { reason } = req.body;
 
-    const patient = await User.findByIdAndUpdate(
-      patientId,
-      { isUnderFollowUp: true },
-      { new: true }
-    ).select('-password');
+    const doctorId = req.user.userId;
+
+    const patient = await User.findOne({
+      _id: patientId,
+      role: "patient",
+    }).select("-password");
 
     if (!patient) {
-      return res.status(404).json({ message: 'Patient not found' });
+      return res.status(404).json({ message: "Patient not found" });
     }
 
-    res.json({
-      message: 'Patient marked for follow-up',
-      patient
+    // רק רופא שמטפל/טיפל במטופל יכול לסמן אותו
+    const hasAppointment = await Appointment.findOne({
+      doctor: doctorId,
+      patient: patientId,
     });
 
+    if (!hasAppointment) {
+      return res.status(403).json({
+        message: "Not authorized to mark this patient for follow-up",
+      });
+    }
+
+    const followUp = await FollowUp.findOneAndUpdate(
+      { doctor: doctorId, patient: patientId },
+      {
+        doctor: doctorId,
+        patient: patientId,
+        isActive: true,
+        reason: reason || "",
+        changedAt: new Date(),
+        changedBy: doctorId,
+      },
+      {
+        new: true,
+        upsert: true,
+        runValidators: true,
+      }
+    );
+
+    await FollowUpLog.create({
+      doctor: doctorId,
+      patient: patientId,
+      action: "added",
+      reason: reason || "",
+      changedBy: doctorId,
+      changedAt: new Date(),
+    });
+
+    res.json({
+      message: "Patient marked for follow-up",
+      followUp,
+      patient,
+    });
   } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    console.error("ERROR in markPatientForFollowUp:", error);
+    res.status(500).json({ message: "Server error" });
   }
 };
 const unmarkPatientFromFollowUp = async (req, res) => {
   try {
     const { patientId } = req.params;
+    const { reason } = req.body;
 
-    const patient = await User.findByIdAndUpdate(
-      patientId,
-      { isUnderFollowUp: false },
-      { new: true }
-    ).select('-password');
+    const doctorId = req.user.userId;
+
+    const patient = await User.findOne({
+      _id: patientId,
+      role: "patient",
+    }).select("-password");
 
     if (!patient) {
-      return res.status(404).json({ message: 'Patient not found' });
+      return res.status(404).json({ message: "Patient not found" });
     }
 
-    res.json({
-      message: 'Patient removed from follow-up',
-      patient
+    const existingFollowUp = await FollowUp.findOne({
+      doctor: doctorId,
+      patient: patientId,
+      isActive: true,
     });
 
+    if (!existingFollowUp) {
+      return res.status(404).json({
+        message: "Patient is not currently under follow-up",
+      });
+    }
+
+    existingFollowUp.isActive = false;
+    existingFollowUp.reason = reason || existingFollowUp.reason || "";
+    existingFollowUp.changedAt = new Date();
+    existingFollowUp.changedBy = doctorId;
+
+    await existingFollowUp.save();
+
+    await FollowUpLog.create({
+      doctor: doctorId,
+      patient: patientId,
+      action: "removed",
+      reason: reason || "",
+      changedBy: doctorId,
+      changedAt: new Date(),
+    });
+
+    res.json({
+      message: "Patient removed from follow-up",
+      patient,
+    });
   } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    console.error("ERROR in unmarkPatientFromFollowUp:", error);
+    res.status(500).json({ message: "Server error" });
   }
 };
 
 const getFollowUpPatients = async (req, res) => {
   try {
-    const patients = await User.find({
-      role: 'patient',
-      isUnderFollowUp: true
-    }).select('-password');
+    const doctorId = req.user.userId;
+
+    const followUps = await FollowUp.find({
+      doctor: doctorId,
+      isActive: true,
+    })
+      .populate("patient", "fullName email idNumber birthDate phone")
+      .sort({ changedAt: -1 });
+
+    const patients = followUps.map((item) => ({
+      ...item.patient.toObject(),
+      followUpReason: item.reason,
+      followUpChangedAt: item.changedAt,
+      followUpId: item._id,
+      isUnderFollowUp: true,
+    }));
 
     res.json(patients);
-
   } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    console.error("ERROR in getFollowUpPatients:", error);
+    res.status(500).json({ message: "Server error" });
   }
 };
+
 const getAvailableDoctors = async (req, res) => {
   console.log("🔥 getAvailableDoctors CALLED");
 
