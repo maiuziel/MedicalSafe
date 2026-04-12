@@ -290,28 +290,32 @@ const [showNotifications, setShowNotifications] = useState(false);
               <h3 className="font-semibold text-gray-700 mb-4">
                 Upcoming Appointment
               </h3>
-              {upcomingAppointment ? (
-                <div className="flex justify-between items-center bg-gray-50 p-4 rounded-lg">
-                  <div>
-                    <p className="font-medium text-gray-800">
-                      {upcomingAppointment?.doctor?.fullName || "Doctor"}
-                    </p>
-                    <p className="text-xs text-gray-400">
-                      {new Date(upcomingAppointment.date).toLocaleString()}
-                    </p>
-                  </div>
-                  <button
-                    onClick={() =>
-                      handleCancelAppointment(upcomingAppointment._id)
-                    }
-                    className="bg-red-100 text-red-600 px-4 py-1 rounded-lg text-sm"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              ) : (
-                <p className="text-gray-400 text-sm">No upcoming appointments</p>
-              )}
+              {appointments.length > 0 ? (
+  appointments.map((appointment) => (
+    <div
+      key={appointment._id}
+      className="flex justify-between items-center bg-gray-50 p-4 rounded-lg mb-2"
+    >
+      <div>
+        <p className="font-medium text-gray-800">
+          {appointment?.doctor?.fullName || "Doctor"}
+        </p>
+        <p className="text-xs text-gray-400">
+          {new Date(appointment.date).toLocaleString()}
+        </p>
+      </div>
+
+      <button
+        onClick={() => handleCancelAppointment(appointment._id)}
+        className="bg-red-100 text-red-600 px-4 py-1 rounded-lg text-sm"
+      >
+        Cancel
+      </button>
+    </div>
+  ))
+) : (
+  <p className="text-gray-400 text-sm">No appointments</p>
+)}
             </div>
 
             <div className="bg-white p-5 rounded-xl shadow-sm">
