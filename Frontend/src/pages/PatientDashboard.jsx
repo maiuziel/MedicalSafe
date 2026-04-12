@@ -83,7 +83,6 @@ const [showNotifications, setShowNotifications] = useState(false);
   const handleNotificationClick = (n) => {
     markAsRead(n._id);
   
-    // 🔥 רק אם זו תגובה לבקשה → ננווט
     if (n.type === "request_reply" && n.relatedRequest) {
       navigate(`/patient/requests/${n.relatedRequest}`);
     }
@@ -188,19 +187,23 @@ const [showNotifications, setShowNotifications] = useState(false);
       "Are you sure you want to cancel this appointment?"
     );
     if (!confirmCancel) return;
-
+  
     try {
       const token = localStorage.getItem("token");
       const res = await fetch(
-        `http://localhost:5001/api/appointments/${appointmentId}`,
+        `http://localhost:5001/api/appointments/cancel/${appointmentId}`, 
         {
-          method: "DELETE",
+          method: "PUT", // 🔥 שינוי METHOD
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-
+  
       if (res.ok) {
         fetchAppointments();
+      } else {
+        const data = await res.json();
+        console.error(data);
+        alert("Failed to cancel appointment");
       }
     } catch (error) {
       console.error(error);

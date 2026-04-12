@@ -29,7 +29,6 @@ const createAppointment = async (req, res) => {
       message: `Appointment scheduled for ${new Date(date).toLocaleString()}`,
     });
 
-    // ✅ Audit Log
     await auditLogger({
       req,
       action: 'CREATE_APPOINTMENT',
@@ -46,12 +45,13 @@ const createAppointment = async (req, res) => {
 };
 
 
-// צפייה בתורים שלי
+// 🔥 צפייה בתורים שלי (מעודכן!)
 const getMyAppointments = async (req, res) => {
   try {
 
     const appointments = await Appointment.find({
       patient: req.user.userId,
+      status: { $ne: 'cancelled' } // ✅ סינון תורים מבוטלים
     }).populate('doctor', 'email fullName');
 
     await auditLogger({
@@ -80,7 +80,11 @@ const cancelAppointment = async (req, res) => {
         _id: id,
         patient: req.user.userId,
       },
-      { status: 'cancelled' },
+      { 
+        status: 'cancelled',
+        statusUpdatedAt: new Date(), // 🔥 בונוס
+        statusUpdatedBy: req.user.userId // 🔥 בונוס
+      },
       { new: true }
     );
 
@@ -95,7 +99,7 @@ const cancelAppointment = async (req, res) => {
       message: "Appointment was cancelled by patient",
     });
 
-    // 🔔 למטופל (דרישה שלך!)
+    // 🔔 למטופל
     await Notification.create({
       user: appointment.patient,
       type: "appointment_cancelled",
@@ -117,6 +121,7 @@ const cancelAppointment = async (req, res) => {
   }
 };
 
+
 const cancelAppointmentByDoctor = async (req, res) => {
   try {
     const { id } = req.params;
@@ -124,9 +129,13 @@ const cancelAppointmentByDoctor = async (req, res) => {
     const appointment = await Appointment.findOneAndUpdate(
       {
         _id: id,
-        doctor: req.user.userId, // 🔥 רק רופא
+        doctor: req.user.userId,
       },
-      { status: 'cancelled' },
+      { 
+        status: 'cancelled',
+        statusUpdatedAt: new Date(),
+        statusUpdatedBy: req.user.userId
+      },
       { new: true }
     );
 
@@ -134,7 +143,6 @@ const cancelAppointmentByDoctor = async (req, res) => {
       return res.status(404).json({ message: 'Appointment not found' });
     }
 
-    // 🔔 התראה למטופל
     await Notification.create({
       user: appointment.patient,
       type: "appointment_cancelled",
@@ -159,6 +167,7 @@ const cancelAppointmentByDoctor = async (req, res) => {
   }
 };
 
+
 // שינוי תאריך/שעה של תור
 const updateAppointment = async (req, res) => {
   try {
@@ -175,14 +184,12 @@ const updateAppointment = async (req, res) => {
     appointment.date = date;
     await appointment.save();
 
-    // 🔔 לרופא
     await Notification.create({
       user: appointment.doctor,
       type: "appointment_updated",
       message: "Appointment time updated",
     });
 
-    // 🔔 למטופל (הכי חשוב!)
     await Notification.create({
       user: appointment.patient,
       type: "appointment_updated",
@@ -220,6 +227,7 @@ const getAppointmentsByPatientId = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
 
 module.exports = {
   createAppointment,
