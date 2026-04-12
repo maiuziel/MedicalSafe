@@ -3,7 +3,7 @@ const Notification = require("../models/Notification");
 const getMyNotifications = async (req, res) => {
   try {
     const notifications = await Notification.find({
-      doctor: req.user.userId, // 🔥 זה התיקון
+      user: req.user.userId, // 🔥 במקום doctor
     }).sort({ createdAt: -1 });
 
     res.json({ notifications });

@@ -70,7 +70,7 @@ const createRequest = async (req, res) => {
     const patientUser = await User.findById(senderId);
 
     await Notification.create({
-      doctor: doctorId,
+      user: doctorId,
       type: "new_request",
       message: `New request from ${patientUser.fullName}`,
     });
@@ -151,7 +151,6 @@ const getDoctorRequestById = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
-
 const replyToRequest = async (req, res) => {
   try {
     const { requestId } = req.params;
@@ -180,6 +179,26 @@ const replyToRequest = async (req, res) => {
     }
 
     await requestItem.save();
+
+    // 🔔 יצירת התראה למטופל + קישור לבקשה
+    try {
+      await Notification.create({
+        user: requestItem.patient,
+        type: "request_reply",
+        message: "Your request has been answered by the doctor",
+        relatedRequest: requestItem._id, // 🔥🔥🔥 זה החלק החשוב
+        status: "sent",
+      });
+    } catch (err) {
+      // במקרה של כשל
+      await Notification.create({
+        user: requestItem.patient,
+        type: "request_reply",
+        message: "Your request has been answered by the doctor",
+        relatedRequest: requestItem._id,
+        status: "failed",
+      });
+    }
 
     res.json({
       message: 'Reply sent successfully',

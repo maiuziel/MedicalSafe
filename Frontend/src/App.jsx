@@ -41,6 +41,7 @@ function App() {
 
         {/* ✅ FIXED */}
         <Route path="/patient/requests" element={<PatientRequests />} />
+        <Route path="/patient/requests/:requestId" element={<PatientRequests />} />
 
       </Routes>
     </Router>

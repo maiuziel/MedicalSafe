@@ -1,8 +1,11 @@
 import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import Sidebar from "../components/patient/Sidebar";
 
 export default function PatientRequests() {
   const [requests, setRequests] = useState([]);
+
+  const { requestId } = useParams(); // 🔥 חדש
 
   const [form, setForm] = useState({
     subject: "",
@@ -70,9 +73,6 @@ export default function PatientRequests() {
       });
   
       const data = await res.json();
-  
-      console.log("REQUESTS RESPONSE:", data); // 🔥 חשוב לבדיקה
-  
       setRequests(data.requests || []);
     } catch (err) {
       console.error(err);
@@ -94,8 +94,6 @@ export default function PatientRequests() {
   }, [selectedSpecialization, doctors]);
 
   const handleSubmit = async () => {
-    console.log("FORM:", form);
-
     if (
       !form.subject ||
       !form.description ||
@@ -147,6 +145,7 @@ export default function PatientRequests() {
 
       <div className="flex-1 p-8 bg-[#eef2f7] min-h-screen">
 
+        {/* 🔹 HEADER */}
         <div className="bg-white p-6 rounded-2xl shadow-sm mb-6">
           <h1 className="text-xl font-semibold text-gray-800">
             Send a Request to a Doctor
@@ -156,6 +155,7 @@ export default function PatientRequests() {
           </p>
         </div>
 
+        {/* 🔹 FORM */}
         <div className="bg-white p-6 rounded-2xl shadow-sm max-w-xl mb-6">
 
           <select
@@ -245,6 +245,40 @@ export default function PatientRequests() {
           >
             Send Request
           </button>
+        </div>
+
+        {/* 🔥 REQUESTS LIST */}
+        <div className="bg-white p-6 rounded-2xl shadow-sm max-w-xl">
+          <h2 className="text-lg font-semibold mb-4">My Requests</h2>
+
+          {requests.length === 0 ? (
+            <p className="text-gray-400">No requests yet</p>
+          ) : (
+            requests.map((req) => (
+              <div
+                key={req._id}
+                className={`border-b py-3 ${
+                  req._id === requestId ? "bg-yellow-50" : ""
+                }`}
+              >
+                <p className="font-medium">{req.subject}</p>
+                <p className="text-sm text-gray-500">{req.description}</p>
+
+                <p className="text-xs text-gray-400 mt-1">
+                  Status: {req.status}
+                </p>
+
+                {req.reply && (
+                  <div className="mt-2 bg-green-50 p-2 rounded">
+                    <p className="text-sm font-semibold text-green-700">
+                      Doctor Reply:
+                    </p>
+                    <p className="text-sm text-gray-700">{req.reply}</p>
+                  </div>
+                )}
+              </div>
+            ))
+          )}
         </div>
 
       </div>

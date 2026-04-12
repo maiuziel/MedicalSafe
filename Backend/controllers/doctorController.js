@@ -3,7 +3,7 @@ const Appointment = require('../models/Appointment');
 const Feedback = require('../models/Feedback');
 const Request = require('../models/Request'); 
 const MedicalFile = require('../models/MedicalFile');
-
+const Notification = require('../models/Notification');
 // GET /api/doctor/me
 const getMyProfile = async (req, res) => {
   try {
@@ -166,6 +166,11 @@ const uploadMedicalFile = async (req, res) => {
     });
 
     await newFile.save();
+    await Notification.create({
+      user: patientId,
+      type: "file_uploaded",
+      message: "A new medical file was uploaded by your doctor",
+    });
 
     res.status(201).json({
       message: "File uploaded successfully",
@@ -485,6 +490,14 @@ const updateAppointmentStatus = async (req, res) => {
     appointment.statusUpdatedBy = req.user.userId;
 
     await appointment.save();
+    // 🔔 התראה למטופל אם הרופא ביטל
+      if (status === "cancelled") {
+        await Notification.create({
+          user: appointment.patient,
+          type: "appointment_cancelled",
+          message: `Your appointment on ${new Date(appointment.date).toLocaleString()} was cancelled by the doctor`,
+        });
+      }
 
     const updatedAppointment = await Appointment.findById(appointment._id)
       .populate("patient", "fullName email");

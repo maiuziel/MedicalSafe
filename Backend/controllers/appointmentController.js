@@ -1,5 +1,5 @@
 const Appointment = require('../models/Appointment');
-const Notification = require('../models/Notification'); // 🔥 NEW
+const Notification = require('../models/Notification');
 const auditLogger = require('../utils/auditLogger');
 
 
@@ -15,11 +15,18 @@ const createAppointment = async (req, res) => {
       date,
     });
 
-    // 🔔 יצירת התראה לרופא
+    // 🔔 התראה לרופא
     await Notification.create({
-      doctor: doctorId,
+      user: doctorId,
       type: "appointment_created",
       message: "New appointment scheduled",
+    });
+
+    // 🔔 התראה למטופל
+    await Notification.create({
+      user: req.user.userId,
+      type: "appointment_created",
+      message: `Appointment scheduled for ${new Date(date).toLocaleString()}`,
     });
 
     // ✅ Audit Log
@@ -47,7 +54,6 @@ const getMyAppointments = async (req, res) => {
       patient: req.user.userId,
     }).populate('doctor', 'email fullName');
 
-    // ✅ Audit Log
     await auditLogger({
       req,
       action: 'VIEW_MY_APPOINTMENTS',
@@ -82,14 +88,20 @@ const cancelAppointment = async (req, res) => {
       return res.status(404).json({ message: 'Appointment not found' });
     }
 
-    // 🔔 התראה לרופא על ביטול
+    // 🔔 לרופא
     await Notification.create({
-      doctor: appointment.doctor,
+      user: appointment.doctor,
       type: "appointment_cancelled",
-      message: "Appointment was cancelled",
+      message: "Appointment was cancelled by patient",
     });
 
-    // ✅ Audit Log
+    // 🔔 למטופל (דרישה שלך!)
+    await Notification.create({
+      user: appointment.patient,
+      type: "appointment_cancelled",
+      message: `Your appointment on ${new Date(appointment.date).toLocaleString()} was cancelled`,
+    });
+
     await auditLogger({
       req,
       action: 'CANCEL_APPOINTMENT',
@@ -105,8 +117,49 @@ const cancelAppointment = async (req, res) => {
   }
 };
 
+const cancelAppointmentByDoctor = async (req, res) => {
+  try {
+    const { id } = req.params;
 
-// שינוי תאריך/שעה של תור (מזכירה)
+    const appointment = await Appointment.findOneAndUpdate(
+      {
+        _id: id,
+        doctor: req.user.userId, // 🔥 רק רופא
+      },
+      { status: 'cancelled' },
+      { new: true }
+    );
+
+    if (!appointment) {
+      return res.status(404).json({ message: 'Appointment not found' });
+    }
+
+    // 🔔 התראה למטופל
+    await Notification.create({
+      user: appointment.patient,
+      type: "appointment_cancelled",
+      message: `Your appointment on ${new Date(appointment.date).toLocaleString()} was cancelled by the doctor`,
+    });
+
+    await auditLogger({
+      req,
+      action: 'CANCEL_APPOINTMENT_BY_DOCTOR',
+      resource: 'appointment',
+      resourceId: appointment._id
+    });
+
+    res.json({
+      message: 'Appointment cancelled by doctor',
+      appointment
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// שינוי תאריך/שעה של תור
 const updateAppointment = async (req, res) => {
   try {
 
@@ -122,14 +175,20 @@ const updateAppointment = async (req, res) => {
     appointment.date = date;
     await appointment.save();
 
-    // 🔔 התראה לרופא על שינוי
+    // 🔔 לרופא
     await Notification.create({
-      doctor: appointment.doctor,
+      user: appointment.doctor,
       type: "appointment_updated",
       message: "Appointment time updated",
     });
 
-    // ✅ Audit Log
+    // 🔔 למטופל (הכי חשוב!)
+    await Notification.create({
+      user: appointment.patient,
+      type: "appointment_updated",
+      message: `Your appointment was updated to ${new Date(date).toLocaleString()}`,
+    });
+
     await auditLogger({
       req,
       action: 'UPDATE_APPOINTMENT',
@@ -161,10 +220,12 @@ const getAppointmentsByPatientId = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
 module.exports = {
   createAppointment,
   getMyAppointments,
   cancelAppointment,
   updateAppointment,
-  getAppointmentsByPatientId
+  getAppointmentsByPatientId,
+  cancelAppointmentByDoctor
 };

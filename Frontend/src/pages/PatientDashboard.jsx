@@ -10,10 +10,19 @@ export default function PatientDashboard() {
   const [selectedTime, setSelectedTime] = useState("");
   const [specialization, setSpecialization] = useState("");
   const [availableDoctors, setAvailableDoctors] = useState([]);
+  const [notifications, setNotifications] = useState([]);
+const [showNotifications, setShowNotifications] = useState(false);
   const navigate = useNavigate();
   useEffect(() => {
     fetchProfile();
     fetchAppointments();
+    fetchNotifications();
+  
+    const interval = setInterval(() => {
+      fetchNotifications();
+    }, 10000);
+  
+    return () => clearInterval(interval);
   }, []);
   
   const handleLogout = () => {
@@ -36,6 +45,48 @@ export default function PatientDashboard() {
       setUser(data);
     } catch (err) {
       console.error(err);
+    }
+  };
+  const fetchNotifications = async () => {
+    try {
+      const token = localStorage.getItem("token");
+  
+      const res = await fetch("http://localhost:5001/api/notifications", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+  
+      const data = await res.json();
+      setNotifications(data.notifications || []);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+  const markAsRead = async (id) => {
+    try {
+      const token = localStorage.getItem("token");
+  
+      await fetch(`http://localhost:5001/api/notifications/${id}/read`, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+  
+      fetchNotifications(); // רענון
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleNotificationClick = (n) => {
+    markAsRead(n._id);
+  
+    if (n.relatedRequest) {
+      navigate(`/patient/requests/${n.relatedRequest}`);
+    } else {
+      navigate("/patient/requests"); // fallback
     }
   };
 
@@ -177,15 +228,58 @@ export default function PatientDashboard() {
             </p>
           </div>
 
-          <button
-            onClick={() => {
-              setShowModal(true);
-              fetchDoctors();
-            }}
-            className="bg-gradient-to-r from-blue-400 to-blue-600 text-white px-5 py-2 rounded-lg shadow hover:opacity-90"
+          <div className="flex items-center gap-4">
+
+{/* 🔔 NOTIFICATIONS */}
+<div className="relative">
+  <button
+    onClick={() => setShowNotifications(!showNotifications)}
+    className="text-2xl"
+  >
+    {notifications.filter(n => !n.isRead).length > 0 && (
+  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs px-1 rounded-full">
+    {notifications.filter(n => !n.isRead).length}
+  </span>
+)}
+    🔔
+  </button>
+
+  {showNotifications && (
+    <div className="absolute right-0 mt-2 bg-white shadow-lg p-3 rounded-xl w-80 z-50">
+      <h4 className="font-semibold mb-2">Notifications</h4>
+
+      {notifications.length > 0 ? (
+        notifications.map((n) => (
+          <div
+            key={n._id}
+            onClick={() => handleNotificationClick(n)}
+            className={`p-2 border-b cursor-pointer ${!n.isRead ? "bg-blue-50" : ""}`}
           >
-            Book Appointment
-          </button>
+            <p className="text-sm">{n.message}</p>
+            <p className="text-xs text-gray-400">
+              {new Date(n.createdAt).toLocaleString()}
+            </p>
+          </div>
+        ))
+        ) : (
+        <p className="text-sm text-gray-400">No notifications</p>
+      )}
+    </div>
+  )}
+</div>
+
+{/* 📅 BOOK BUTTON */}
+<button
+  onClick={() => {
+    setShowModal(true);
+    fetchDoctors();
+  }}
+  className="bg-gradient-to-r from-blue-400 to-blue-600 text-white px-5 py-2 rounded-lg shadow hover:opacity-90"
+>
+  Book Appointment
+</button>
+
+</div>
         </div>
 
         <div className="grid grid-cols-3 gap-6">
