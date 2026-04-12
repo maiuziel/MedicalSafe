@@ -490,15 +490,22 @@ const updateAppointmentStatus = async (req, res) => {
     appointment.statusUpdatedBy = req.user.userId;
 
     await appointment.save();
-    // 🔔 התראה למטופל אם הרופא ביטל
-      if (status === "cancelled") {
-        await Notification.create({
-          user: appointment.patient,
-          type: "appointment_cancelled",
-          message: `Your appointment on ${new Date(appointment.date).toLocaleString()} was cancelled by the doctor`,
-        });
-      }
+if (status === "cancelled") {
+  await Notification.create({
+    user: appointment.patient,
+    type: "appointment_cancelled",
+    message: `Your appointment on ${new Date(appointment.date).toLocaleString()} was cancelled by the doctor`,
+  });
+}
 
+if (status === "completed") {
+  await Notification.create({
+    user: appointment.patient,
+    type: "appointment_completed",
+    message: "Your appointment has been completed. Click to leave feedback",
+    relatedAppointment: appointment._id, 
+  });
+}
     const updatedAppointment = await Appointment.findById(appointment._id)
       .populate("patient", "fullName email");
 

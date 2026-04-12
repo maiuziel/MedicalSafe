@@ -12,7 +12,7 @@ import DoctorAvailability from "./pages/DoctorAvailability";
 import DoctorSearchPatients from "./pages/DoctorSearchPatients";
 import PatientDetails from "./pages/PatientDetails";
 import DoctorRequests from "./pages/DoctorRequests";
-
+import PatientFeedback from "./pages/PatientFeedback";
 function App() {
   const role = localStorage.getItem("role");
 
@@ -42,6 +42,7 @@ function App() {
         {/* ✅ FIXED */}
         <Route path="/patient/requests" element={<PatientRequests />} />
         <Route path="/patient/requests/:requestId" element={<PatientRequests />} />
+        <Route path="/patient/feedback/:appointmentId" element={<PatientFeedback />} />
 
       </Routes>
     </Router>

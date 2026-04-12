@@ -14,7 +14,8 @@ const feedbackSchema = new mongoose.Schema({
   appointment: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Appointment',
-    required: true
+    required: true,
+    unique: true
   },
   rating: {
     type: Number,
@@ -23,7 +24,8 @@ const feedbackSchema = new mongoose.Schema({
     max: 5
   },
   comment: {
-    type: String
+    type: String,
+    required: true
   }
 }, { timestamps: true });
 

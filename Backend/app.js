@@ -24,7 +24,7 @@ const adminRoutes = require('./routes/adminRoutes');
 const messageRoutes = require('./routes/messageRoutes');
 const requestRoutes = require("./routes/requestRoutes");
 const notificationRoutes = require("./routes/notificationRoutes");
-
+const feedbackRoutes = require('./routes/feedbackRoutes');
 // ----------------------------------------------------
 // 🔥 סדר חשוב מאוד!
 // ספציפי → כללי
@@ -44,6 +44,7 @@ app.use('/api/admin', adminRoutes);
 // 🔥 זה חייב להיות בסוף!
 app.use("/api", requestRoutes);
 app.use('/api/doctor', doctorRoutes); // 🔥 לפני requestRoutes
+app.use('/api/feedback', feedbackRoutes);
 
 // ----------------------------------------------------
 

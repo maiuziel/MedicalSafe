@@ -1,7 +1,6 @@
 const mongoose = require("mongoose");
 
 const notificationSchema = new mongoose.Schema({
-  // 👇 חדש
   user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
@@ -14,9 +13,10 @@ const notificationSchema = new mongoose.Schema({
       "appointment_created",
       "appointment_cancelled",
       "appointment_updated",
-      "appointment_status_updated", 
-      "file_uploaded",              
-      "request_reply",             
+      "appointment_status_updated",
+      "appointment_completed",
+      "file_uploaded",
+      "request_reply",
     ],
   },
 
@@ -32,10 +32,15 @@ const notificationSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
-  
+
   relatedRequest: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Request",
+  },
+
+  relatedAppointment: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Appointment",
   },
 
   createdAt: {
@@ -43,4 +48,5 @@ const notificationSchema = new mongoose.Schema({
     default: Date.now,
   },
 });
+
 module.exports = mongoose.model("Notification", notificationSchema);

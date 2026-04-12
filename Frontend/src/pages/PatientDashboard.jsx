@@ -89,6 +89,9 @@ const [filterSpecialization, setFilterSpecialization] = useState("");
     if (n.type === "request_reply" && n.relatedRequest) {
       navigate(`/patient/requests/${n.relatedRequest}`);
     }
+    if (n.type === "appointment_completed" && n.relatedAppointment) {
+      navigate(`/patient/feedback/${n.relatedAppointment}`);
+    }
   };
 
   const fetchAppointments = async () => {
