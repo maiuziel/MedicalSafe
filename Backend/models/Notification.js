@@ -17,6 +17,7 @@ const notificationSchema = new mongoose.Schema({
       "appointment_completed",
       "file_uploaded",
       "request_reply",
+      "feedback_received",
     ],
   },
 

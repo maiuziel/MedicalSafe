@@ -167,6 +167,40 @@ export default function DoctorDashboard() {
       console.error(err);
     }
   };
+  const handleNotificationClick = async (n) => {
+    try {
+      const token = localStorage.getItem("token");
+  
+      // 🔹 סימון כנקרא
+      await fetch(
+        `http://localhost:5001/api/notifications/${n._id}/read`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+  
+      // 🔥 רענון התראות (חשוב!!)
+      fetchNotifications();
+  
+      // 🔥 סגירת הדרופדאון
+      setShowNotifications(false);
+  
+      // 🔹 ניווט
+      if (n.type === "feedback_received") {
+        navigate("/doctor/feedback");
+      }
+  
+      if (n.type === "request_reply" && n.relatedRequest) {
+        navigate(`/patient/requests/${n.relatedRequest}`);
+      }
+  
+    } catch (error) {
+      console.error(error);
+    }
+  };
   const detectNewRequests = (oldList, newList) => {
     const newRequests = newList.filter(r => r.status === "new");
 
@@ -420,23 +454,23 @@ export default function DoctorDashboard() {
       <h4 className="font-semibold mb-2">Notifications</h4>
 
       {notifications.length > 0 ? (
-        notifications.map((n) => (
-          <div
-            key={n._id}
-            onClick={() => markNotificationAsRead(n._id)}
-            className={`p-2 mb-2 rounded-lg cursor-pointer ${
-              n.isRead ? "bg-gray-100" : "bg-blue-50"
-            }`}
-          >
-            <p className="text-sm">{n.message}</p>
-            <p className="text-xs text-gray-400">
-              {new Date(n.createdAt).toLocaleString()}
-            </p>
-          </div>
-        ))
-      ) : (
-        <p className="text-sm text-gray-400">No notifications</p>
-      )}
+  notifications.map((n) => (
+    <div
+      key={n._id}
+      onClick={() => handleNotificationClick(n)}
+      className={`p-2 mb-2 rounded-lg cursor-pointer ${
+        n.isRead ? "bg-gray-100" : "bg-blue-50"
+      }`}
+    >
+      <p className="text-sm">{n.message}</p>
+      <p className="text-xs text-gray-400">
+        {new Date(n.createdAt).toLocaleString()}
+      </p>
+    </div>
+  ))
+) : (
+  <p className="text-sm text-gray-500">No notifications</p>
+)}
     </div>
   )}
 </div>

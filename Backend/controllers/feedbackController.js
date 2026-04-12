@@ -1,7 +1,7 @@
 const Feedback = require('../models/Feedback');
 const Appointment = require('../models/Appointment');
 const auditLogger = require('../utils/auditLogger');
-
+const Notification = require("../models/Notification");
 const createFeedback = async (req, res) => {
   try {
     const { appointmentId } = req.params;
@@ -38,6 +38,13 @@ const createFeedback = async (req, res) => {
         rating,
         comment
       });
+      // 🔔 יצירת התראה לרופא על משוב חדש
+        await Notification.create({
+            user: appointment.doctor,
+            type: "feedback_received",
+            message: "You received new feedback from a patient",
+            relatedAppointment: appointment._id,
+        });
 
     await auditLogger({
       req,
@@ -57,18 +64,35 @@ const createFeedback = async (req, res) => {
 };
 
 const getDoctorFeedbacks = async (req, res) => {
-  try {
-    const feedbacks = await Feedback.find({ doctor: req.user.userId })
-      .populate('patient', 'fullName email')
-      .populate('appointment', 'date status')
-      .sort({ createdAt: -1 });
-
-    res.json(feedbacks);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Server error' });
-  }
-};
+    try {
+      const feedbacks = await Feedback.find({ doctor: req.user.userId })
+        .populate('patient', 'fullName email')
+        .populate('appointment', 'date status')
+        .sort({ createdAt: -1 });
+  
+      // 🔢 חישוב כמות
+      const totalFeedbacks = feedbacks.length;
+  
+      // ⭐ חישוב ממוצע
+      const averageRating =
+        totalFeedbacks > 0
+          ? (
+              feedbacks.reduce((sum, f) => sum + f.rating, 0) /
+              totalFeedbacks
+            ).toFixed(1)
+          : 0;
+  
+      // 🔁 החזרת הנתונים
+      res.json({
+        feedbacks,
+        totalFeedbacks,
+        averageRating,
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Server error' });
+    }
+  };
 
 module.exports = {
   createFeedback,
