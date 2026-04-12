@@ -83,10 +83,9 @@ const [showNotifications, setShowNotifications] = useState(false);
   const handleNotificationClick = (n) => {
     markAsRead(n._id);
   
-    if (n.relatedRequest) {
+    // 🔥 רק אם זו תגובה לבקשה → ננווט
+    if (n.type === "request_reply" && n.relatedRequest) {
       navigate(`/patient/requests/${n.relatedRequest}`);
-    } else {
-      navigate("/patient/requests"); // fallback
     }
   };
 
