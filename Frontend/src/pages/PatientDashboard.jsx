@@ -12,6 +12,9 @@ export default function PatientDashboard() {
   const [availableDoctors, setAvailableDoctors] = useState([]);
   const [notifications, setNotifications] = useState([]);
 const [showNotifications, setShowNotifications] = useState(false);
+const [searchDoctor, setSearchDoctor] = useState("");
+const [filterDate, setFilterDate] = useState("");
+const [filterSpecialization, setFilterSpecialization] = useState("");
   const navigate = useNavigate();
   useEffect(() => {
     fetchProfile();
@@ -181,6 +184,23 @@ const [showNotifications, setShowNotifications] = useState(false);
       console.error(err);
     }
   };
+  const filteredAppointments = appointments.filter((a) => {
+    const matchesDoctor =
+      a.doctor?.fullName
+        ?.toLowerCase()
+        .includes(searchDoctor.toLowerCase());
+  
+    const matchesDate = filterDate
+      ? new Date(a.date).toDateString() ===
+        new Date(filterDate).toDateString()
+      : true;
+  
+    const matchesSpecialization = filterSpecialization
+      ? a.doctor?.specialization === filterSpecialization
+      : true;
+  
+    return matchesDoctor && matchesDate && matchesSpecialization;
+  });
 
   const handleCancelAppointment = async (appointmentId) => {
     const confirmCancel = window.confirm(
@@ -290,8 +310,52 @@ const [showNotifications, setShowNotifications] = useState(false);
               <h3 className="font-semibold text-gray-700 mb-4">
                 Upcoming Appointment
               </h3>
-              {appointments.length > 0 ? (
-  appointments.map((appointment) => (
+              <div className="flex flex-wrap gap-3 mb-4">
+
+            {/* 🔍 חיפוש לפי רופא */}
+            <input
+              type="text"
+              placeholder="Search doctor..."
+              value={searchDoctor}
+              onChange={(e) => setSearchDoctor(e.target.value)}
+              className="border p-2 rounded-lg text-sm"
+            />
+
+            {/* 📅 תאריך */}
+            <input
+              type="date"
+              value={filterDate}
+              onChange={(e) => setFilterDate(e.target.value)}
+              className="border p-2 rounded-lg text-sm"
+            />
+
+            {/* 🩺 התמחות */}
+            <select
+              value={filterSpecialization}
+              onChange={(e) => setFilterSpecialization(e.target.value)}
+              className="border p-2 rounded-lg text-sm"
+            >
+              <option value="">All Specializations</option>
+              {[...new Set(appointments.map(a => a.doctor?.specialization))].map((s) => (
+                <option key={s} value={s}>{s}</option>
+              ))}
+            </select>
+
+            {/* 🔄 reset */}
+            <button
+              onClick={() => {
+                setSearchDoctor("");
+                setFilterDate("");
+                setFilterSpecialization("");
+              }}
+              className="bg-blue-500 text-white px-3 py-2 rounded-lg text-sm hover:bg-blue-600 transition"
+            >
+              Reset
+            </button>
+
+          </div>
+          {filteredAppointments.length > 0 ? (
+  filteredAppointments.map((appointment) => (
     <div
       key={appointment._id}
       className="flex justify-between items-center bg-gray-50 p-4 rounded-lg mb-2"
@@ -314,7 +378,9 @@ const [showNotifications, setShowNotifications] = useState(false);
     </div>
   ))
 ) : (
-  <p className="text-gray-400 text-sm">No appointments</p>
+  <p className="text-gray-400 text-sm">
+    No appointments found for selected filters
+  </p>
 )}
             </div>
 

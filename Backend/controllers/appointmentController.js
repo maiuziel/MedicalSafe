@@ -52,7 +52,7 @@ const getMyAppointments = async (req, res) => {
     const appointments = await Appointment.find({
       patient: req.user.userId,
       status: { $ne: 'cancelled' } // ✅ סינון תורים מבוטלים
-    }).populate('doctor', 'email fullName');
+    }).populate('doctor', 'email fullName specialization');
 
     await auditLogger({
       req,
