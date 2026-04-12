@@ -14,18 +14,53 @@ const medicalRecordSchema = new mongoose.Schema(
     required: true
   },
 
+  // 🔥 חשוב מאוד
+  appointment: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Appointment',
+    required: true
+  },
+
+  // 🔥 חשוב מאוד
+  visitDate: {
+    type: Date,
+    required: true
+  },
+
   diagnosis: {
     type: String,
     required: true
   },
 
   treatment: {
-    type: String
+    type: String,
+    required: true
+  },
+
+  // 🔥 חשוב מאוד
+  recommendations: {
+    type: String,
+    required: true
   },
 
   notes: {
-    type: String
-  }
+    type: String,
+    default: ""
+  },
+
+  // 🔥 גרסאות
+  versions: [
+    {
+      diagnosis: String,
+      treatment: String,
+      recommendations: String,
+      notes: String,
+      updatedAt: {
+        type: Date,
+        default: Date.now
+      }
+    }
+  ]
 
 },
 { timestamps: true }

@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom"; // 🔥 חדש
 import Sidebar from "../components/patient/Sidebar";
 
 export default function DoctorAppointments() {
   const [appointments, setAppointments] = useState([]);
+  const navigate = useNavigate(); // 🔥 חדש
 
   useEffect(() => {
     fetchAppointments();
@@ -57,6 +59,20 @@ export default function DoctorAppointments() {
                     <p className="text-xs text-gray-400">
                       {new Date(a.date).toLocaleString()}
                     </p>
+
+                    {/* 🔥 כפתור Add Summary */}
+                    {a.status === "completed" && (
+                      <button
+                        onClick={() =>
+                          navigate(`/doctor/appointments/${a._id}/summary`, {
+                            state: { appointment: a }
+                          })
+                        }
+                        className="mt-2 bg-green-500 text-white px-3 py-1 rounded-lg text-xs"
+                      >
+                        Add Summary
+                      </button>
+                    )}
                   </div>
 
                   <span className="text-sm text-blue-500">

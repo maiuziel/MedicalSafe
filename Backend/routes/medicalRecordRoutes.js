@@ -1,17 +1,17 @@
 const express = require('express');
 const router = express.Router();
 
-// ✅ תיקון import
 const { authenticate, authorizeRoles } = require('../middleware/authMiddleware');
 
 const {
   createMedicalRecord,
   getMyMedicalRecords,
-  getPatientMedicalRecords
+  getPatientMedicalRecords,
+  updateMedicalRecord
 } = require('../controllers/medicalRecordController');
 
 
-// רופא יוצר רשומה רפואית
+// 🔥 רופא יוצר סיכום רפואי
 router.post(
   '/',
   authenticate,
@@ -20,7 +20,7 @@ router.post(
 );
 
 
-// מטופל רואה את הרשומות שלו
+// 🔥 מטופל רואה את הסיכומים שלו
 router.get(
   '/my',
   authenticate,
@@ -28,11 +28,22 @@ router.get(
   getMyMedicalRecords
 );
 
+
+// 🔥 רופא רואה סיכומים של מטופל
 router.get(
   '/patient/:patientId',
   authenticate,
   authorizeRoles('doctor'),
   getPatientMedicalRecords
+);
+
+
+// 🔥 עדכון סיכום רפואי (חשוב!)
+router.put(
+  '/:id',
+  authenticate,
+  authorizeRoles('doctor'),
+  updateMedicalRecord
 );
 
 module.exports = router;

@@ -13,6 +13,7 @@ export default function PatientDetails() {
   const [description, setDescription] = useState("");
   const [uploadMessage, setUploadMessage] = useState("");
   const [followUpLogs, setFollowUpLogs] = useState([]);
+  const [medicalRecords, setMedicalRecords] = useState([]);
 
   useEffect(() => {
     fetchData();
@@ -48,10 +49,22 @@ export default function PatientDetails() {
 
       const dataAppointments = await resAppointments.json();
       setAppointments(dataAppointments);
+      const resRecords = await fetch(
+        `http://localhost:5001/api/medical-records/patient/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+const dataRecords = await resRecords.json();
+setMedicalRecords(dataRecords);
     } catch (err) {
       console.error(err);
     }
   };
+  
 
   const checkFollowUp = async () => {
     try {
@@ -304,6 +317,31 @@ export default function PatientDetails() {
               </div>
             ))
           )}
+          <h2 className="text-xl font-semibold mt-8 mb-4">
+  Medical Summaries
+</h2>
+
+{medicalRecords.length === 0 ? (
+  <p className="text-gray-400">No medical summaries yet</p>
+) : (
+  medicalRecords.map((r) => (
+    <div key={r._id} className="bg-white p-4 rounded-xl shadow mb-4">
+
+      <p className="text-sm text-gray-400 mb-2">
+        {new Date(r.visitDate).toLocaleDateString()}
+      </p>
+
+      <p><strong>Diagnosis:</strong> {r.diagnosis}</p>
+      <p><strong>Treatment:</strong> {r.treatment}</p>
+      <p><strong>Recommendations:</strong> {r.recommendations}</p>
+
+      {r.notes && (
+        <p><strong>Notes:</strong> {r.notes}</p>
+      )}
+
+    </div>
+  ))
+)}
           {/* 🔴 Follow-Up History */}
 <div style={{ marginTop: "30px" }}>
   <h3>Follow-Up History</h3>

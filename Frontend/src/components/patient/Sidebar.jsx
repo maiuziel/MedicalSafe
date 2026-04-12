@@ -149,20 +149,7 @@ export default function Sidebar({ onLogout }) {
           </>
         )}
 
-        {/* רופא */}
-        {role === "doctor" && (
-          <>
-            <button className="flex items-center gap-3 text-[#3e4c66] px-4 py-3 rounded-xl hover:bg-white text-sm font-medium transition">
-              <FileText size={18} />
-              Patient Records
-            </button>
-
-            <button className="flex items-center gap-3 text-[#3e4c66] px-4 py-3 rounded-xl hover:bg-white text-sm font-medium transition">
-              <MessageSquare size={18} />
-              Requests
-            </button>
-          </>
-        )}
+  
 
         {/* Edit Profile */}
         <button

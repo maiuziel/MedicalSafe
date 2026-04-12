@@ -1,18 +1,43 @@
 const MedicalRecord = require('../models/MedicalRecord');
+const Appointment = require('../models/Appointment');
 const auditLogger = require('../utils/auditLogger');
 
 
-// רופא יוצר תיק רפואי
+// 🔥 יצירת סיכום רפואי
 const createMedicalRecord = async (req, res) => {
+  console.log("BODY:", req.body);
   try {
 
-    const { patientId, diagnosis, treatment, notes } = req.body;
+    const {
+      patientId,
+      appointmentId,
+      visitDate,
+      diagnosis,
+      treatment,
+      recommendations,
+      notes
+    } = req.body;
 
+    // ✅ בדיקת שדות חובה
+    if (!patientId || !appointmentId || !visitDate || !diagnosis || !treatment || !recommendations) {
+      return res.status(400).json({ message: 'Missing required fields' });
+    }
+
+    // ✅ בדיקה שהתור קיים
+    const appointment = await Appointment.findById(appointmentId);
+    if (!appointment) {
+      return res.status(404).json({ message: 'Appointment not found' });
+    }
+
+    // 🔥 יצירת הסיכום
     const record = await MedicalRecord.create({
       patient: patientId,
       doctor: req.user.userId,
+      appointment: appointmentId,
+      visitDate,
       diagnosis,
       treatment,
+      recommendations,
       notes
     });
 
@@ -27,20 +52,22 @@ const createMedicalRecord = async (req, res) => {
     res.status(201).json(record);
 
   } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: error.message });
   }
 };
 
 
-// מטופל רואה את התיק שלו
+// 🔥 מטופל רואה את הסיכומים שלו
 const getMyMedicalRecords = async (req, res) => {
   try {
 
     const records = await MedicalRecord.find({
       patient: req.user.userId
-    }).populate('doctor', 'email');
+    })
+    .populate('doctor', 'email')
+    .populate('appointment')
+    .sort({ createdAt: -1 });
 
-    // ✅ Audit Log
     await auditLogger({
       req,
       action: 'VIEW_MEDICAL_RECORD',
@@ -53,7 +80,9 @@ const getMyMedicalRecords = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
-// רופא רואה רשומות רפואיות של מטופל
+
+
+// 🔥 רופא רואה סיכומים של מטופל
 const getPatientMedicalRecords = async (req, res) => {
   try {
 
@@ -61,7 +90,10 @@ const getPatientMedicalRecords = async (req, res) => {
 
     const records = await MedicalRecord.find({
       patient: patientId
-    }).populate('doctor', 'email');
+    })
+    .populate('doctor', 'email')
+    .populate('appointment')
+    .sort({ createdAt: -1 });
 
     res.json(records);
 
@@ -71,8 +103,51 @@ const getPatientMedicalRecords = async (req, res) => {
 };
 
 
+// 🔥 עדכון סיכום רפואי + שמירת גרסאות
+const updateMedicalRecord = async (req, res) => {
+  try {
+
+    const record = await MedicalRecord.findById(req.params.id);
+
+    if (!record) {
+      return res.status(404).json({ message: 'Medical record not found' });
+    }
+
+    // 🔥 שמירת גרסה קודמת
+    record.versions.push({
+      diagnosis: record.diagnosis,
+      treatment: record.treatment,
+      recommendations: record.recommendations,
+      notes: record.notes,
+      updatedAt: new Date()
+    });
+
+    // 🔥 עדכון
+    record.diagnosis = req.body.diagnosis ?? record.diagnosis;
+    record.treatment = req.body.treatment ?? record.treatment;
+    record.recommendations = req.body.recommendations ?? record.recommendations;
+    record.notes = req.body.notes ?? record.notes;
+
+    await record.save();
+
+    await auditLogger({
+      req,
+      action: 'UPDATE_MEDICAL_RECORD',
+      resource: 'medical_record',
+      resourceId: record._id
+    });
+
+    res.json(record);
+
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+
 module.exports = {
   createMedicalRecord,
   getPatientMedicalRecords,
-  getMyMedicalRecords
+  getMyMedicalRecords,
+  updateMedicalRecord
 };
