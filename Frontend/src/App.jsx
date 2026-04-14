@@ -16,6 +16,7 @@ import PatientFeedback from "./pages/PatientFeedback";
 import DoctorFeedbacks from "./pages/DoctorFeedback";
 import FollowUpPatients from "./pages/FollowUpPatients";
 import AddMedicalSummary from "./pages/AddMedicalSummary";
+import SecretaryDashboard from "./pages/SecretaryDashboard";
 function App() {
   const role = localStorage.getItem("role");
 
@@ -42,6 +43,7 @@ function App() {
         {/* Dashboards */}
         <Route path="/patient" element={<PatientDashboard />} />
         <Route path="/doctor" element={<DoctorDashboard />} />
+        <Route path="/secretary" element={<SecretaryDashboard />} />
         
 
         {/* Edit Profile - לכולם */}

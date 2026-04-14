@@ -190,11 +190,54 @@ const createDoctor = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+const createUserByAdmin = async (req, res) => {
+  try {
+    const { fullName, email, password, phone, role, specialization } = req.body;
 
+    // 🔒 רק אדמין יכול לשלוח role
+    if (!["doctor", "secretary"].includes(role)) {
+      return res.status(400).json({ message: "Invalid role" });
+    }
+
+    if (!fullName || !email || !password || !phone) {
+      return res.status(400).json({ message: "Missing fields" });
+    }
+
+    if (role === "doctor" && !specialization) {
+      return res.status(400).json({ message: "Doctor must have specialization" });
+    }
+
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(409).json({ message: "User already exists" });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const user = await User.create({
+      fullName,
+      email,
+      password: hashedPassword,
+      phone,
+      role,
+      specialization: role === "doctor" ? specialization : undefined
+    });
+
+    res.status(201).json({
+      message: `${role} created successfully`,
+      user
+    });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
 module.exports = {
   register,
   login,
   forgotPassword,
   resetPassword,
-  createDoctor
+  createDoctor,
+  createUserByAdmin
 };

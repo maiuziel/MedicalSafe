@@ -15,15 +15,6 @@ const {
 } = require('../controllers/secretaryController');
 
 
-console.log({
-  authenticate,
-  authorizeRoles,
-  getMyProfile,
-  updateMyProfile,
-  getDoctors,
-  getPatients,
-});
-
 router.get(
   '/me',
   authenticate,
