@@ -339,27 +339,59 @@ const getDoctorsAvailability = async (req, res) => {
 
     const doctors = await User.find(filter).select('-password');
 
-    const result = doctors.map((doctor) => {
-      return {
-        doctorId: doctor._id,
-        fullName: doctor.fullName,
-        specialization: doctor.specialization,
-        availability: doctor.availability,
+    const now = new Date();
 
-        // 🔥 התיקון החשוב
-        isAvailable: doctor.availability && doctor.availability.length > 0
-      };
-    });
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
 
-    await auditLogger({
-      req,
-      action: 'VIEW_DOCTORS_AVAILABILITY',
-      resource: 'doctor'
-    });
+    const todayEnd = new Date();
+    todayEnd.setHours(23, 59, 59, 999);
+
+    const result = await Promise.all(
+      doctors.map(async (doctor) => {
+        const todayAppointments = await Appointment.find({
+          doctor: doctor._id,
+          date: { $gte: todayStart, $lte: todayEnd },
+          status: { $ne: 'cancelled' }
+        })
+          .populate('patient', 'fullName')
+          .sort({ date: 1 });
+
+        const dayName = now
+          .toLocaleDateString('en-US', { weekday: 'long' })
+          .toLowerCase();
+
+        const currentTime = now.toLocaleTimeString('en-GB', {
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: false
+        });
+
+        const todayAvailability = doctor.availability?.find((a) => {
+          return a.day?.toLowerCase() === dayName;
+        });
+
+        const isOnShiftNow =
+          todayAvailability?.slots?.includes(currentTime);
+
+        return {
+          doctorId: doctor._id,
+          fullName: doctor.fullName,
+          specialization: doctor.specialization,
+          availability: doctor.availability || [],
+          todayAppointments,
+          todayAvailability: todayAvailability || null,
+          isOnShiftNow,
+          isAvailable:
+            doctor.availability && doctor.availability.length > 0
+        };
+      })
+    );
 
     res.json(result);
 
   } catch (err) {
+    console.error("ERROR in getDoctorsAvailability:", err);
     res.status(500).json({ message: 'Server error' });
   }
 };

@@ -19,6 +19,7 @@ import AddMedicalSummary from "./pages/AddMedicalSummary";
 import SecretaryDashboard from "./pages/SecretaryDashboard";
 import SecretarySendMessage from "./pages/SecretarySendMessage";
 import DoctorSendMessage from "./pages/DoctorSendMessage";
+import SecretaryDoctorsAvailability from "./pages/SecretaryDoctorsAvailability";
 function App() {
   const role = localStorage.getItem("role");
 
@@ -37,6 +38,10 @@ function App() {
 
         <Route path="/doctor/patient/:id" element={<PatientDetails />} />
         <Route path="/doctor/follow-up" element={<FollowUpPatients />} />
+        <Route
+  path="/secretary/doctors-availability"
+  element={<SecretaryDoctorsAvailability />}
+/>
         <Route
           path="/doctor/appointments/:appointmentId/summary"
           element={<AddMedicalSummary />}

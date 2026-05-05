@@ -159,6 +159,20 @@ export default function Sidebar({ onLogout }) {
     <MessageSquare size={18} />
     Send Message
   </button>
+  
+)}
+{role === "secretary" && (
+  <button
+    onClick={() => navigate("/secretary/doctors-availability")}
+    className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition
+      ${location.pathname === "/secretary/doctors-availability"
+        ? "bg-gradient-to-r from-[#4f8df7] to-[#5d95f7] text-white"
+        : "text-[#3e4c66] hover:bg-white"
+      }`}
+  >
+    <CalendarDays size={18} />
+    Doctors Availability
+  </button>
 )}
 
         {/* מטופל */}
