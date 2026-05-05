@@ -9,9 +9,10 @@ const {
   getMessageById,
   replyToMessage,
   getConversation,
+  getSecretaries,
+  sendMessageToSecretary,
 } = require('../controllers/messageController');
 
-// ✅ תיקון import
 const { authenticate, authorizeRoles } = require('../middleware/authMiddleware');
 
 router.post(
@@ -22,10 +23,31 @@ router.post(
 );
 
 router.get(
+  '/secretaries',
+  authenticate,
+  authorizeRoles('doctor'),
+  getSecretaries
+);
+
+router.post(
+  '/doctor-to-secretary',
+  authenticate,
+  authorizeRoles('doctor'),
+  sendMessageToSecretary
+);
+
+router.get(
   '/doctor',
   authenticate,
   authorizeRoles('doctor'),
   getDoctorMessages
+);
+
+router.get(
+  '/sent',
+  authenticate,
+  authorizeRoles('secretary', 'doctor'),
+  getSentMessages
 );
 
 router.patch(
@@ -33,20 +55,6 @@ router.patch(
   authenticate,
   authorizeRoles('doctor'),
   markAsRead
-);
-
-router.get(
-  '/sent',
-  authenticate,
-  authorizeRoles('secretary'),
-  getSentMessages
-);
-
-router.get(
-  '/:id',
-  authenticate,
-  authorizeRoles('doctor', 'secretary'),
-  getMessageById
 );
 
 router.get(
@@ -61,6 +69,13 @@ router.post(
   authenticate,
   authorizeRoles('doctor', 'secretary'),
   replyToMessage
+);
+
+router.get(
+  '/:id',
+  authenticate,
+  authorizeRoles('doctor', 'secretary'),
+  getMessageById
 );
 
 module.exports = router;

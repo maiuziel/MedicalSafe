@@ -20,7 +20,8 @@ const {
   getSpecializations,
   searchPatients,
   updateAppointmentStatus,
-  getPatientFiles
+  getPatientFiles,
+  sendAppointmentRequestToSecretary,
 } = require('../controllers/doctorController');
 
 // 🔹 request controller (פניות)
@@ -178,5 +179,10 @@ router.get(
   authorizeRoles("doctor"),
   getPatientFiles
 );
-
+router.post(
+  "/appointments/request-change",
+  authenticate,
+  authorizeRoles("doctor"),
+  sendAppointmentRequestToSecretary
+);
 module.exports = router;

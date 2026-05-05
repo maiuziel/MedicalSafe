@@ -77,6 +77,19 @@ export default function Sidebar({ onLogout }) {
             Appointments
           </button>
         )}
+        {role === "doctor" && (
+  <button
+    onClick={() => navigate("/doctor/send-message")}
+    className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition
+      ${location.pathname === "/doctor/send-message"
+        ? "bg-gradient-to-r from-[#4f8df7] to-[#5d95f7] text-white"
+        : "text-[#3e4c66] hover:bg-white"
+      }`}
+  >
+    <MessageSquare size={18} />
+    Send Message to secretary
+  </button>
+)}
 
         {/* 🔥 Availability */}
         {role === "doctor" && (

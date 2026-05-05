@@ -150,10 +150,6 @@ const getAllAppointments = async (req, res) => {
 };
 
 
-/**
- * PUT /api/secretary/appointments/:id
- * עדכון תור - תאריך / שעה / רופא
- */
 const updateAppointment = async (req, res) => {
   try {
     const { id } = req.params;
@@ -175,6 +171,11 @@ const updateAppointment = async (req, res) => {
       return res.status(404).json({ message: 'Appointment not found' });
     }
 
+    // שמירת הערכים הישנים לפני שינוי
+    const oldDate = appointment.date;
+    const oldDoctor = appointment.doctor;
+    const oldStatus = appointment.status;
+
     const newDate = date ? new Date(date) : appointment.date;
     const newDoctor = doctorId || appointment.doctor;
 
@@ -187,13 +188,14 @@ const updateAppointment = async (req, res) => {
         message: 'Date must be in the future'
       });
     }
+
     const allowedStatuses = ['scheduled', 'completed', 'cancelled'];
 
-if (status && !allowedStatuses.includes(status)) {
-  return res.status(400).json({
-    message: 'Invalid appointment status'
-  });
-}
+    if (status && !allowedStatuses.includes(status)) {
+      return res.status(400).json({
+        message: 'Invalid appointment status'
+      });
+    }
 
     const doctor = await User.findById(newDoctor);
 
@@ -241,18 +243,66 @@ if (status && !allowedStatuses.includes(status)) {
 
     appointment.date = newDate;
     appointment.doctor = newDoctor;
+
     if (status) {
       appointment.status = status;
     }
+
     await appointment.save();
+
+    // בניית פירוט שינויים להתראה
+    const changes = [];
+
+    if (String(oldDoctor) !== String(newDoctor)) {
+      changes.push('Doctor was changed');
+    }
+
+    const oldDateOnly = new Date(oldDate).toLocaleDateString();
+    const newDateOnly = new Date(newDate).toLocaleDateString();
+
+    if (oldDateOnly !== newDateOnly) {
+      changes.push(`Date changed from ${oldDateOnly} to ${newDateOnly}`);
+    }
+
+    const oldTimeOnly = new Date(oldDate).toLocaleTimeString([], {
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+
+    const newTimeOnly = new Date(newDate).toLocaleTimeString([], {
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+
+    if (oldTimeOnly !== newTimeOnly) {
+      changes.push(`Time changed from ${oldTimeOnly} to ${newTimeOnly}`);
+    }
+
+    if (status && oldStatus !== status) {
+      changes.push(`Status changed from ${oldStatus} to ${status}`);
+    }
+
+    if (changes.length > 0) {
+      await Notification.create({
+        user: newDoctor,
+        type: 'appointment_updated',
+        message: `Appointment updated by secretary: ${changes.join(', ')}`,
+        relatedAppointment: appointment._id,
+        isRead: false
+      });
+      await Notification.create({
+        user: appointment.patient,
+        type: 'appointment_updated',
+        message: `Your appointment was updated by the secretary: ${changes.join(', ')}`,
+        relatedAppointment: appointment._id,
+        isRead: false
+      });
+    }
+    
 
     const updatedAppointment = await Appointment.findById(id)
       .populate('doctor', 'fullName email specialization')
       .populate('patient', 'fullName email');
-
-    console.log(
-      `Notification sent to patient ${updatedAppointment.patient?._id}`
-    );
 
     await auditLogger({
       req,

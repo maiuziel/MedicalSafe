@@ -232,3 +232,61 @@ exports.replyToMessage = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+exports.getSecretaries = async (req, res) => {
+  try {
+    const secretaries = await User.find({ role: "secretary" })
+      .select("fullName email role");
+
+    res.status(200).json(secretaries);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+exports.sendMessageToSecretary = async (req, res) => {
+  try {
+    const { secretaryId, subject, content, template } = req.body;
+
+    if (!secretaryId || !subject || !content) {
+      return res.status(400).json({
+        message: "Secretary, subject and content are required",
+      });
+    }
+
+    const secretary = await User.findOne({
+      _id: secretaryId,
+      role: "secretary",
+    });
+
+    if (!secretary) {
+      return res.status(404).json({ message: "Secretary not found" });
+    }
+
+    const doctor = await User.findById(req.user.userId);
+
+    const message = await Message.create({
+      sender: req.user.userId,
+      receiver: secretaryId,
+      subject,
+      content,
+      template: template || "FREE_TEXT",
+      isRead: false,
+    });
+
+    await Notification.create({
+      user: secretaryId,
+      type: "doctor_message",
+      message: `New message from ${doctor?.fullName || "doctor"}: ${subject}`,
+      relatedMessage: message._id,
+      isRead: false,
+    });
+
+    res.status(201).json({
+      message: "Message sent successfully",
+      data: message,
+    });
+  } catch (error) {
+    console.error("ERROR in sendMessageToSecretary:", error);
+    res.status(500).json({ message: error.message });
+  }
+};

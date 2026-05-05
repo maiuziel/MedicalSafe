@@ -414,6 +414,22 @@ export default function SecretaryDashboard() {
       setSavingEdit(false);
     }
   };
+  const openEditModal = (appointment) => {
+    const appointmentDate = new Date(appointment.date);
+  
+    setEditingAppointment(appointment);
+    setEditDoctorId(appointment.doctor?._id || "");
+    setEditDate(appointmentDate.toISOString().split("T")[0]);
+    setEditStatus(appointment.status || "scheduled");
+    setEditTime(
+      appointmentDate.toLocaleTimeString("en-GB", {
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    );
+    setEditError("");
+    setEditSuccess("");
+  };
 
   return (
     <div className="flex bg-[#eef2f7] min-h-screen">

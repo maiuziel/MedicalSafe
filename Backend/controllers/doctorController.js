@@ -6,7 +6,7 @@ const MedicalFile = require('../models/MedicalFile');
 const Notification = require('../models/Notification');
 const FollowUp = require("../models/FollowUp");
 const FollowUpLog = require("../models/FollowUpLog");
-
+const Message = require('../models/Message');
 // GET /api/doctor/me
 const getMyProfile = async (req, res) => {
   try {
@@ -635,6 +635,78 @@ const getPatientFiles = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+const sendAppointmentRequestToSecretary = async (req, res) => {
+  try {
+    const { appointmentId, requestType, requestedDate, requestedTime, room, reason } = req.body;
+
+    if (!appointmentId || !requestType || !reason) {
+      return res.status(400).json({
+        message: "Appointment, request type and reason are required"
+      });
+    }
+
+    const appointment = await Appointment.findOne({
+      _id: appointmentId,
+      doctor: req.user.userId
+    })
+      .populate("patient", "fullName email")
+      .populate("doctor", "fullName email");
+
+    if (!appointment) {
+      return res.status(404).json({ message: "Appointment not found" });
+    }
+
+    const secretary = await User.findOne({ role: "secretary" });
+
+    if (!secretary) {
+      return res.status(404).json({ message: "Secretary not found" });
+    }
+
+    const subject =
+      requestType === "cancel"
+        ? "Appointment cancellation request"
+        : "Appointment change request";
+
+    const content = `
+Doctor: ${appointment.doctor.fullName}
+Patient: ${appointment.patient?.fullName || "Unknown patient"}
+Current appointment: ${new Date(appointment.date).toLocaleString()}
+Request type: ${requestType}
+Requested date: ${requestedDate || "Not specified"}
+Requested time: ${requestedTime || "Not specified"}
+Room: ${room || "Not specified"}
+Reason: ${reason}
+    `;
+
+    const message = await Message.create({
+      sender: req.user.userId,
+      receiver: secretary._id,
+      subject,
+      content,
+      template: "FREE_TEXT",
+      isRead: false
+    });
+
+    await Notification.create({
+      user: secretary._id,
+      type: "appointment_change_request",
+      message: `New ${requestType} request from Dr. ${appointment.doctor.fullName}`,
+      relatedAppointment: appointment._id,
+      relatedMessage: message._id,
+      isRead: false
+    });
+
+    res.status(201).json({
+      message: "Request sent to secretary successfully",
+      data: message
+    });
+
+  } catch (error) {
+    console.error("ERROR in sendAppointmentRequestToSecretary:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
 module.exports = {
   getMyProfile,
   updateMyProfile,
@@ -651,4 +723,5 @@ module.exports = {
   searchPatients,
   updateAppointmentStatus,
   getPatientFiles,
+  sendAppointmentRequestToSecretary,
 };
