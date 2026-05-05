@@ -56,7 +56,7 @@ const getDoctorAppointments = async (req, res) => {
       doctor: req.user.userId
     };
 
-    // 🔹 סינון לפי סטטוס
+    //  סינון לפי סטטוס
     if (status) {
       filter.status = status;
     }
@@ -64,9 +64,9 @@ const getDoctorAppointments = async (req, res) => {
     let query = Appointment.find(filter)
       .populate('patient', 'email fullName');
 
-    // 🔹 מיון
+    //  מיון
     if (sortBy === 'date') {
-      query = query.sort({ date: 1 }); // מהקרוב לרחוק
+      query = query.sort({ date: 1 }); 
     }
 
     if (sortBy === 'dateDesc') {
@@ -117,7 +117,7 @@ const setAvailability = async (req, res) => {
       });
     }
 
-    // 🔥 ניקוי נתונים
+    //  ניקוי נתונים
     availability = availability
       .map(day => ({
         day: String(day.day || "").trim(),
@@ -160,7 +160,7 @@ const uploadMedicalFile = async (req, res) => {
       return res.status(400).json({ message: "No file uploaded" });
     }
 
-    // 🔥 שמירה במסד נתונים
+    // שמירה במסד נתונים
     const newFile = new MedicalFile({
       patient: patientId,
       doctor: req.user.userId,
@@ -169,7 +169,7 @@ const uploadMedicalFile = async (req, res) => {
     });
 
     await newFile.save();
-    // 🔴 בדיקה אם המטופל במעקב אצל הרופא
+    //  בדיקה אם המטופל במעקב אצל הרופא
       const followUp = await FollowUp.findOne({
         doctor: req.user.userId,
         patient: patientId,
@@ -384,7 +384,7 @@ const getFollowUpPatients = async (req, res) => {
 };
 
 const getAvailableDoctors = async (req, res) => {
-  console.log("🔥 getAvailableDoctors CALLED");
+  console.log("getAvailableDoctors CALLED");
 
   try {
     const { date, time, specialization } = req.query;
@@ -393,7 +393,6 @@ const getAvailableDoctors = async (req, res) => {
       return res.status(400).json({ message: "Missing search criteria" });
     }
 
-    // תומך גם ב-YYYY-MM-DD וגם ב-DD/MM/YYYY
     let normalizedDate = String(date).trim();
 
     if (normalizedDate.includes("/")) {
@@ -433,7 +432,7 @@ const getAvailableDoctors = async (req, res) => {
 
     const availableBySchedule = doctors.filter((doc) => {
       if (!Array.isArray(doc.availability) || doc.availability.length === 0) {
-        console.log(`❌ ${doc.fullName} has no availability`);
+        console.log(` ${doc.fullName} has no availability`);
         return false;
       }
 
@@ -469,7 +468,7 @@ const getAvailableDoctors = async (req, res) => {
       });
 
       if (!hasMatchingSlot) {
-        console.log(`❌ ${doc.fullName} does not match selected day/time`);
+        console.log(` ${doc.fullName} does not match selected day/time`);
       }
 
       return hasMatchingSlot;
@@ -530,7 +529,6 @@ const searchPatients = async (req, res) => {
 const allAppointments = await Appointment.find();
 console.log("All appointments:", allAppointments);
 
-    // אם אין חיפוש - לא מחזירים כלום
     if (!query) {
       return res.json({ patients: [] });
     }
@@ -545,12 +543,11 @@ console.log("All appointments:", allAppointments);
       ...new Set(
         doctorAppointments
           .map(a => a.patient)
-          .filter(p => p) // 🔥 מונע קריסה
+          .filter(p => p) 
           .map(p => p.toString())
       )
     ];
 
-    // חיפוש רק בתוך המטופלים האלה
     const patients = await User.find({
       _id: { $in: patientIds },
       $or: [

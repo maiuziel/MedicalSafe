@@ -1,4 +1,3 @@
-console.log("🔥 AUTH ROUTES LOADED");
 const express = require('express');
 const router = express.Router();
 
@@ -10,7 +9,6 @@ const {
   createUserByAdmin
 } = require("../controllers/authController");
 
-// 🔥 IMPORT MIDDLEWARE
 const { authenticate, authorizeRoles } = require("../middleware/authMiddleware");
 
 router.post('/register', register);

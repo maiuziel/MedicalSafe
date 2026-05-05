@@ -3,7 +3,6 @@ const Notification = require('../models/Notification');
 const auditLogger = require('../utils/auditLogger');
 
 
-// קביעת תור
 const createAppointment = async (req, res) => {
   console.log("🔥 CREATE APPOINTMENT TRIGGERED");
   try {
@@ -15,14 +14,12 @@ const createAppointment = async (req, res) => {
       date,
     });
 
-    // 🔔 התראה לרופא
     await Notification.create({
       user: doctorId,
       type: "appointment_created",
       message: "New appointment scheduled",
     });
 
-    // 🔔 התראה למטופל
     await Notification.create({
       user: req.user.userId,
       type: "appointment_created",
@@ -45,13 +42,12 @@ const createAppointment = async (req, res) => {
 };
 
 
-// 🔥 צפייה בתורים שלי (מעודכן!)
 const getMyAppointments = async (req, res) => {
   try {
 
     const appointments = await Appointment.find({
       patient: req.user.userId,
-      status: { $ne: 'cancelled' } // ✅ סינון תורים מבוטלים
+      status: { $ne: 'cancelled' } 
     }).populate('doctor', 'email fullName specialization');
 
     await auditLogger({
@@ -82,8 +78,8 @@ const cancelAppointment = async (req, res) => {
       },
       { 
         status: 'cancelled',
-        statusUpdatedAt: new Date(), // 🔥 בונוס
-        statusUpdatedBy: req.user.userId // 🔥 בונוס
+        statusUpdatedAt: new Date(), 
+        statusUpdatedBy: req.user.userId 
       },
       { new: true }
     );
@@ -92,14 +88,12 @@ const cancelAppointment = async (req, res) => {
       return res.status(404).json({ message: 'Appointment not found' });
     }
 
-    // 🔔 לרופא
     await Notification.create({
       user: appointment.doctor,
       type: "appointment_cancelled",
       message: "Appointment was cancelled by patient",
     });
 
-    // 🔔 למטופל
     await Notification.create({
       user: appointment.patient,
       type: "appointment_cancelled",

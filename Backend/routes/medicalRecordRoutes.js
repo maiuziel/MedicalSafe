@@ -11,7 +11,7 @@ const {
 } = require('../controllers/medicalRecordController');
 
 
-// 🔥 רופא יוצר סיכום רפואי
+//  רופא יוצר סיכום רפואי
 router.post(
   '/',
   authenticate,
@@ -20,7 +20,7 @@ router.post(
 );
 
 
-// 🔥 מטופל רואה את הסיכומים שלו
+//  מטופל רואה את הסיכומים שלו
 router.get(
   '/my',
   authenticate,
@@ -29,7 +29,7 @@ router.get(
 );
 
 
-// 🔥 רופא רואה סיכומים של מטופל
+//  רופא רואה סיכומים של מטופל
 router.get(
   '/patient/:patientId',
   authenticate,
@@ -38,7 +38,7 @@ router.get(
 );
 
 
-// 🔥 עדכון סיכום רפואי (חשוב!)
+//  עדכון סיכום רפואי (חשוב!)
 router.put(
   '/:id',
   authenticate,

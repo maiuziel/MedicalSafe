@@ -18,7 +18,6 @@ const authenticate = (req, res, next) => {
   }
 };
 
-// 🔥 הוספה חדשה - הרשאות לפי role
 const authorizeRoles = (...roles) => {
   return (req, res, next) => {
     if (!req.user || !roles.includes(req.user.role)) {
@@ -28,7 +27,6 @@ const authorizeRoles = (...roles) => {
   };
 };
 
-// ❗ שימי לב - שינוי ב-export
 module.exports = {
   authenticate,
   authorizeRoles

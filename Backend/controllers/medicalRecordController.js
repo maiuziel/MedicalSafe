@@ -3,7 +3,7 @@ const Appointment = require('../models/Appointment');
 const auditLogger = require('../utils/auditLogger');
 
 
-// 🔥 יצירת סיכום רפואי
+//  יצירת סיכום רפואי
 const createMedicalRecord = async (req, res) => {
   console.log("BODY:", req.body);
   try {
@@ -18,18 +18,18 @@ const createMedicalRecord = async (req, res) => {
       notes
     } = req.body;
 
-    // ✅ בדיקת שדות חובה
+    //  בדיקת שדות חובה
     if (!patientId || !appointmentId || !visitDate || !diagnosis || !treatment || !recommendations) {
       return res.status(400).json({ message: 'Missing required fields' });
     }
 
-    // ✅ בדיקה שהתור קיים
+    //  בדיקה שהתור קיים
     const appointment = await Appointment.findById(appointmentId);
     if (!appointment) {
       return res.status(404).json({ message: 'Appointment not found' });
     }
 
-    // 🔥 יצירת הסיכום
+    //  יצירת הסיכום
     const record = await MedicalRecord.create({
       patient: patientId,
       doctor: req.user.userId,
@@ -41,7 +41,7 @@ const createMedicalRecord = async (req, res) => {
       notes
     });
 
-    // ✅ Audit Log
+    //  Audit Log
     await auditLogger({
       req,
       action: 'CREATE_MEDICAL_RECORD',
@@ -57,7 +57,7 @@ const createMedicalRecord = async (req, res) => {
 };
 
 
-// 🔥 מטופל רואה את הסיכומים שלו
+//  מטופל רואה את הסיכומים שלו
 const getMyMedicalRecords = async (req, res) => {
   try {
 
@@ -82,7 +82,7 @@ const getMyMedicalRecords = async (req, res) => {
 };
 
 
-// 🔥 רופא רואה סיכומים של מטופל
+//  רופא רואה סיכומים של מטופל
 const getPatientMedicalRecords = async (req, res) => {
   try {
 
@@ -103,7 +103,7 @@ const getPatientMedicalRecords = async (req, res) => {
 };
 
 
-// 🔥 עדכון סיכום רפואי + שמירת גרסאות
+//  עדכון סיכום רפואי + שמירת גרסאות
 const updateMedicalRecord = async (req, res) => {
   try {
 
@@ -113,7 +113,7 @@ const updateMedicalRecord = async (req, res) => {
       return res.status(404).json({ message: 'Medical record not found' });
     }
 
-    // 🔥 שמירת גרסה קודמת
+    //  שמירת גרסה קודמת
     record.versions.push({
       diagnosis: record.diagnosis,
       treatment: record.treatment,
@@ -122,7 +122,7 @@ const updateMedicalRecord = async (req, res) => {
       updatedAt: new Date()
     });
 
-    // 🔥 עדכון
+    //  עדכון
     record.diagnosis = req.body.diagnosis ?? record.diagnosis;
     record.treatment = req.body.treatment ?? record.treatment;
     record.recommendations = req.body.recommendations ?? record.recommendations;

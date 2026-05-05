@@ -38,7 +38,7 @@ const createFeedback = async (req, res) => {
         rating,
         comment
       });
-      // 🔔 יצירת התראה לרופא על משוב חדש
+      //  יצירת התראה לרופא על משוב חדש
         await Notification.create({
             user: appointment.doctor,
             type: "feedback_received",
@@ -70,10 +70,10 @@ const getDoctorFeedbacks = async (req, res) => {
         .populate('appointment', 'date status')
         .sort({ createdAt: -1 });
   
-      // 🔢 חישוב כמות
+      // חישוב כמות
       const totalFeedbacks = feedbacks.length;
   
-      // ⭐ חישוב ממוצע
+      //  חישוב ממוצע
       const averageRating =
         totalFeedbacks > 0
           ? (
@@ -82,7 +82,7 @@ const getDoctorFeedbacks = async (req, res) => {
             ).toFixed(1)
           : 0;
   
-      // 🔁 החזרת הנתונים
+      //  החזרת הנתונים
       res.json({
         feedbacks,
         totalFeedbacks,

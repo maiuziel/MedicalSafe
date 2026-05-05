@@ -66,7 +66,7 @@ const createRequest = async (req, res) => {
       ]
     });
 
-    // 🔔 יצירת התראה לרופא (בלי אייקון)
+    //  יצירת התראה לרופא)
     const patientUser = await User.findById(senderId);
 
     await Notification.create({
@@ -81,7 +81,7 @@ const createRequest = async (req, res) => {
     });
 
   } catch (error) {
-    console.error("❌ ERROR IN createRequest:", error);
+    console.error(" ERROR IN createRequest:", error);
     res.status(500).json({ message: 'Server error' });
   }
 };
@@ -180,13 +180,13 @@ const replyToRequest = async (req, res) => {
 
     await requestItem.save();
 
-    // 🔔 יצירת התראה למטופל + קישור לבקשה
+    // יצירת התראה למטופל + קישור לבקשה
     try {
       await Notification.create({
         user: requestItem.patient,
         type: "request_reply",
         message: "Your request has been answered by the doctor",
-        relatedRequest: requestItem._id, // 🔥🔥🔥 זה החלק החשוב
+        relatedRequest: requestItem._id, 
         status: "sent",
       });
     } catch (err) {
@@ -206,7 +206,7 @@ const replyToRequest = async (req, res) => {
     });
 
   } catch (error) {
-    console.error("❌ ERROR IN replyToRequest:", error);
+    console.error(" ERROR IN replyToRequest:", error);
     res.status(500).json({ message: 'Server error' });
   }
 };

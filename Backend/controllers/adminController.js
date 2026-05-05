@@ -1,7 +1,5 @@
 const AuditLog = require('../models/AuditLog');
 
-// GET /api/admin/audit-logs
-// צפייה בכל ה-Audit Logs במערכת (Admin בלבד)
 const getAuditLogs = async (req, res) => {
   try {
 

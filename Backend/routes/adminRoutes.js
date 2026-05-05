@@ -5,7 +5,6 @@ const { authenticate, authorizeRoles } = require('../middleware/authMiddleware')
 
 const { getAuditLogs } = require('../controllers/adminController');
 
-// רק admin יכול לראות Audit Logs
 router.get(
   '/audit-logs',
   authenticate,

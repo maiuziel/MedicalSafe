@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 
-// ✅ תיקון import
 const { authenticate, authorizeRoles } = require('../middleware/authMiddleware');
 
 const {

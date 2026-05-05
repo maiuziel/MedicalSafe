@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 
-// ✅ תיקון import
 const { authenticate, authorizeRoles } = require('../middleware/authMiddleware');
 
 const {
@@ -18,7 +17,7 @@ const {
 } = require('../controllers/requestController');
 
 
-// 🔹 פרופיל מטופל
+//  פרופיל מטופל
 router.get(
   '/me',
   authenticate,
@@ -33,7 +32,7 @@ router.put(
   updateMyProfile
 );
 
-// 🔹 משוב
+//  משוב
 router.post(
   '/feedback',
   authenticate,
@@ -58,7 +57,7 @@ router.get(
   getPatientRequests
 );
 router.get("/:id", authenticate, getPatientById);
-// קבלת פנייה לפי ID
+
 router.get(
   '/requests/:requestId',
   authenticate,

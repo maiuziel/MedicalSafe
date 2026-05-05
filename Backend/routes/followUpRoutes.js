@@ -11,7 +11,7 @@ const {
 
 const FollowUpLog = require("../models/FollowUpLog");
 
-// 🔴 סימון מטופל למעקב
+//  סימון מטופל למעקב
 router.put(
   "/:patientId",
   authenticate,
@@ -19,7 +19,7 @@ router.put(
   markPatientForFollowUp
 );
 
-// ❌ הסרת מטופל ממעקב
+//  הסרת מטופל ממעקב
 router.delete(
   "/:patientId",
   authenticate,
@@ -27,7 +27,7 @@ router.delete(
   unmarkPatientFromFollowUp
 );
 
-// 📋 רשימת מטופלים במעקב
+// רשימת מטופלים במעקב
 router.get(
   "/",
   authenticate,
@@ -35,7 +35,7 @@ router.get(
   getFollowUpPatients
 );
 
-// 🧾 היסטוריית שינויים למטופל
+//  היסטוריית שינויים למטופל
 router.get(
   "/logs/:patientId",
   authenticate,

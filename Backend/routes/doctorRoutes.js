@@ -4,7 +4,7 @@ const router = express.Router();
 const { authenticate, authorizeRoles } = require('../middleware/authMiddleware');
 const upload = require('../middleware/upload');
 
-// 🔹 doctor controller
+//  doctor controller
 const {
   getMyProfile,
   updateMyProfile,
@@ -24,7 +24,7 @@ const {
   sendAppointmentRequestToSecretary,
 } = require('../controllers/doctorController');
 
-// 🔹 request controller (פניות)
+//  request controller (פניות)
 const {
   getDoctorRequests,
   getDoctorRequestById,
@@ -145,7 +145,7 @@ router.get(
 );
 
 // ----------------------------------------------------
-// 🔥 פניות
+//  פניות
 // ----------------------------------------------------
 router.get(
   '/requests',

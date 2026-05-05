@@ -3,7 +3,7 @@ const Notification = require("../models/Notification");
 const getMyNotifications = async (req, res) => {
   try {
     const notifications = await Notification.find({
-      user: req.user.userId, // 🔥 במקום doctor
+      user: req.user.userId, 
     }).sort({ createdAt: -1 });
 
     res.json({ notifications });
@@ -12,7 +12,7 @@ const getMyNotifications = async (req, res) => {
   }
 };
 
-// 🔹 סימון כנקרא
+//  סימון כנקרא
 const markAsRead = async (req, res) => {
   try {
     await Notification.findByIdAndUpdate(req.params.id, {

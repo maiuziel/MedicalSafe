@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken');
 const crypto = require("crypto");
 const sendResetEmail = require("../utils/mailer");
 
-// 🔥 REGISTER
+// REGISTER
 const register = async (req, res) => {
   try {
     const { fullName, email, password, role, specialization, phone } = req.body;
@@ -16,7 +16,6 @@ const register = async (req, res) => {
       });
     }
 
-    // ❗ תיקון: לא מאפשרים לבחור role מהבקשה
     const userRole = 'patient';
 
     const existingUser = await User.findOne({ email });
@@ -56,7 +55,7 @@ const register = async (req, res) => {
   }
 };
 
-// 🔥 LOGIN
+//  LOGIN
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -101,7 +100,7 @@ const login = async (req, res) => {
   }
 };
 
-// 🔥 FORGOT PASSWORD
+// FORGOT PASSWORD
 const forgotPassword = async (req, res) => {
   const { email } = req.body;
 
@@ -112,16 +111,16 @@ const forgotPassword = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // 🔐 יצירת token
+    //  יצירת token
     const token = crypto.randomBytes(32).toString("hex");
 
-    // 💾 שמירה ב-DB
+    //  שמירה ב-DB
     user.resetPasswordToken = token;
     user.resetPasswordExpires = Date.now() + 15 * 60 * 1000;
 
     await user.save();
 
-    // 📧 שליחת מייל
+    //  שליחת מייל
     await sendResetEmail(email, token);
 
     res.json({ message: "Reset email sent" });
@@ -132,7 +131,7 @@ const forgotPassword = async (req, res) => {
   }
 };
 
-// 🔥 RESET PASSWORD
+// RESET PASSWORD
 const resetPassword = async (req, res) => {
   const { token } = req.params;
   const { password } = req.body;
@@ -194,7 +193,7 @@ const createUserByAdmin = async (req, res) => {
   try {
     const { fullName, email, password, phone, role, specialization } = req.body;
 
-    // 🔒 רק אדמין יכול לשלוח role
+    //  רק אדמין יכול לשלוח role
     if (!["doctor", "secretary"].includes(role)) {
       return res.status(400).json({ message: "Invalid role" });
     }

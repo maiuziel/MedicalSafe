@@ -57,7 +57,7 @@ const userSchema = new mongoose.Schema(
       },
       slots: {
         type: [String],
-        default: []   // 🔥 זה החלק הקריטי
+        default: []   
       }
     }
   ]

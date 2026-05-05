@@ -14,14 +14,12 @@ const medicalRecordSchema = new mongoose.Schema(
     required: true
   },
 
-  // 🔥 חשוב מאוד
   appointment: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Appointment',
     required: true
   },
 
-  // 🔥 חשוב מאוד
   visitDate: {
     type: Date,
     required: true
@@ -37,7 +35,6 @@ const medicalRecordSchema = new mongoose.Schema(
     required: true
   },
 
-  // 🔥 חשוב מאוד
   recommendations: {
     type: String,
     required: true
@@ -48,7 +45,6 @@ const medicalRecordSchema = new mongoose.Schema(
     default: ""
   },
 
-  // 🔥 גרסאות
   versions: [
     {
       diagnosis: String,
