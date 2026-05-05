@@ -5,7 +5,10 @@ const {
   sendMessageToDoctor,
   getDoctorMessages,
   markAsRead,
-  getSentMessages
+  getSentMessages,
+  getMessageById,
+  replyToMessage,
+  getConversation,
 } = require('../controllers/messageController');
 
 // ✅ תיקון import
@@ -37,6 +40,27 @@ router.get(
   authenticate,
   authorizeRoles('secretary'),
   getSentMessages
+);
+
+router.get(
+  '/:id',
+  authenticate,
+  authorizeRoles('doctor', 'secretary'),
+  getMessageById
+);
+
+router.get(
+  '/:id/conversation',
+  authenticate,
+  authorizeRoles('doctor', 'secretary'),
+  getConversation
+);
+
+router.post(
+  '/:id/reply',
+  authenticate,
+  authorizeRoles('doctor', 'secretary'),
+  replyToMessage
 );
 
 module.exports = router;

@@ -1,6 +1,18 @@
 import { useEffect, useState } from "react";
 import Sidebar from "../components/patient/Sidebar";
 
+const getProfileEndpoint = (role) => {
+  if (role === "doctor") {
+    return "http://localhost:5001/api/doctor/me";
+  }
+
+  if (role === "secretary") {
+    return "http://localhost:5001/api/secretary/me";
+  }
+
+  return "http://localhost:5001/api/patient/me";
+};
+
 export default function EditProfile() {
   const [form, setForm] = useState({
     fullName: "",
@@ -17,10 +29,7 @@ export default function EditProfile() {
       const token = localStorage.getItem("token");
       const role = localStorage.getItem("role");
 
-      const endpoint =
-        role === "doctor"
-          ? "http://localhost:5001/api/doctor/me"
-          : "http://localhost:5001/api/patient/me";
+      const endpoint = getProfileEndpoint(role);
 
       const res = await fetch(endpoint, {
         headers: {
@@ -30,6 +39,11 @@ export default function EditProfile() {
 
       const data = await res.json();
 
+      if (!res.ok) {
+        alert(data.message || "Failed to load profile");
+        return;
+      }
+
       setForm({
         fullName: data.fullName || "",
         email: data.email || "",
@@ -37,6 +51,7 @@ export default function EditProfile() {
       });
     } catch (err) {
       console.error(err);
+      alert("Failed to load profile");
     }
   };
 
@@ -45,10 +60,7 @@ export default function EditProfile() {
       const token = localStorage.getItem("token");
       const role = localStorage.getItem("role");
 
-      const endpoint =
-        role === "doctor"
-          ? "http://localhost:5001/api/doctor/me"
-          : "http://localhost:5001/api/patient/me";
+      const endpoint = getProfileEndpoint(role);
 
       const res = await fetch(endpoint, {
         method: "PUT",
@@ -62,12 +74,13 @@ export default function EditProfile() {
       const data = await res.json();
 
       if (res.ok) {
-        alert("Profile updated successfully ");
+        alert("Profile updated successfully");
       } else {
-        alert(data.message || "Update failed ");
+        alert(data.message || "Update failed");
       }
     } catch (err) {
       console.error(err);
+      alert("Update failed");
     }
   };
 
@@ -76,7 +89,6 @@ export default function EditProfile() {
       <Sidebar />
 
       <div className="flex-1 p-8 bg-[#eef2f7] min-h-screen">
-
         <div className="bg-white p-6 rounded-2xl shadow-sm mb-6">
           <h1 className="text-xl font-semibold text-gray-800">
             Edit Your Personal Details
@@ -87,7 +99,6 @@ export default function EditProfile() {
         </div>
 
         <div className="bg-white p-6 rounded-2xl shadow-sm max-w-xl">
-
           <div className="mb-4">
             <label className="text-sm text-gray-500">Full Name</label>
             <input
@@ -130,7 +141,6 @@ export default function EditProfile() {
           >
             Save Changes
           </button>
-
         </div>
       </div>
     </div>

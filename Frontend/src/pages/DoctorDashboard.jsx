@@ -23,6 +23,10 @@ export default function DoctorDashboard() {
   const [patientResults, setPatientResults] = useState([]);
   const previousAppointmentsRef = useRef([]);
   const previousRequestsRef = useRef([]);
+  const [selectedMessage, setSelectedMessage] = useState(null);
+const [replyText, setReplyText] = useState("");
+const [conversationMessages, setConversationMessages] = useState([]);
+const [messageAlert, setMessageAlert] = useState("");
 
   const navigate = useNavigate();
 
@@ -196,6 +200,23 @@ export default function DoctorDashboard() {
       if (n.type === "request_reply" && n.relatedRequest) {
         navigate(`/patient/requests/${n.relatedRequest}`);
       }
+      if (n.type === "doctor_message" && n.relatedMessage) {
+        const res = await fetch(
+          `http://localhost:5001/api/messages/${n.relatedMessage}/conversation`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+      
+        const data = await res.json();
+      
+        if (res.ok) {
+          setConversationMessages(data);
+          setSelectedMessage(data[data.length - 1]);
+        }
+      }
   
     } catch (error) {
       console.error(error);
@@ -221,6 +242,49 @@ export default function DoctorDashboard() {
       });
   
       fetchNotifications(); // רענון
+    } catch (err) {
+      console.error(err);
+    }
+  };
+  const sendReplyToMessage = async () => {
+    try {
+      const token = localStorage.getItem("token");
+  
+      const res = await fetch(
+        `http://localhost:5001/api/messages/${selectedMessage._id}/reply`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ content: replyText }),
+        }
+      );
+  
+      if (res.ok) {
+        setReplyText("");
+      
+        const convRes = await fetch(
+          `http://localhost:5001/api/messages/${selectedMessage._id}/conversation`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+      
+        const convData = await convRes.json();
+      
+        if (convRes.ok) {
+          setConversationMessages(convData);
+          setSelectedMessage(convData[convData.length - 1]);
+        }
+      
+        fetchNotifications();
+      }
+      setMessageAlert("Message sent successfully");
+setTimeout(() => setMessageAlert(""), 3000);
     } catch (err) {
       console.error(err);
     }
@@ -466,6 +530,7 @@ export default function DoctorDashboard() {
       <p className="text-xs text-gray-400">
         {new Date(n.createdAt).toLocaleString()}
       </p>
+      
     </div>
   ))
 ) : (
@@ -613,7 +678,7 @@ export default function DoctorDashboard() {
                         onClick={() => removeAvailability(day.day, slot)}
                         className="text-red-500"
                       >
-                        ✕
+                        
                       </button>
                     </div>
                   ))}
@@ -664,6 +729,81 @@ export default function DoctorDashboard() {
         )}
 
       </div>
+      {selectedMessage && (
+  <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+    <div className="bg-white rounded-xl p-6 w-full max-w-lg shadow-lg">
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="text-lg font-semibold">
+          {selectedMessage.subject}
+        </h3>
+
+        <button
+          onClick={() => {
+            setSelectedMessage(null);
+            setConversationMessages([]);
+          }}
+          className="text-gray-400 hover:text-gray-600 text-xl"
+        >
+       
+        </button>
+      </div>
+
+      <div className="max-h-80 overflow-y-auto mb-4 space-y-3">
+        {conversationMessages.map((msg) => {
+          const isMine = msg.sender?._id === user?._id;
+
+          return (
+            <div
+              key={msg._id}
+              className={`p-3 rounded-lg text-sm ${
+                isMine ? "bg-blue-100 ml-10" : "bg-gray-100 mr-10"
+              }`}
+            >
+              <p className="text-xs text-gray-500 mb-1">
+                {msg.sender?.fullName || msg.sender?.email}
+              </p>
+              <p>{msg.content}</p>
+              <p className="text-xs text-gray-400 mt-1">
+                {new Date(msg.createdAt).toLocaleString()}
+              </p>
+            </div>
+          );
+        })}
+      </div>
+      {messageAlert && (
+  <p className="bg-green-50 border border-green-200 text-green-700 p-2 rounded-lg text-sm mb-3">
+    {messageAlert}
+  </p>
+)}
+
+      <textarea
+        value={replyText}
+        onChange={(e) => setReplyText(e.target.value)}
+        placeholder="Write message..."
+        className="w-full border p-3 rounded-lg mb-3"
+      />
+
+      <div className="flex justify-end gap-3">
+        <button
+          onClick={() => {
+            setSelectedMessage(null);
+            setConversationMessages([]);
+          }}
+          className="px-4 py-2 rounded-lg bg-gray-100"
+        >
+          Close
+        </button>
+
+        <button
+          onClick={sendReplyToMessage}
+          className="px-4 py-2 rounded-lg bg-blue-500 text-white"
+        >
+          Send
+        </button>
+      </div>
+    </div>
+  </div>
+)}
     </div>
   );
 }

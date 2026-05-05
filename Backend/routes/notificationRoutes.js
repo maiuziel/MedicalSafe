@@ -8,9 +8,19 @@ const {
   markAsRead,
 } = require("../controllers/notificationController");
 
-// 🔥 גם רופא וגם מטופל
-router.get("/", authenticate, authorizeRoles("doctor", "patient"), getMyNotifications);
+// רופא, מטופל וגם מזכירה
+router.get(
+  "/",
+  authenticate,
+  authorizeRoles("doctor", "patient", "secretary"),
+  getMyNotifications
+);
 
-router.put("/:id/read", authenticate, authorizeRoles("doctor", "patient"), markAsRead);
+router.put(
+  "/:id/read",
+  authenticate,
+  authorizeRoles("doctor", "patient", "secretary"),
+  markAsRead
+);
 
 module.exports = router;

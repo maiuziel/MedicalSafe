@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 
-// ✅ תיקון import
 const { authenticate, authorizeRoles } = require('../middleware/authMiddleware');
 
 const {
@@ -11,57 +10,43 @@ const {
   getPatients,
   getAllAppointments,
   updateAppointment,
-  getDoctorsAvailability
+  getDoctorsAvailability,
+  getDoctorFreeSlots,
+  sendMessageToDoctor,
+getSentMessages
 } = require('../controllers/secretaryController');
 
+router.get('/me', authenticate, authorizeRoles('secretary'), getMyProfile);
+
+router.put('/me', authenticate, authorizeRoles('secretary'), updateMyProfile);
+
+router.get('/doctors', authenticate, authorizeRoles('secretary'), getDoctors);
+
+router.get('/patients', authenticate, authorizeRoles('secretary'), getPatients);
+
+router.get('/appointments', authenticate, authorizeRoles('secretary'), getAllAppointments);
+
+router.put('/appointments/:id', authenticate, authorizeRoles('secretary'), updateAppointment);
+
+router.get('/doctors/availability', authenticate, authorizeRoles('secretary'), getDoctorsAvailability);
 
 router.get(
-  '/me',
+  '/doctors/:doctorId/free-slots',
   authenticate,
   authorizeRoles('secretary'),
-  getMyProfile
+  getDoctorFreeSlots
 );
-
-router.put(
-  '/me',
+router.post(
+  '/messages',
   authenticate,
   authorizeRoles('secretary'),
-  updateMyProfile
-);
-
-router.get(
-  '/doctors',
-  authenticate,
-  authorizeRoles('secretary'),
-  getDoctors
-);
-
-router.get(
-  '/patients',
-  authenticate,
-  authorizeRoles('secretary'),
-  getPatients
+  sendMessageToDoctor
 );
 
 router.get(
-  '/appointments',
+  '/messages/sent',
   authenticate,
   authorizeRoles('secretary'),
-  getAllAppointments
+  getSentMessages
 );
-
-router.put(
-  '/appointments/:id',
-  authenticate,
-  authorizeRoles('secretary'),
-  updateAppointment
-);
-
-router.get(
-  '/doctors/availability',
-  authenticate,
-  authorizeRoles('secretary'),
-  getDoctorsAvailability
-);
-
 module.exports = router;

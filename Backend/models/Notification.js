@@ -15,10 +15,14 @@ const notificationSchema = new mongoose.Schema({
       "appointment_updated",
       "appointment_status_updated",
       "appointment_completed",
+      "appointment_rescheduled",
       "file_uploaded",
       "request_reply",
       "feedback_received",
+      "doctor_message",
+      "follow_up_alert",
     ],
+    required: true,
   },
 
   message: String,
@@ -44,10 +48,20 @@ const notificationSchema = new mongoose.Schema({
     ref: "Appointment",
   },
 
+  relatedMessage: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Message",
+  },
+
   createdAt: {
     type: Date,
     default: Date.now,
   },
+  conversationId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Message",
+  },
 });
+
 
 module.exports = mongoose.model("Notification", notificationSchema);

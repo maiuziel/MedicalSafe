@@ -6,9 +6,14 @@ export default function Sidebar({ onLogout }) {
   const location = useLocation();
 
   const role = localStorage.getItem("role");
-
+  const isSendMessage = location.pathname === "/secretary/send-message";
   // 🔥 routes
-  const dashboardRoute = role === "doctor" ? "/doctor" : "/patient";
+  const dashboardRoute =
+  role === "doctor"
+    ? "/doctor"
+    : role === "secretary"
+    ? "/secretary"
+    : "/patient";
   const appointmentsRoute =
     role === "doctor" ? "/doctor/appointments" : "/patient/appointments";
 
@@ -103,6 +108,7 @@ export default function Sidebar({ onLogout }) {
           </button>
           
         )}
+        {role === "doctor" && (
         <button
   onClick={() => navigate("/doctor/follow-up")}
   className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition
@@ -114,6 +120,8 @@ export default function Sidebar({ onLogout }) {
 <Eye size={18} />
   Follow-Up Patients
 </button>
+        )}
+{role === "doctor" && (
         <button
           onClick={() => navigate("/doctor/requests")}
           className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition
@@ -125,6 +133,20 @@ export default function Sidebar({ onLogout }) {
           <MessageSquare size={18} />
           Requests
         </button>
+)}
+        {role === "secretary" && (
+  <button
+    onClick={() => navigate("/secretary/send-message")}
+    className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition
+      ${isSendMessage
+        ? "bg-gradient-to-r from-[#4f8df7] to-[#5d95f7] text-white"
+        : "text-[#3e4c66] hover:bg-white"
+      }`}
+  >
+    <MessageSquare size={18} />
+    Send Message
+  </button>
+)}
 
         {/* מטופל */}
         {role === "patient" && (

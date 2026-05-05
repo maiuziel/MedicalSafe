@@ -1,7 +1,8 @@
 const User = require('../models/User');
 const Appointment = require('../models/Appointment');
 const auditLogger = require('../utils/auditLogger');
-
+const Message = require('../models/Message');
+const Notification = require('../models/Notification');
 /**
  * GET /api/secretary/me
  */
@@ -115,20 +116,14 @@ const getAllAppointments = async (req, res) => {
 
     let filter = {};
 
-    // 🔹 סינון לפי רופא
     if (doctorId) {
       filter.doctor = doctorId;
     }
 
-    // 🔹 סינון לפי מטופל (היסטוריה)
     if (patientId) {
       filter.patient = patientId;
-
-      // רק תורים בעבר
-      filter.date = { $lt: new Date() };
     }
 
-    // 🔹 סינון לפי תאריכים (אם קיים)
     if (startDate && endDate) {
       filter.date = {
         $gte: new Date(startDate),
@@ -137,15 +132,9 @@ const getAllAppointments = async (req, res) => {
     }
 
     const appointments = await Appointment.find(filter)
-      .populate('doctor', 'fullName email specialization') 
+      .populate('doctor', 'fullName email specialization')
       .populate('patient', 'fullName email')
       .sort({ date: 1 });
-
-    if (appointments.length === 0) {
-      return res.status(404).json({
-        message: 'No appointments found for given filters'
-      });
-    }
 
     await auditLogger({
       req,
@@ -160,29 +149,24 @@ const getAllAppointments = async (req, res) => {
   }
 };
 
+
 /**
  * PUT /api/secretary/appointments/:id
- * עדכון תור
+ * עדכון תור - תאריך / שעה / רופא
  */
 const updateAppointment = async (req, res) => {
   try {
     const { id } = req.params;
-    const { date } = req.body;
+    const { date, doctorId, status } = req.body;
 
     if (req.user.role !== 'secretary') {
       return res.status(403).json({ message: 'Access denied' });
     }
 
-    if (!date) {
-      return res.status(400).json({ message: 'Date is required' });
-    }
-
-    if (isNaN(new Date(date))) {
-      return res.status(400).json({ message: 'Invalid date format' });
-    }
-
-    if (new Date(date) < new Date()) {
-      return res.status(400).json({ message: 'Date must be in the future' });
+    if (!date && !doctorId && !status) {
+      return res.status(400).json({
+        message: 'Date, doctor or status is required'
+      });
     }
 
     const appointment = await Appointment.findById(id);
@@ -191,13 +175,61 @@ const updateAppointment = async (req, res) => {
       return res.status(404).json({ message: 'Appointment not found' });
     }
 
-    if (appointment.date.getTime() === new Date(date).getTime()) {
-      return res.status(400).json({ message: 'Same date as current' });
+    const newDate = date ? new Date(date) : appointment.date;
+    const newDoctor = doctorId || appointment.doctor;
+
+    if (date && isNaN(newDate)) {
+      return res.status(400).json({ message: 'Invalid date format' });
+    }
+
+    if (newDate < new Date()) {
+      return res.status(400).json({
+        message: 'Date must be in the future'
+      });
+    }
+    const allowedStatuses = ['scheduled', 'completed', 'cancelled'];
+
+if (status && !allowedStatuses.includes(status)) {
+  return res.status(400).json({
+    message: 'Invalid appointment status'
+  });
+}
+
+    const doctor = await User.findById(newDoctor);
+
+    if (!doctor || doctor.role !== 'doctor') {
+      return res.status(404).json({ message: 'Doctor not found' });
+    }
+
+    const dayName = newDate
+      .toLocaleDateString('en-US', { weekday: 'long' })
+      .toLowerCase();
+
+    const requestedTime = newDate.toLocaleTimeString('en-GB', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false
+    });
+
+    const dayAvailability = doctor.availability?.find((a) => {
+      return a.day?.toLowerCase() === dayName;
+    });
+
+    if (!dayAvailability) {
+      return res.status(400).json({
+        message: 'Doctor is not working on this day'
+      });
+    }
+
+    if (!dayAvailability.slots.includes(requestedTime)) {
+      return res.status(400).json({
+        message: 'Doctor is not available at this time'
+      });
     }
 
     const existingAppointment = await Appointment.findOne({
-      doctor: appointment.doctor,
-      date: new Date(date),
+      doctor: newDoctor,
+      date: newDate,
       _id: { $ne: id }
     });
 
@@ -207,14 +239,20 @@ const updateAppointment = async (req, res) => {
       });
     }
 
-    appointment.date = new Date(date);
+    appointment.date = newDate;
+    appointment.doctor = newDoctor;
+    if (status) {
+      appointment.status = status;
+    }
     await appointment.save();
 
     const updatedAppointment = await Appointment.findById(id)
-      .populate('doctor', 'fullName email')
+      .populate('doctor', 'fullName email specialization')
       .populate('patient', 'fullName email');
 
-    console.log(`Notification sent to patient ${updatedAppointment.patient._id}`);
+    console.log(
+      `Notification sent to patient ${updatedAppointment.patient?._id}`
+    );
 
     await auditLogger({
       req,
@@ -229,9 +267,12 @@ const updateAppointment = async (req, res) => {
     });
 
   } catch (err) {
+    console.error(err);
     res.status(500).json({ message: 'Server error' });
   }
 };
+
+
 const getDoctorsAvailability = async (req, res) => {
   try {
     const { doctorId, specialization } = req.query;
@@ -272,7 +313,125 @@ const getDoctorsAvailability = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
+const getDoctorFreeSlots = async (req, res) => {
+  try {
+    const { doctorId } = req.params;
 
+    const doctor = await User.findById(doctorId).select('-password');
+
+    if (!doctor || doctor.role !== 'doctor') {
+      return res.status(404).json({ message: 'Doctor not found' });
+    }
+
+    const appointments = await Appointment.find({
+      doctor: doctorId,
+      date: { $gte: new Date() },
+      status: { $ne: 'cancelled' }
+    });
+
+    const busySlots = appointments.map((appointment) => {
+      const appointmentDate = new Date(appointment.date);
+
+      const day = appointmentDate
+        .toLocaleDateString('en-US', { weekday: 'long' })
+        .toLowerCase();
+
+      const time = appointmentDate.toLocaleTimeString('en-GB', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+      });
+
+      return `${day}-${time}`;
+    });
+
+    const freeSlots = doctor.availability.map((dayAvailability) => {
+      const day = dayAvailability.day.toLowerCase();
+
+      return {
+        day,
+        slots: dayAvailability.slots.filter((slot) => {
+          return !busySlots.includes(`${day}-${slot}`);
+        })
+      };
+    });
+
+    res.json({
+      doctorId: doctor._id,
+      fullName: doctor.fullName,
+      specialization: doctor.specialization,
+      freeSlots
+    });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+const sendMessageToDoctor = async (req, res) => {
+  try {
+    const { doctorId, subject, content, template } = req.body;
+
+    if (!doctorId || !subject || !content) {
+      return res.status(400).json({
+        message: 'Doctor, subject and content are required'
+      });
+    }
+
+    const doctor = await User.findOne({ _id: doctorId, role: 'doctor' });
+
+    if (!doctor) {
+      return res.status(404).json({ message: 'Doctor not found' });
+    }
+
+    const secretary = await User.findById(req.user.userId);
+
+    const message = await Message.create({
+      sender: req.user.userId,
+      receiver: doctorId,
+      subject,
+      content,
+      template: template || 'FREE_TEXT',
+      isRead: false
+    });
+
+    await Notification.create({
+      user: doctorId,
+      type: 'doctor_message',
+      message: `New message from ${secretary?.fullName || 'secretary'}: ${subject}`,
+      relatedMessage: message._id,
+      isRead: false
+    });
+
+    await auditLogger({
+      req,
+      action: 'SEND_MESSAGE_TO_DOCTOR',
+      resource: 'message',
+      resourceId: message._id
+    });
+
+    res.status(201).json({
+      message: 'Message sent successfully',
+      data: message
+    });
+
+  } catch (err) {
+    console.error("ERROR in sendMessageToDoctor:", err);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+const getSentMessages = async (req, res) => {
+  try {
+    const messages = await Message.find({ sender: req.user.userId })
+      .populate('receiver', 'fullName email specialization')
+      .sort({ createdAt: -1 });
+
+    res.json(messages);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error' });
+  }
+};
 module.exports = {
   getMyProfile,
   updateMyProfile,
@@ -280,5 +439,8 @@ module.exports = {
   getPatients,
   getAllAppointments,
   updateAppointment,
-  getDoctorsAvailability
+  getDoctorsAvailability,
+  getDoctorFreeSlots,
+  sendMessageToDoctor,
+  getSentMessages
 };
