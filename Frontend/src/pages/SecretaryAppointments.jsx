@@ -24,7 +24,7 @@ export default function SecretaryAppointments() {
     try {
       const token = localStorage.getItem("token");
 
-      const res = await fetch("http://localhost:5001/api/secretary/doctors", {
+      const res = await fetch("https://medicalsafe-backend.onrender.com/api/secretary/doctors", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -55,7 +55,7 @@ export default function SecretaryAppointments() {
         params.append("endDate", endDate);
       }
 
-      const url = `http://localhost:5001/api/secretary/appointments?${params.toString()}`;
+      const url = `https://medicalsafe-backend.onrender.com/api/secretary/appointments?${params.toString()}`;
 
       const res = await fetch(url, {
         headers: {

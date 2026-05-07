@@ -42,7 +42,7 @@ export default function AddMedicalSummary() {
     try {
       const token = localStorage.getItem("token");
 
-      const res = await fetch("http://localhost:5001/api/medical-records", {
+      const res = await fetch("https://medicalsafe-backend.onrender.com/api/medical-records", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

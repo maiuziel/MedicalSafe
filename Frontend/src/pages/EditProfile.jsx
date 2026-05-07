@@ -3,14 +3,14 @@ import Sidebar from "../components/patient/Sidebar";
 
 const getProfileEndpoint = (role) => {
   if (role === "doctor") {
-    return "http://localhost:5001/api/doctor/me";
+    return "https://medicalsafe-backend.onrender.com/api/doctor/me";
   }
 
   if (role === "secretary") {
-    return "http://localhost:5001/api/secretary/me";
+    return "https://medicalsafe-backend.onrender.com/api/secretary/me";
   }
 
-  return "http://localhost:5001/api/patient/me";
+  return "https://medicalsafe-backend.onrender.com/api/patient/me";
 };
 
 export default function EditProfile() {
@@ -85,7 +85,7 @@ export default function EditProfile() {
     }
     setResetLoading(true);
     try {
-      const res = await fetch("http://localhost:5001/api/auth/forgot-password", {
+      const res = await fetch("https://medicalsafe-backend.onrender.com/api/auth/forgot-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: form.email }),

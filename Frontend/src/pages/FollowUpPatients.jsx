@@ -14,7 +14,7 @@ export default function FollowUpPatients() {
     try {
       const token = localStorage.getItem("token");
 
-      const res = await fetch("http://localhost:5001/api/follow-up", {
+      const res = await fetch("https://medicalsafe-backend.onrender.com/api/follow-up", {
         headers: {
           Authorization: `Bearer ${token}`,
         },

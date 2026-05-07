@@ -34,7 +34,7 @@ export default function Sidebar({ onLogout }) {
 
     const token = localStorage.getItem("token");
     try {
-      await fetch("http://localhost:5001/api/auth/logout", {
+      await fetch("https://medicalsafe-backend.onrender.com/api/auth/logout", {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
       });

@@ -22,7 +22,7 @@ export default function SecretaryPatientHistory() {
     setAppointments([]);
     try {
       const res = await fetch(
-        `http://localhost:5001/api/secretary/patients?q=${encodeURIComponent(query)}`,
+        `https://medicalsafe-backend.onrender.com/api/secretary/patients?q=${encodeURIComponent(query)}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       const data = await res.json();
@@ -40,7 +40,7 @@ export default function SecretaryPatientHistory() {
     setHistoryLoading(true);
     try {
       const res = await fetch(
-        `http://localhost:5001/api/secretary/patients/${patient._id}/appointments?sort=${order}`,
+        `https://medicalsafe-backend.onrender.com/api/secretary/patients/${patient._id}/appointments?sort=${order}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       const data = await res.json();

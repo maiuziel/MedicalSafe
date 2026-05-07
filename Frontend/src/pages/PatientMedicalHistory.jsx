@@ -22,7 +22,7 @@ export default function PatientMedicalHistory() {
     setLoading(true);
     try {
       const res = await fetch(
-        `http://localhost:5001/api/appointments/my/history?sort=${order}`,
+        `https://medicalsafe-backend.onrender.com/api/appointments/my/history?sort=${order}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       const data = await res.json();
@@ -53,7 +53,7 @@ export default function PatientMedicalHistory() {
     setRecordLoading(appt._id);
     try {
       const res = await fetch(
-        `http://localhost:5001/api/medical-records/appointment/${appt._id}`,
+        `https://medicalsafe-backend.onrender.com/api/medical-records/appointment/${appt._id}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       if (res.status === 404) {

@@ -19,7 +19,7 @@ export default function SecretaryDoctorsAvailability() {
 
   const fetchDoctorsList = async () => {
     try {
-      const res = await fetch("http://localhost:5001/api/secretary/doctors", {
+      const res = await fetch("https://medicalsafe-backend.onrender.com/api/secretary/doctors", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -35,7 +35,7 @@ export default function SecretaryDoctorsAvailability() {
 
   const fetchAvailability = async () => {
     try {
-      let url = "http://localhost:5001/api/secretary/doctors/availability";
+      let url = "https://medicalsafe-backend.onrender.com/api/secretary/doctors/availability";
 
       const params = new URLSearchParams();
 

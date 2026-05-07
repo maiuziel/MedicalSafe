@@ -16,7 +16,7 @@ export default function DoctorSearchPatients() {
     console.log("ROLE:", localStorage.getItem("role"));
     try {
       const res = await axios.get(
-        `http://localhost:5001/api/doctor/patients/search?query=${value}`,
+        `https://medicalsafe-backend.onrender.com/api/doctor/patients/search?query=${value}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,

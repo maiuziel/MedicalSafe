@@ -15,7 +15,7 @@ export default function useInactivityLogout() {
 
     timerRef.current = setTimeout(async () => {
       try {
-        await fetch("http://localhost:5001/api/auth/logout", {
+        await fetch("https://medicalsafe-backend.onrender.com/api/auth/logout", {
           method: "POST",
           headers: { Authorization: `Bearer ${token}` },
         });

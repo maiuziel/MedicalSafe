@@ -29,7 +29,7 @@ export default function ResetPassword() {
 
     try {
       const res = await fetch(
-        `http://localhost:5001/api/auth/reset-password/${token}`,
+        `https://medicalsafe-backend.onrender.com/api/auth/reset-password/${token}`,
         {
           method: "POST",
           headers: {

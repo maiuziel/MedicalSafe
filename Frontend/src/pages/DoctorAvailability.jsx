@@ -20,7 +20,7 @@ export default function DoctorAvailability() {
     try {
       const token = localStorage.getItem("token");
 
-      const res = await fetch("http://localhost:5001/api/doctor/me", {
+      const res = await fetch("https://medicalsafe-backend.onrender.com/api/doctor/me", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -110,7 +110,7 @@ export default function DoctorAvailability() {
         slots: day.slots.filter(s => s !== "")
       }));
 
-      const res = await fetch("http://localhost:5001/api/doctor/availability", {
+      const res = await fetch("https://medicalsafe-backend.onrender.com/api/doctor/availability", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
