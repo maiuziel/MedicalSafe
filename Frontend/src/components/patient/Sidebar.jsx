@@ -157,6 +157,19 @@ export default function Sidebar({ onLogout }) {
           Requests
         </button>
 )}
+{role === "doctor" && (
+        <button
+          onClick={() => navigate("/doctor/feedback")}
+          className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition
+            ${location.pathname === "/doctor/feedback"
+              ? "bg-gradient-to-r from-[#4f8df7] to-[#5d95f7] text-white"
+              : "text-[#3e4c66] hover:bg-white"
+            }`}
+        >
+          <ClipboardList size={18} />
+          Feedbacks
+        </button>
+)}
         {role === "secretary" && (
   <button
     onClick={() => navigate("/secretary/send-message")}

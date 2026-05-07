@@ -393,12 +393,31 @@ export default function PatientDashboard() {
         </p>
       </div>
 
-      <button
-        onClick={() => handleCancelAppointment(appointment._id)}
-        className="bg-red-100 text-red-600 px-4 py-1 rounded-lg text-sm"
-      >
-        Cancel
-      </button>
+      <div className="flex gap-2">
+        {appointment.status === "completed" && (
+          <button
+            onClick={() => navigate(`/patient/feedback/${appointment._id}`)}
+            className="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-lg text-sm"
+          >
+            Leave Feedback
+          </button>
+        )}
+        {appointment.status !== "completed" && appointment.status !== "cancelled" && (
+          <button
+            onClick={() => handleCancelAppointment(appointment._id)}
+            className="bg-red-100 text-red-600 px-4 py-1 rounded-lg text-sm"
+          >
+            Cancel
+          </button>
+        )}
+        <span className={`px-2 py-1 rounded-lg text-xs font-medium ${
+          appointment.status === "completed" ? "bg-green-100 text-green-700" :
+          appointment.status === "cancelled" ? "bg-red-100 text-red-600" :
+          "bg-blue-100 text-blue-600"
+        }`}>
+          {appointment.status}
+        </span>
+      </div>
     </div>
   ))
 ) : (
