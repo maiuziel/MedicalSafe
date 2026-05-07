@@ -14,6 +14,8 @@ export default function PatientDetails() {
   const [uploadMessage, setUploadMessage] = useState("");
   const [followUpLogs, setFollowUpLogs] = useState([]);
   const [medicalRecords, setMedicalRecords] = useState([]);
+  const [editingRecord, setEditingRecord] = useState(null);
+  const [editForm, setEditForm] = useState({ diagnosis: "", treatment: "", recommendations: "", notes: "" });
 
   useEffect(() => {
     fetchData();
@@ -157,6 +159,26 @@ setMedicalRecords(dataRecords);
       setFiles(data.files || []);
     } catch (err) {
       console.error(err);
+    }
+  };
+
+  const handleSaveEdit = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch(`http://localhost:5001/api/medical-records/${editingRecord}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify(editForm),
+      });
+      if (res.ok) {
+        const updated = await res.json();
+        setMedicalRecords((prev) => prev.map((r) => (r._id === updated._id ? updated : r)));
+        setEditingRecord(null);
+      } else {
+        alert("Failed to update summary");
+      }
+    } catch (err) {
+      alert("Server error");
     }
   };
 
@@ -327,18 +349,45 @@ setMedicalRecords(dataRecords);
   medicalRecords.map((r) => (
     <div key={r._id} className="bg-white p-4 rounded-xl shadow mb-4">
 
-      <p className="text-sm text-gray-400 mb-2">
-        {new Date(r.visitDate).toLocaleDateString()}
-      </p>
+      <div className="flex justify-between items-start mb-2">
+        <p className="text-sm text-gray-400">{new Date(r.visitDate).toLocaleDateString()}</p>
+        <button
+          onClick={() => {
+            setEditingRecord(r._id);
+            setEditForm({ diagnosis: r.diagnosis, treatment: r.treatment, recommendations: r.recommendations, notes: r.notes || "" });
+          }}
+          className="text-xs text-blue-500 border border-blue-300 px-2 py-0.5 rounded-lg hover:bg-blue-50"
+        >
+          Edit
+        </button>
+      </div>
 
-      <p><strong>Diagnosis:</strong> {r.diagnosis}</p>
-      <p><strong>Treatment:</strong> {r.treatment}</p>
-      <p><strong>Recommendations:</strong> {r.recommendations}</p>
-
-      {r.notes && (
-        <p><strong>Notes:</strong> {r.notes}</p>
+      {editingRecord === r._id ? (
+        <div className="space-y-2 mt-2">
+          {["diagnosis", "treatment", "recommendations", "notes"].map((field) => (
+            <div key={field}>
+              <label className="text-xs font-medium text-gray-500 capitalize">{field}</label>
+              <textarea
+                rows={2}
+                value={editForm[field]}
+                onChange={(e) => setEditForm({ ...editForm, [field]: e.target.value })}
+                className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm resize-none"
+              />
+            </div>
+          ))}
+          <div className="flex gap-2 pt-1">
+            <button onClick={handleSaveEdit} className="bg-blue-500 text-white text-xs px-4 py-1.5 rounded-lg">Save</button>
+            <button onClick={() => setEditingRecord(null)} className="text-xs text-gray-500 border border-gray-200 px-4 py-1.5 rounded-lg">Cancel</button>
+          </div>
+        </div>
+      ) : (
+        <>
+          <p><strong>Diagnosis:</strong> {r.diagnosis}</p>
+          <p><strong>Treatment:</strong> {r.treatment}</p>
+          <p><strong>Recommendations:</strong> {r.recommendations}</p>
+          {r.notes && <p><strong>Notes:</strong> {r.notes}</p>}
+        </>
       )}
-
     </div>
   ))
 )}

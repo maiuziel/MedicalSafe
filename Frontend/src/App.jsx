@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import useInactivityLogout from "./hooks/useInactivityLogout";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import PatientDashboard from "./pages/PatientDashboard";
@@ -22,12 +23,11 @@ import DoctorSendMessage from "./pages/DoctorSendMessage";
 import SecretaryDoctorsAvailability from "./pages/SecretaryDoctorsAvailability";
 import SecretaryPatientHistory from "./pages/SecretaryPatientHistory";
 import PatientMedicalHistory from "./pages/PatientMedicalHistory";
-function App() {
-  const role = localStorage.getItem("role");
+function AppRoutes() {
+  useInactivityLogout();
 
   return (
-    <Router>
-      <Routes>
+    <Routes>
 
         <Route path="/" element={<Login />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
@@ -67,7 +67,14 @@ function App() {
         <Route path="/secretary/send-message" element={<SecretarySendMessage />} />
         <Route path="/secretary/patient-history" element={<SecretaryPatientHistory />} />
         <Route path="/doctor/send-message" element={<DoctorSendMessage />} />
-      </Routes>
+    </Routes>
+  );
+}
+
+function App() {
+  return (
+    <Router>
+      <AppRoutes />
     </Router>
   );
 }

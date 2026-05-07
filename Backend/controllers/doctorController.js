@@ -7,6 +7,7 @@ const Notification = require('../models/Notification');
 const FollowUp = require("../models/FollowUp");
 const FollowUpLog = require("../models/FollowUpLog");
 const Message = require('../models/Message');
+const auditLogger = require('../utils/auditLogger');
 // GET /api/doctor/me
 const getMyProfile = async (req, res) => {
   try {
@@ -38,6 +39,8 @@ const updateMyProfile = async (req, res) => {
       { fullName, phone, email, specialization },
       { new: true, runValidators: true }
     ).select('-password');
+
+    await auditLogger({ req, action: 'UPDATE_PROFILE', resource: 'user', resourceId: userId });
 
     res.json(updatedDoctor);
 
@@ -555,7 +558,7 @@ console.log("All appointments:", allAppointments);
         { idNumber: { $regex: query, $options: "i" } },
       ],
     }).select("fullName email idNumber birthDate phone");
-    console.log("Patient IDs:", patientIds);
+    await auditLogger({ req, action: 'SEARCH_PATIENTS', resource: 'user' });
     res.json({ patients });
 
   } catch (err) {

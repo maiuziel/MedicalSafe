@@ -74,6 +74,35 @@ export default function EditProfile() {
     return Object.keys(newErrors).length === 0;
   };
 
+  const [resetSent, setResetSent] = useState(false);
+  const [resetLoading, setResetLoading] = useState(false);
+
+
+  const handleChangePassword = async () => {
+    if (!form.email) {
+      alert("Could not find your email. Please reload the page.");
+      return;
+    }
+    setResetLoading(true);
+    try {
+      const res = await fetch("http://localhost:5001/api/auth/forgot-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: form.email }),
+      });
+      if (res.ok) {
+        setResetSent(true);
+      } else {
+        const data = await res.json();
+        alert(data.message || "Failed to send reset link");
+      }
+    } catch (err) {
+      alert("Server error");
+    } finally {
+      setResetLoading(false);
+    }
+  };
+
   const handleUpdate = async () => {
     if (!validate()) return;
     try {
@@ -159,6 +188,29 @@ export default function EditProfile() {
             Save Changes
           </button>
         </div>
+
+        {/* Change Password */}
+        <div className="bg-white p-6 rounded-2xl shadow-sm max-w-xl mt-4">
+          <h2 className="text-base font-semibold text-gray-800 mb-1">Forgot Your Password?</h2>
+          <p className="text-sm text-gray-400 mb-4">
+            A reset link will be sent to <span className="font-medium text-gray-600">{form.email}</span>
+          </p>
+
+          {resetSent ? (
+            <div className="bg-green-50 border border-green-200 rounded-lg px-4 py-3 text-sm text-green-700">
+              Reset link sent! Check your email and follow the instructions.
+            </div>
+          ) : (
+            <button
+              onClick={handleChangePassword}
+              disabled={resetLoading}
+              className="w-full border border-blue-400 text-blue-500 hover:bg-blue-50 p-3 rounded-lg text-sm font-medium transition disabled:opacity-50"
+            >
+              {resetLoading ? "Sending..." : "Send Password Reset Link"}
+            </button>
+          )}
+        </div>
+
       </div>
     </div>
   );

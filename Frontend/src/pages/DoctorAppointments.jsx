@@ -4,20 +4,23 @@ import Sidebar from "../components/patient/Sidebar";
 
 export default function DoctorAppointments() {
   const [appointments, setAppointments] = useState([]);
-  const navigate = useNavigate(); // 🔥 חדש
+  const [statusFilter, setStatusFilter] = useState("");
+  const [sortBy, setSortBy] = useState("date");
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchAppointments();
-  }, []);
+  }, [statusFilter, sortBy]);
 
   const fetchAppointments = async () => {
     try {
       const token = localStorage.getItem("token");
+      const params = new URLSearchParams();
+      if (statusFilter) params.append("status", statusFilter);
+      if (sortBy) params.append("sortBy", sortBy);
 
-      const res = await fetch("http://localhost:5001/api/doctor/appointments", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+      const res = await fetch(`http://localhost:5001/api/doctor/appointments?${params.toString()}`, {
+        headers: { Authorization: `Bearer ${token}` },
       });
 
       const data = await res.json();
@@ -33,13 +36,32 @@ export default function DoctorAppointments() {
 
       <div className="flex-1 p-8 bg-[#eef2f7] min-h-screen">
 
-        <div className="bg-white p-6 rounded-2xl shadow-sm mb-6">
-          <h1 className="text-xl font-semibold text-gray-800">
-            My Appointments
-          </h1>
-          <p className="text-gray-400 text-sm">
-            View all your scheduled appointments
-          </p>
+        <div className="bg-white p-6 rounded-2xl shadow-sm mb-6 flex flex-wrap justify-between items-center gap-4">
+          <div>
+            <h1 className="text-xl font-semibold text-gray-800">My Appointments</h1>
+            <p className="text-gray-400 text-sm">View all your scheduled appointments</p>
+          </div>
+          <div className="flex gap-3">
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="border border-gray-200 rounded-lg px-3 py-2 text-sm"
+            >
+              <option value="">All statuses</option>
+              <option value="scheduled">Scheduled</option>
+              <option value="completed">Completed</option>
+              <option value="cancelled">Cancelled</option>
+            </select>
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="border border-gray-200 rounded-lg px-3 py-2 text-sm"
+            >
+              <option value="date">Sort: Date ↑</option>
+              <option value="dateDesc">Sort: Date ↓</option>
+              <option value="patient">Sort: Patient Name</option>
+            </select>
+          </div>
         </div>
 
         <div className="bg-white p-6 rounded-2xl shadow-sm">

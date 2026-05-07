@@ -142,7 +142,10 @@ export default function AddMedicalSummary() {
               </button>
               <button
                 type="button"
-                onClick={() => navigate("/doctor")}
+                onClick={() => {
+                  if (isDirty && !window.confirm("You have unsaved changes. Leave anyway?")) return;
+                  navigate("/doctor");
+                }}
                 className="px-6 py-2.5 rounded-xl text-sm font-medium text-[#6b7a90] border border-[#d1dce8] hover:bg-[#f0f4f9] transition"
               >
                 Cancel

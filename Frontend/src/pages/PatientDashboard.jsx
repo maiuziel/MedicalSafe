@@ -129,7 +129,10 @@ export default function PatientDashboard() {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
-      setDoctors(Array.isArray(data) ? data : data.doctors || []);
+      const list = Array.isArray(data) ? data : data.doctors || [];
+      setDoctors([...list].sort((a, b) =>
+        (a.specialization || "").localeCompare(b.specialization || "")
+      ));
     } catch (err) {
       console.error(err);
     }
@@ -239,6 +242,7 @@ export default function PatientDashboard() {
       );
   
       if (res.ok) {
+        alert("Appointment cancelled successfully");
         fetchAppointments();
       } else {
         const data = await res.json();

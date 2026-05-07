@@ -9,7 +9,7 @@ const tokenBlacklist = require('../utils/tokenBlacklist');
 // REGISTER
 const register = async (req, res) => {
   try {
-    const { fullName, email, password, role, specialization, phone } = req.body;
+    const { fullName, email, password, role, specialization, phone, idNumber } = req.body;
 
     if (!fullName || !email || !password || !phone) {
       return res.status(400).json({
@@ -33,6 +33,7 @@ const register = async (req, res) => {
       password: hashedPassword,
       role: userRole,
       phone,
+      idNumber,
       specialization: userRole === 'doctor' ? specialization : undefined
     });
 
@@ -147,12 +148,24 @@ const resetPassword = async (req, res) => {
       return res.status(400).json({ message: "Token invalid or expired" });
     }
 
-    user.password = await bcrypt.hash(password, 10);
+    const isSamePassword = await bcrypt.compare(password, user.password);
+    if (isSamePassword) {
+      return res.status(400).json({ message: "New password must be different from the current password" });
+    }
 
+    user.password = await bcrypt.hash(password, 10);
     user.resetPasswordToken = undefined;
     user.resetPasswordExpires = undefined;
 
     await user.save();
+
+    await AuditLog.create({
+      userId: user._id,
+      action: 'PASSWORD_RESET',
+      resource: 'auth',
+      ipAddress: req.ip,
+      userAgent: req.headers['user-agent'],
+    });
 
     res.json({ message: "Password updated successfully" });
 
@@ -233,12 +246,53 @@ const createUserByAdmin = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
-const logout = (req, res) => {
+const changePassword = async (req, res) => {
+  const { currentPassword, newPassword } = req.body;
+  try {
+    const user = await User.findById(req.user.userId);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) return res.status(400).json({ message: 'Current password is incorrect' });
+
+    const isSame = await bcrypt.compare(newPassword, user.password);
+    if (isSame) return res.status(400).json({ message: 'New password must be different from the current password' });
+
+    user.password = await bcrypt.hash(newPassword, 10);
+    await user.save();
+
+    await AuditLog.create({
+      userId: user._id,
+      action: 'PASSWORD_CHANGE',
+      resource: 'auth',
+      ipAddress: req.ip,
+      userAgent: req.headers['user-agent'],
+    });
+
+    res.json({ message: 'Password changed successfully' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+const logout = async (req, res) => {
   const authHeader = req.headers.authorization;
   if (authHeader && authHeader.startsWith('Bearer ')) {
     const token = authHeader.split(' ')[1];
     tokenBlacklist.add(token);
   }
+
+  try {
+    await AuditLog.create({
+      userId: req.user.userId,
+      action: 'USER_LOGOUT',
+      resource: 'auth',
+      ipAddress: req.ip,
+      userAgent: req.headers['user-agent'],
+    });
+  } catch (_) {}
+
   res.json({ message: 'Logged out successfully' });
 };
 
@@ -247,6 +301,7 @@ module.exports = {
   login,
   forgotPassword,
   resetPassword,
+  changePassword,
   createDoctor,
   createUserByAdmin,
   logout

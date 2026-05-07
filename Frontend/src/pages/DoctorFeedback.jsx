@@ -6,6 +6,8 @@ export default function DoctorFeedbacks() {
   const [averageRating, setAverageRating] = useState(0);
   const [totalFeedbacks, setTotalFeedbacks] = useState(0);
   const [search, setSearch] = useState("");
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
 
   useEffect(() => {
     fetchFeedbacks();
@@ -31,10 +33,13 @@ export default function DoctorFeedbacks() {
     }
   };
 
-  // 🔍 סינון לפי שם מטופל
-  const filteredFeedbacks = feedbacks.filter((f) =>
-    f.patient.fullName.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredFeedbacks = feedbacks.filter((f) => {
+    const matchesSearch = f.patient.fullName.toLowerCase().includes(search.toLowerCase());
+    const date = new Date(f.createdAt);
+    const matchesFrom = fromDate ? date >= new Date(fromDate) : true;
+    const matchesTo = toDate ? date <= new Date(toDate + "T23:59:59") : true;
+    return matchesSearch && matchesFrom && matchesTo;
+  });
 
   return (
     <div className="flex bg-[#eef2f7] min-h-screen">
@@ -59,15 +64,35 @@ export default function DoctorFeedbacks() {
           </div>
         </div>
 
-        {/* 🔍 חיפוש */}
-        <div className="mb-6">
+        {/* Filters */}
+        <div className="mb-6 flex flex-wrap gap-3">
           <input
             type="text"
             placeholder="Search by patient name..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full p-2 border rounded-lg"
+            className="flex-1 min-w-[180px] p-2 border rounded-lg text-sm"
           />
+          <input
+            type="date"
+            value={fromDate}
+            onChange={(e) => setFromDate(e.target.value)}
+            className="p-2 border rounded-lg text-sm"
+          />
+          <input
+            type="date"
+            value={toDate}
+            onChange={(e) => setToDate(e.target.value)}
+            className="p-2 border rounded-lg text-sm"
+          />
+          {(fromDate || toDate) && (
+            <button
+              onClick={() => { setFromDate(""); setToDate(""); }}
+              className="px-3 py-2 text-sm bg-gray-100 rounded-lg hover:bg-gray-200"
+            >
+              Clear
+            </button>
+          )}
         </div>
 
         {/* 📋 רשימת משובים */}

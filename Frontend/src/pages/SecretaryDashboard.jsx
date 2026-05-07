@@ -30,6 +30,9 @@ export default function SecretaryDashboard() {
   const [freeSlots, setFreeSlots] = useState(null);
   const [loadingFreeSlots, setLoadingFreeSlots] = useState(false);
   const [editStatus, setEditStatus] = useState("");
+  const [notificationTypeFilter, setNotificationTypeFilter] = useState("all");
+  const [todayAppointments, setTodayAppointments] = useState([]);
+  const [todayDoctors, setTodayDoctors] = useState([]);
   const [selectedMessage, setSelectedMessage] = useState(null);
   const [conversationMessages, setConversationMessages] = useState([]);
   const [replyText, setReplyText] = useState("");
@@ -48,6 +51,8 @@ export default function SecretaryDashboard() {
     fetchProfile();
     fetchNotifications();
     fetchDoctors();
+    fetchTodayAppointments();
+    fetchTodayDoctors();
 
     const interval = setInterval(() => {
       fetchNotifications();
@@ -129,6 +134,39 @@ export default function SecretaryDashboard() {
 
       const data = await res.json();
       setDoctors(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const fetchTodayAppointments = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const today = new Date().toISOString().split("T")[0];
+      const res = await fetch(
+        `http://localhost:5001/api/secretary/appointments?startDate=${today}&endDate=${today}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      const data = await res.json();
+      setTodayAppointments(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const fetchTodayDoctors = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch(
+        "http://localhost:5001/api/secretary/doctors/availability",
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      const data = await res.json();
+      const todayName = new Date().toLocaleDateString("en-US", { weekday: "long" });
+      const working = (Array.isArray(data) ? data : []).filter((d) =>
+        d.availability?.some((a) => a.day.toLowerCase() === todayName.toLowerCase())
+      );
+      setTodayDoctors(working);
     } catch (err) {
       console.error(err);
     }
@@ -462,23 +500,43 @@ export default function SecretaryDashboard() {
 
               {showNotifications && (
                 <div className="absolute right-0 mt-2 bg-white shadow-lg p-3 rounded-xl w-80 z-50">
-                  <h4 className="font-semibold mb-2">Notifications</h4>
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="font-semibold">Notifications</h4>
+                    <select
+                      value={notificationTypeFilter}
+                      onChange={(e) => setNotificationTypeFilter(e.target.value)}
+                      className="text-xs border border-gray-200 rounded-lg px-2 py-1"
+                    >
+                      <option value="all">All types</option>
+                      <option value="doctor_message">Messages</option>
+                      <option value="appointment_booked">Bookings</option>
+                      <option value="appointment_cancelled">Cancellations</option>
+                    </select>
+                  </div>
 
-                  {notifications.length > 0 ? (
-                    notifications.map((n) => (
-                      <div
-                        key={n._id}
-                        onClick={() => handleNotificationClick(n)}
-                        className={`p-2 border-b cursor-pointer ${
-                          !n.isRead ? "bg-blue-50" : ""
-                        }`}
-                      >
-                        <p className="text-sm">{n.message}</p>
-                        <p className="text-xs text-gray-400">
-                          {new Date(n.createdAt).toLocaleString()}
-                        </p>
-                      </div>
-                    ))
+                  {notifications
+                    .filter((n) =>
+                      notificationTypeFilter === "all" ? true : n.type === notificationTypeFilter
+                    )
+                    .length > 0 ? (
+                    notifications
+                      .filter((n) =>
+                        notificationTypeFilter === "all" ? true : n.type === notificationTypeFilter
+                      )
+                      .map((n) => (
+                        <div
+                          key={n._id}
+                          onClick={() => handleNotificationClick(n)}
+                          className={`p-2 border-b cursor-pointer ${
+                            !n.isRead ? "bg-blue-50" : ""
+                          }`}
+                        >
+                          <p className="text-sm">{n.message}</p>
+                          <p className="text-xs text-gray-400">
+                            {new Date(n.createdAt).toLocaleString()}
+                          </p>
+                        </div>
+                      ))
                   ) : (
                     <p className="text-sm text-gray-400">No notifications</p>
                   )}
@@ -649,21 +707,12 @@ export default function SecretaryDashboard() {
               )}
             </div>
 
-            {/* FUTURE SECTION */}
-            <div className="bg-white p-5 rounded-xl shadow-sm">
-              <div className="flex justify-between items-center mb-3">
-                <h3 className="font-semibold text-gray-700">Activity</h3>
-                <button className="text-blue-500 text-sm">View</button>
-              </div>
-
-              <p className="text-sm text-gray-400">
-                Activity logs will appear here
-              </p>
-            </div>
           </div>
 
           {/* RIGHT SIDE */}
           <div className="space-y-6">
+
+            {/* System Info */}
             <div className="bg-white p-5 rounded-xl shadow-sm">
               <h3 className="text-gray-500 text-sm">System Info</h3>
               <h1 className="text-4xl font-bold text-blue-500 mt-2">
@@ -674,13 +723,89 @@ export default function SecretaryDashboard() {
               </p>
             </div>
 
+            {/* Today's Appointments */}
             <div className="bg-white p-5 rounded-xl shadow-sm">
-              <div className="flex justify-between mb-3">
-                <h3 className="font-semibold text-gray-700">Notifications</h3>
-                <button className="text-blue-500 text-sm">View All</button>
-              </div>
-              <p className="text-sm text-gray-400">No messages yet</p>
+              <h3 className="font-semibold text-gray-700 mb-3">Today's Appointments</h3>
+              {todayAppointments.length === 0 ? (
+                <p className="text-sm text-gray-400">No appointments today</p>
+              ) : (
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-500">Scheduled</span>
+                    <span className="font-semibold text-gray-700">
+                      {todayAppointments.filter((a) => a.status === "scheduled").length}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-500">Completed</span>
+                    <span className="font-semibold text-green-600">
+                      {todayAppointments.filter((a) => a.status === "completed").length}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-500">Cancelled</span>
+                    <span className="font-semibold text-red-500">
+                      {todayAppointments.filter((a) => a.status === "cancelled").length}
+                    </span>
+                  </div>
+                  <div className="border-t pt-2 flex justify-between text-sm font-semibold">
+                    <span className="text-gray-600">Total</span>
+                    <span className="text-blue-500">{todayAppointments.length}</span>
+                  </div>
+                </div>
+              )}
             </div>
+
+            {/* Doctors Working Today */}
+            <div className="bg-white p-5 rounded-xl shadow-sm">
+              <h3 className="font-semibold text-gray-700 mb-3">Doctors Today</h3>
+              {todayDoctors.length === 0 ? (
+                <p className="text-sm text-gray-400">No doctors scheduled today</p>
+              ) : (
+                <div className="space-y-2">
+                  {todayDoctors.map((d) => (
+                    <div key={d.doctorId} className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-700">{d.fullName}</p>
+                        <p className="text-xs text-gray-400">{d.specialization}</p>
+                      </div>
+                      {d.isOnShiftNow && (
+                        <span className="inline-flex items-center gap-1 bg-green-100 text-green-700 text-xs font-medium px-2 py-0.5 rounded-full">
+                          <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse inline-block" />
+                          Now
+                        </span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Unread Messages */}
+            <div className="bg-white p-5 rounded-xl shadow-sm">
+              <h3 className="font-semibold text-gray-700 mb-3">Unread Messages</h3>
+              {notifications.filter((n) => !n.isRead && n.type === "doctor_message").length === 0 ? (
+                <p className="text-sm text-gray-400">No unread messages</p>
+              ) : (
+                <div className="space-y-2">
+                  {notifications
+                    .filter((n) => !n.isRead && n.type === "doctor_message")
+                    .map((n) => (
+                      <div
+                        key={n._id}
+                        onClick={() => handleNotificationClick(n)}
+                        className="bg-blue-50 border border-blue-100 rounded-lg px-3 py-2 cursor-pointer hover:bg-blue-100 transition"
+                      >
+                        <p className="text-sm text-gray-700 truncate">{n.message}</p>
+                        <p className="text-xs text-gray-400 mt-0.5">
+                          {new Date(n.createdAt).toLocaleString("en-GB")}
+                        </p>
+                      </div>
+                    ))}
+                </div>
+              )}
+            </div>
+
           </div>
         </div>
       </div>

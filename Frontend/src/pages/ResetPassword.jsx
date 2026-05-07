@@ -42,7 +42,9 @@ export default function ResetPassword() {
       const data = await res.json();
 
       if (res.ok) {
-        alert("Password updated successfully");
+        alert("Password updated successfully. Please log in with your new password.");
+        localStorage.removeItem("token");
+        localStorage.removeItem("role");
         navigate("/");
       } else {
         alert(data.message || "Invalid or expired link");

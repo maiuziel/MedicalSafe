@@ -559,161 +559,127 @@ setTimeout(() => setMessageAlert(""), 3000);
 
        
 
-        {/* APPOINTMENTS */}
-        <div className="bg-white p-5 rounded-xl shadow-sm">
-          <h3 className="font-semibold mb-4">My Schedule</h3>
-          <div className="flex flex-wrap gap-3 mb-4 items-center">
+        {/* MAIN GRID */}
+        <div className="grid grid-cols-3 gap-6 items-start">
 
-            {/* 🔍 Search by name */}
-            <div className="flex items-center border rounded px-2">
-              <span>🔍</span>
+          {/* LEFT: My Schedule */}
+          <div className="col-span-2 bg-white p-5 rounded-xl shadow-sm">
+            <h3 className="font-semibold mb-4">My Schedule</h3>
+            <div className="flex flex-wrap gap-3 mb-4 items-center">
+              <div className="flex items-center border rounded px-2">
+                <span>🔍</span>
+                <input
+                  type="text"
+                  placeholder="Search patient..."
+                  value={searchPatient}
+                  onChange={(e) => setSearchPatient(e.target.value)}
+                  className="outline-none px-2 py-1"
+                />
+              </div>
               <input
-                type="text"
-                placeholder="Search patient..."
-                value={searchPatient}
-                onChange={(e) => setSearchPatient(e.target.value)}
-                className="outline-none px-2 py-1"
+                type="date"
+                value={filterDate}
+                onChange={(e) => setFilterDate(e.target.value)}
+                className="border rounded px-2 py-1"
               />
+              <input
+                type="time"
+                value={filterTime}
+                onChange={(e) => setFilterTime(e.target.value)}
+                className="border rounded px-2 py-1"
+              />
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="border rounded px-2 py-1"
+              >
+                <option value="all">All Statuses</option>
+                <option value="scheduled">Scheduled</option>
+                <option value="completed">Completed</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+              <button
+                onClick={handleResetFilters}
+                className="bg-gray-200 hover:bg-gray-300 px-3 py-1 rounded"
+              >
+                Reset
+              </button>
             </div>
 
-            {/* 📅 Date */}
-            <input
-              type="date"
-              value={filterDate}
-              onChange={(e) => setFilterDate(e.target.value)}
-              className="border rounded px-2 py-1"
-            />
-
-            {/* ⏰ Time */}
-            <input
-              type="time"
-              value={filterTime}
-              onChange={(e) => setFilterTime(e.target.value)}
-              className="border rounded px-2 py-1"
-            />
-
-            {/* 📊 Status */}
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="border rounded px-2 py-1"
-            >
-              <option value="all">All Statuses</option>
-              <option value="scheduled">Scheduled</option>
-              <option value="completed">Completed</option>
-              <option value="cancelled">Cancelled</option>
-            </select>
-            <button
-          onClick={handleResetFilters}
-          className="bg-gray-200 hover:bg-gray-300 px-3 py-1 rounded"
-        >
-          Reset
-        </button>
-
+            {sortedAppointments.length > 0 ? (
+              sortedAppointments.map((a) => (
+                <div key={a._id} className="flex justify-between items-center bg-gray-50 p-4 rounded-lg mb-3">
+                  <div>
+                    <p className="font-medium">{a.patient?.fullName || "Patient"}</p>
+                    <p className="text-xs text-gray-400">{new Date(a.date).toLocaleString()}</p>
+                    <p className="text-xs text-blue-500">{a.specialization}</p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className={`text-xs font-semibold ${getStatusColor(a.status)}`}>{a.status}</span>
+                    {a.status === "scheduled" && (
+                      <>
+                        <button onClick={() => updateAppointmentStatus(a._id, "completed")} className="bg-green-500 text-white px-2 py-1 rounded text-xs">✔ Complete</button>
+                        <button onClick={() => updateAppointmentStatus(a._id, "cancelled")} className="bg-red-500 text-white px-2 py-1 rounded text-xs">✖ Cancel</button>
+                      </>
+                    )}
+                    {a.status === "completed" && (
+                      <button
+                        onClick={() => navigate(`/doctor/appointments/${a._id}/summary`, { state: { appointment: a } })}
+                        className="bg-blue-500 text-white px-2 py-1 rounded text-xs"
+                      >
+                        + Add Summary
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p className="text-gray-400 text-sm">No appointments found</p>
+            )}
           </div>
 
-          {sortedAppointments.length > 0 ? (
-  sortedAppointments.map((a) => {
-    console.log("appointment:", a);
-    return (
-      <div key={a._id} className="flex justify-between items-center bg-gray-50 p-4 rounded-lg mb-3">
-        <div>
-          <p className="font-medium">{a.patient?.fullName || "Patient"}</p>
-          <p className="text-xs text-gray-400">{new Date(a.date).toLocaleString()}</p>
-          <p className="text-xs text-blue-500">{a.specialization}</p>
-        </div>
-        <div className="flex items-center gap-3">
+          {/* RIGHT: Availability + Requests */}
+          <div className="space-y-6">
 
-{/* STATUS */}
-<span className={`text-xs font-semibold ${getStatusColor(a.status)}`}>
-  {a.status}
-</span>
-
-{/* BUTTONS */}
-{a.status === "scheduled" && (
-  <>
-    <button
-      onClick={() => updateAppointmentStatus(a._id, "completed")}
-      className="bg-green-500 text-white px-2 py-1 rounded text-xs"
-    >
-      ✔ Complete
-    </button>
-
-    <button
-      onClick={() => updateAppointmentStatus(a._id, "cancelled")}
-      className="bg-red-500 text-white px-2 py-1 rounded text-xs"
-    >
-      ✖ Cancel
-    </button>
-  </>
-)}
-
-{a.status === "completed" && (
-  <button
-    onClick={() =>
-      navigate(`/doctor/appointments/${a._id}/summary`, {
-        state: { appointment: a }
-      })
-    }
-    className="bg-blue-500 text-white px-2 py-1 rounded text-xs"
-  >
-    + Add Summary
-  </button>
-)}
-
-</div>
-      </div>
-    );
-  })
-) : (
-  <p className="text-gray-400 text-sm">No appointments found</p>
-)}
-        </div>
-
-        {/* 🔥 MY AVAILABILITY */}
-        <div className="bg-white p-5 rounded-xl shadow-sm mt-6">
-          <h3 className="font-semibold mb-4">My Availability</h3>
-
-          {user?.availability && user.availability.length > 0 ? (
-            user.availability.map((day, i) => (
-              <div key={i} className="mb-3">
-                <p className="font-medium">{day.day}</p>
-
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {day.slots.map((slot, j) => (
-                    <div
-                      key={j}
-                      className="bg-gray-100 px-3 py-1 rounded-lg text-sm flex items-center gap-2"
-                    >
-                      {slot}
-
-                      <button
-                        onClick={() => removeAvailability(day.day, slot)}
-                        className="text-red-500"
-                      >
-                        
-                      </button>
+            {/* My Availability */}
+            <div className="bg-white p-5 rounded-xl shadow-sm">
+              <h3 className="font-semibold mb-4">My Availability</h3>
+              {user?.availability && user.availability.length > 0 ? (
+                user.availability.map((day, i) => (
+                  <div key={i} className="mb-3">
+                    <p className="font-medium text-sm">{day.day}</p>
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {day.slots.map((slot, j) => (
+                        <div key={j} className="bg-gray-100 px-3 py-1 rounded-lg text-sm flex items-center gap-2">
+                          {slot}
+                          <button onClick={() => removeAvailability(day.day, slot)} className="text-red-500">×</button>
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
-              </div>
-            ))
-          ) : (
-            <p className="text-gray-400 text-sm">No availability set</p>
-          )}
-        </div>
-
-        {/* REQUESTS */}
-        <div className="bg-white p-5 rounded-xl shadow-sm mt-6">
-          <h3 className="font-semibold mb-4">Patient Requests</h3>
-
-          {requests.map((r) => (
-            <div key={r._id} onClick={() => setSelectedRequest(r)} className="p-4 bg-gray-50 rounded-lg mb-3 cursor-pointer">
-              <p className="font-medium">{r.patient?.fullName}</p>
-              <p className="text-xs text-gray-400">{r.subject}</p>
-              <span className="text-xs text-blue-500">{r.status}</span>
+                  </div>
+                ))
+              ) : (
+                <p className="text-gray-400 text-sm">No availability set</p>
+              )}
             </div>
-          ))}
+
+            {/* Patient Requests */}
+            <div className="bg-white p-5 rounded-xl shadow-sm">
+              <h3 className="font-semibold mb-4">Patient Requests</h3>
+              {requests.length === 0 ? (
+                <p className="text-gray-400 text-sm">No requests</p>
+              ) : (
+                requests.map((r) => (
+                  <div key={r._id} onClick={() => setSelectedRequest(r)} className="p-3 bg-gray-50 rounded-lg mb-2 cursor-pointer hover:bg-gray-100 transition">
+                    <p className="font-medium text-sm">{r.patient?.fullName}</p>
+                    <p className="text-xs text-gray-400">{r.subject}</p>
+                    <span className="text-xs text-blue-500">{r.status}</span>
+                  </div>
+                ))
+              )}
+            </div>
+
+          </div>
         </div>
 
         {/* REQUEST DETAILS */}
@@ -721,20 +687,17 @@ setTimeout(() => setMessageAlert(""), 3000);
           <div className="bg-white p-6 rounded-xl shadow-sm mt-6">
             <h3 className="font-semibold">{selectedRequest.subject}</h3>
             <p className="text-sm mb-2">{selectedRequest.description}</p>
-
             <div className="flex gap-2 mb-4">
               <button onClick={() => updateStatus("in_progress")} className="bg-yellow-400 text-white px-3 py-1 rounded">In Progress</button>
               <button onClick={() => updateStatus("resolved")} className="bg-green-500 text-white px-3 py-1 rounded">Completed</button>
               <button onClick={() => updateStatus("needs_further_review")} className="bg-red-500 text-white px-3 py-1 rounded">Need Review</button>
             </div>
-
             <textarea
               value={responseText}
               onChange={(e) => setResponseText(e.target.value)}
               className="w-full border p-3 rounded-lg mb-3"
               placeholder="Write response..."
             />
-
             <button onClick={handleSendResponse} className="bg-blue-500 text-white px-4 py-2 rounded-lg">
               Send Response
             </button>
