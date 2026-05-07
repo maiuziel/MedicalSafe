@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import Sidebar from "../components/patient/Sidebar";
-import { CalendarDays, ChevronDown, ChevronUp, ArrowUp, ArrowDown, Stethoscope } from "lucide-react";
+import { CalendarDays, ChevronDown, ChevronUp, ArrowUp, ArrowDown, Stethoscope, MessageSquare } from "lucide-react";
 
 export default function PatientMedicalHistory() {
+  const navigate = useNavigate();
   const [appointments, setAppointments] = useState([]);
   const [sortOrder, setSortOrder] = useState("desc");
   const [loading, setLoading] = useState(true);
@@ -182,6 +184,18 @@ export default function PatientMedicalHistory() {
                           {record.notes && (
                             <RecordField label="Notes" value={record.notes} />
                           )}
+                        </div>
+                      )}
+
+                      {appt.status === "completed" && (
+                        <div className="mt-4 pt-4 border-t border-[#e6edf5]">
+                          <button
+                            onClick={() => navigate(`/patient/feedback/${appt._id}`)}
+                            className="flex items-center gap-2 text-sm text-[#5d95f7] font-medium hover:underline"
+                          >
+                            <MessageSquare size={15} />
+                            Leave Feedback for this visit
+                          </button>
                         </div>
                       )}
                     </div>

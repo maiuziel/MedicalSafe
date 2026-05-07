@@ -4,6 +4,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const crypto = require("crypto");
 const sendResetEmail = require("../utils/mailer");
+const tokenBlacklist = require('../utils/tokenBlacklist');
 
 // REGISTER
 const register = async (req, res) => {
@@ -232,11 +233,21 @@ const createUserByAdmin = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+const logout = (req, res) => {
+  const authHeader = req.headers.authorization;
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    const token = authHeader.split(' ')[1];
+    tokenBlacklist.add(token);
+  }
+  res.json({ message: 'Logged out successfully' });
+};
+
 module.exports = {
   register,
   login,
   forgotPassword,
   resetPassword,
   createDoctor,
-  createUserByAdmin
+  createUserByAdmin,
+  logout
 };

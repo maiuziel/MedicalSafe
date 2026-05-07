@@ -26,15 +26,25 @@ export default function Sidebar({ onLogout }) {
   const isAvailability = location.pathname === "/doctor/availability";
   const isFollowUp = location.pathname === "/doctor/follow-up";
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     if (onLogout) return onLogout();
 
     const confirmLogout = window.confirm("Are you sure you want to log out?");
-    if (confirmLogout) {
-      localStorage.removeItem("token");
-      localStorage.removeItem("role");
-      navigate("/");
+    if (!confirmLogout) return;
+
+    const token = localStorage.getItem("token");
+    try {
+      await fetch("http://localhost:5001/api/auth/logout", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+    } catch (err) {
+      console.error("Logout request failed", err);
     }
+
+    localStorage.removeItem("token");
+    localStorage.removeItem("role");
+    navigate("/");
   };
 
   return (
@@ -201,11 +211,6 @@ export default function Sidebar({ onLogout }) {
             >
               <FileText size={18} />
               Medical Record
-            </button>
-
-            <button className="flex items-center gap-3 text-[#3e4c66] px-4 py-3 rounded-xl hover:bg-white text-sm font-medium transition">
-              <MessageSquare size={18} />
-              Messages
             </button>
 
             <button

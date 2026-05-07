@@ -11,20 +11,22 @@ export default function PatientDashboard() {
   const [specialization, setSpecialization] = useState("");
   const [availableDoctors, setAvailableDoctors] = useState([]);
   const [notifications, setNotifications] = useState([]);
-const [showNotifications, setShowNotifications] = useState(false);
-const [searchDoctor, setSearchDoctor] = useState("");
-const [filterDate, setFilterDate] = useState("");
-const [filterSpecialization, setFilterSpecialization] = useState("");
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [searchDoctor, setSearchDoctor] = useState("");
+  const [filterDate, setFilterDate] = useState("");
+  const [filterSpecialization, setFilterSpecialization] = useState("");
+  const [medicalRecords, setMedicalRecords] = useState([]);
   const navigate = useNavigate();
   useEffect(() => {
     fetchProfile();
     fetchAppointments();
     fetchNotifications();
-  
+    fetchMedicalRecords();
+
     const interval = setInterval(() => {
       fetchNotifications();
     }, 10000);
-  
+
     return () => clearInterval(interval);
   }, []);
   
@@ -102,6 +104,19 @@ const [filterSpecialization, setFilterSpecialization] = useState("");
       });
       const data = await res.json();
       setAppointments(Array.isArray(data) ? data : data.appointments || []);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const fetchMedicalRecords = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch("http://localhost:5001/api/medical-records/my", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      setMedicalRecords(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error(err);
     }
@@ -188,21 +203,23 @@ const [filterSpecialization, setFilterSpecialization] = useState("");
     }
   };
   const filteredAppointments = appointments.filter((a) => {
+    const isFuture = new Date(a.date) > new Date();
+
     const matchesDoctor =
       a.doctor?.fullName
         ?.toLowerCase()
         .includes(searchDoctor.toLowerCase());
-  
+
     const matchesDate = filterDate
       ? new Date(a.date).toDateString() ===
         new Date(filterDate).toDateString()
       : true;
-  
+
     const matchesSpecialization = filterSpecialization
       ? a.doctor?.specialization === filterSpecialization
       : true;
-  
-    return matchesDoctor && matchesDate && matchesSpecialization;
+
+    return isFuture && matchesDoctor && matchesDate && matchesSpecialization;
   });
 
   const handleCancelAppointment = async (appointmentId) => {
@@ -234,7 +251,7 @@ const [filterSpecialization, setFilterSpecialization] = useState("");
   };
 
   const upcomingAppointment = appointments.find(
-    (a) => a.status !== "cancelled"
+    (a) => a.status !== "cancelled" && new Date(a.date) > new Date()
   );
 
   return (
@@ -390,25 +407,44 @@ const [filterSpecialization, setFilterSpecialization] = useState("");
             <div className="bg-white p-5 rounded-xl shadow-sm">
               <div className="flex justify-between items-center mb-3">
                 <h3 className="font-semibold text-gray-700">Medical Record Summary</h3>
-                <button className="text-blue-500 text-sm">View</button>
+                <button
+                  onClick={() => navigate("/patient/medical-history")}
+                  className="text-blue-500 text-sm hover:underline"
+                >
+                  View All
+                </button>
               </div>
-              <p className="text-sm text-gray-400">Your medical records will appear here</p>
+              {medicalRecords.length === 0 ? (
+                <p className="text-sm text-gray-400">No medical records yet</p>
+              ) : (
+                <div className="space-y-2">
+                  {medicalRecords.slice(0, 2).map((rec) => (
+                    <div key={rec._id} className="bg-gray-50 rounded-lg px-3 py-2">
+                      <p className="text-xs text-gray-400">
+                        {new Date(rec.visitDate).toLocaleDateString("en-GB")} · Dr. {rec.doctor?.fullName || "—"}
+                      </p>
+                      <p className="text-sm text-gray-700 mt-0.5 truncate">
+                        {rec.diagnosis}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 
           <div className="space-y-6">
             <div className="bg-white p-5 rounded-xl shadow-sm">
               <h3 className="text-gray-500 text-sm">Medical Records</h3>
-              <h1 className="text-4xl font-bold text-blue-500 mt-2">-</h1>
-              <button className="mt-3 bg-gray-100 px-3 py-1 rounded-lg text-sm">View</button>
-            </div>
-
-            <div className="bg-white p-5 rounded-xl shadow-sm">
-              <div className="flex justify-between mb-3">
-                <h3 className="font-semibold text-gray-700">Latest Messages</h3>
-                <button className="text-blue-500 text-sm">View All</button>
-              </div>
-              <p className="text-sm text-gray-400">No messages yet</p>
+              <h1 className="text-4xl font-bold text-blue-500 mt-2">
+                {medicalRecords.length}
+              </h1>
+              <button
+                onClick={() => navigate("/patient/medical-history")}
+                className="mt-3 bg-gray-100 hover:bg-gray-200 px-3 py-1 rounded-lg text-sm transition"
+              >
+                View History
+              </button>
             </div>
           </div>
         </div>

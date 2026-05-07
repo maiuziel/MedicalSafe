@@ -55,7 +55,27 @@ export default function EditProfile() {
     }
   };
 
+  const [errors, setErrors] = useState({});
+
+  const validate = () => {
+    const newErrors = {};
+    if (!form.fullName.trim()) {
+      newErrors.fullName = "Full name is required";
+    }
+    if (!form.email.trim()) {
+      newErrors.email = "Email is required";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
+      newErrors.email = "Invalid email format";
+    }
+    if (form.phone && !/^[0-9+\-\s]{7,15}$/.test(form.phone)) {
+      newErrors.phone = "Invalid phone number";
+    }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleUpdate = async () => {
+    if (!validate()) return;
     try {
       const token = localStorage.getItem("token");
       const role = localStorage.getItem("role");
@@ -104,11 +124,10 @@ export default function EditProfile() {
             <input
               type="text"
               value={form.fullName}
-              onChange={(e) =>
-                setForm({ ...form, fullName: e.target.value })
-              }
-              className="w-full mt-1 p-3 border border-gray-200 rounded-lg"
+              onChange={(e) => setForm({ ...form, fullName: e.target.value })}
+              className={`w-full mt-1 p-3 border rounded-lg ${errors.fullName ? "border-red-400" : "border-gray-200"}`}
             />
+            {errors.fullName && <p className="text-red-500 text-xs mt-1">{errors.fullName}</p>}
           </div>
 
           <div className="mb-4">
@@ -116,11 +135,10 @@ export default function EditProfile() {
             <input
               type="email"
               value={form.email}
-              onChange={(e) =>
-                setForm({ ...form, email: e.target.value })
-              }
-              className="w-full mt-1 p-3 border border-gray-200 rounded-lg"
+              onChange={(e) => setForm({ ...form, email: e.target.value })}
+              className={`w-full mt-1 p-3 border rounded-lg ${errors.email ? "border-red-400" : "border-gray-200"}`}
             />
+            {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
           </div>
 
           <div className="mb-6">
@@ -128,11 +146,10 @@ export default function EditProfile() {
             <input
               type="text"
               value={form.phone}
-              onChange={(e) =>
-                setForm({ ...form, phone: e.target.value })
-              }
-              className="w-full mt-1 p-3 border border-gray-200 rounded-lg"
+              onChange={(e) => setForm({ ...form, phone: e.target.value })}
+              className={`w-full mt-1 p-3 border rounded-lg ${errors.phone ? "border-red-400" : "border-gray-200"}`}
             />
+            {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone}</p>}
           </div>
 
           <button
