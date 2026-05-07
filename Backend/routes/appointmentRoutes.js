@@ -6,6 +6,7 @@ const { authenticate, authorizeRoles } = require('../middleware/authMiddleware')
 const {
   createAppointment,
   getMyAppointments,
+  getMyAppointmentHistory,
   cancelAppointment,
   updateAppointment,
   getAppointmentsByPatientId,
@@ -26,6 +27,14 @@ router.get(
   authenticate,
   authorizeRoles('patient'),
   getMyAppointments
+);
+
+// היסטוריית תורים עבר למטופל
+router.get(
+  '/my/history',
+  authenticate,
+  authorizeRoles('patient'),
+  getMyAppointmentHistory
 );
 
 // ביטול תור

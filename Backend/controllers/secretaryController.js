@@ -514,6 +514,39 @@ const getSentMessages = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
+const getPatientAppointmentHistory = async (req, res) => {
+  try {
+    const { patientId } = req.params;
+    const { sort } = req.query; // 'asc' or 'desc'
+
+    const patient = await User.findOne({ _id: patientId, role: 'patient' });
+    if (!patient) {
+      return res.status(404).json({ message: 'Patient not found' });
+    }
+
+    const sortOrder = sort === 'asc' ? 1 : -1;
+
+    const appointments = await Appointment.find({
+      patient: patientId,
+      date: { $lt: new Date() }
+    })
+      .populate('doctor', 'fullName specialization')
+      .sort({ date: sortOrder });
+
+    await auditLogger({
+      req,
+      action: 'VIEW_PATIENT_APPOINTMENT_HISTORY',
+      resource: 'appointment',
+      resourceId: patientId
+    });
+
+    res.json({ patient: { _id: patient._id, fullName: patient.fullName }, appointments });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
 module.exports = {
   getMyProfile,
   updateMyProfile,
@@ -524,5 +557,6 @@ module.exports = {
   getDoctorsAvailability,
   getDoctorFreeSlots,
   sendMessageToDoctor,
-  getSentMessages
+  getSentMessages,
+  getPatientAppointmentHistory
 };

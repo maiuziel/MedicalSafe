@@ -64,7 +64,7 @@ const getMyMedicalRecords = async (req, res) => {
     const records = await MedicalRecord.find({
       patient: req.user.userId
     })
-    .populate('doctor', 'email')
+    .populate('doctor', 'fullName specialization email')
     .populate('appointment')
     .sort({ createdAt: -1 });
 
@@ -145,9 +145,36 @@ const updateMedicalRecord = async (req, res) => {
 };
 
 
+const getMedicalRecordByAppointment = async (req, res) => {
+  try {
+    const { appointmentId } = req.params;
+
+    const record = await MedicalRecord.findOne({
+      appointment: appointmentId,
+      patient: req.user.userId
+    }).populate('doctor', 'fullName specialization');
+
+    if (!record) {
+      return res.status(404).json({ message: 'No medical record for this appointment' });
+    }
+
+    await auditLogger({
+      req,
+      action: 'VIEW_MEDICAL_RECORD_BY_APPOINTMENT',
+      resource: 'medical_record',
+      resourceId: record._id
+    });
+
+    res.json(record);
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
 module.exports = {
   createMedicalRecord,
   getPatientMedicalRecords,
   getMyMedicalRecords,
-  updateMedicalRecord
+  updateMedicalRecord,
+  getMedicalRecordByAppointment
 };

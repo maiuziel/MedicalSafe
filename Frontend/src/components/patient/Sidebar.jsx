@@ -1,4 +1,4 @@
-import { Home, CalendarDays, FileText, MessageSquare, LogOut, Search, Eye } from "lucide-react";import { FaShieldAlt, FaEdit } from "react-icons/fa";
+import { Home, CalendarDays, FileText, MessageSquare, LogOut, Search, Eye, ClipboardList } from "lucide-react";import { FaShieldAlt, FaEdit } from "react-icons/fa";
 import { useNavigate, useLocation } from "react-router-dom";
 
 export default function Sidebar({ onLogout }) {
@@ -174,11 +174,31 @@ export default function Sidebar({ onLogout }) {
     Doctors Availability
   </button>
 )}
+{role === "secretary" && (
+  <button
+    onClick={() => navigate("/secretary/patient-history")}
+    className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition
+      ${location.pathname === "/secretary/patient-history"
+        ? "bg-gradient-to-r from-[#4f8df7] to-[#5d95f7] text-white"
+        : "text-[#3e4c66] hover:bg-white"
+      }`}
+  >
+    <ClipboardList size={18} />
+    Medical History
+  </button>
+)}
 
         {/* מטופל */}
         {role === "patient" && (
           <>
-            <button className="flex items-center gap-3 text-[#3e4c66] px-4 py-3 rounded-xl hover:bg-white text-sm font-medium transition">
+            <button
+              onClick={() => navigate("/patient/medical-history")}
+              className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition
+                ${location.pathname === "/patient/medical-history"
+                  ? "bg-gradient-to-r from-[#4f8df7] to-[#5d95f7] text-white"
+                  : "text-[#3e4c66] hover:bg-white"
+                }`}
+            >
               <FileText size={18} />
               Medical Record
             </button>

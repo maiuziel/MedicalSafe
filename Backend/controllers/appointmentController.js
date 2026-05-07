@@ -209,6 +209,32 @@ const updateAppointment = async (req, res) => {
 };
 
 
+const getMyAppointmentHistory = async (req, res) => {
+  try {
+    const { sort } = req.query;
+    const sortOrder = sort === 'asc' ? 1 : -1;
+
+    const appointments = await Appointment.find({
+      patient: req.user.userId,
+      date: { $lt: new Date() }
+    })
+      .populate('doctor', 'fullName specialization')
+      .sort({ date: sortOrder });
+
+    await auditLogger({
+      req,
+      action: 'VIEW_MY_APPOINTMENT_HISTORY',
+      resource: 'appointment'
+    });
+
+    res.json(appointments);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+
 const getAppointmentsByPatientId = async (req, res) => {
   try {
     const appointments = await Appointment.find({
@@ -226,6 +252,7 @@ const getAppointmentsByPatientId = async (req, res) => {
 module.exports = {
   createAppointment,
   getMyAppointments,
+  getMyAppointmentHistory,
   cancelAppointment,
   updateAppointment,
   getAppointmentsByPatientId,

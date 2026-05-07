@@ -20,6 +20,8 @@ import SecretaryDashboard from "./pages/SecretaryDashboard";
 import SecretarySendMessage from "./pages/SecretarySendMessage";
 import DoctorSendMessage from "./pages/DoctorSendMessage";
 import SecretaryDoctorsAvailability from "./pages/SecretaryDoctorsAvailability";
+import SecretaryPatientHistory from "./pages/SecretaryPatientHistory";
+import PatientMedicalHistory from "./pages/PatientMedicalHistory";
 function App() {
   const role = localStorage.getItem("role");
 
@@ -58,10 +60,12 @@ function App() {
         <Route path="/doctor/appointments" element={<DoctorAppointments />} />
 
         {/* ✅ FIXED */}
+        <Route path="/patient/medical-history" element={<PatientMedicalHistory />} />
         <Route path="/patient/requests" element={<PatientRequests />} />
         <Route path="/patient/requests/:requestId" element={<PatientRequests />} />
         <Route path="/patient/feedback/:appointmentId" element={<PatientFeedback />} />
         <Route path="/secretary/send-message" element={<SecretarySendMessage />} />
+        <Route path="/secretary/patient-history" element={<SecretaryPatientHistory />} />
         <Route path="/doctor/send-message" element={<DoctorSendMessage />} />
       </Routes>
     </Router>

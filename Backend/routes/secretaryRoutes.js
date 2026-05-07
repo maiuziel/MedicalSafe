@@ -13,7 +13,8 @@ const {
   getDoctorsAvailability,
   getDoctorFreeSlots,
   sendMessageToDoctor,
-getSentMessages
+  getSentMessages,
+  getPatientAppointmentHistory
 } = require('../controllers/secretaryController');
 
 router.get('/me', authenticate, authorizeRoles('secretary'), getMyProfile);
@@ -49,4 +50,11 @@ router.get(
   authorizeRoles('secretary'),
   getSentMessages
 );
+router.get(
+  '/patients/:patientId/appointments',
+  authenticate,
+  authorizeRoles('secretary'),
+  getPatientAppointmentHistory
+);
+
 module.exports = router;

@@ -648,6 +648,19 @@ setTimeout(() => setMessageAlert(""), 3000);
   </>
 )}
 
+{a.status === "completed" && (
+  <button
+    onClick={() =>
+      navigate(`/doctor/appointments/${a._id}/summary`, {
+        state: { appointment: a }
+      })
+    }
+    className="bg-blue-500 text-white px-2 py-1 rounded text-xs"
+  >
+    + Add Summary
+  </button>
+)}
+
 </div>
       </div>
     );

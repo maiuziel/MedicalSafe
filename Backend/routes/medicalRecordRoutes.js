@@ -7,7 +7,8 @@ const {
   createMedicalRecord,
   getMyMedicalRecords,
   getPatientMedicalRecords,
-  updateMedicalRecord
+  updateMedicalRecord,
+  getMedicalRecordByAppointment
 } = require('../controllers/medicalRecordController');
 
 
@@ -44,6 +45,14 @@ router.put(
   authenticate,
   authorizeRoles('doctor'),
   updateMedicalRecord
+);
+
+// מטופל רואה סיכום רפואי לתור ספציפי
+router.get(
+  '/appointment/:appointmentId',
+  authenticate,
+  authorizeRoles('patient'),
+  getMedicalRecordByAppointment
 );
 
 module.exports = router;
