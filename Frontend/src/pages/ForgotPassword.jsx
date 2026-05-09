@@ -5,8 +5,10 @@ import { FaShieldAlt } from "react-icons/fa";
 export default function ForgotPassword() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async () => {
+    setLoading(true);
     try {
       const res = await fetch("https://medicalsafe-backend.onrender.com/api/auth/forgot-password", {
         method: "POST",
@@ -27,6 +29,8 @@ export default function ForgotPassword() {
     } catch (err) {
       console.error(err);
       alert("Server error");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -55,9 +59,10 @@ export default function ForgotPassword() {
 
         <button
           onClick={handleSubmit}
-          className="w-full bg-gradient-to-r from-blue-400 to-blue-600 text-white p-3 rounded-lg"
+          disabled={loading}
+          className="w-full bg-gradient-to-r from-blue-400 to-blue-600 text-white p-3 rounded-lg disabled:opacity-60"
         >
-          Send Reset Link
+          {loading ? "Sending..." : "Send Reset Link"}
         </button>
 
         <p
