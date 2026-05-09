@@ -9,7 +9,7 @@ const transporter = nodemailer.createTransport({
 });
 
 const sendResetEmail = async (email, token) => {
-    const resetLink = `http://localhost:5173/reset-password/${token}`;
+    const resetLink = `https://medicalsafefrontend.vercel.app/reset-password/${token}`;
 
   await transporter.sendMail({
     from: `"MedicalSafe" <your-email@gmail.com>`,
