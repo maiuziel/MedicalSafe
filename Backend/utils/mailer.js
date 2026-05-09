@@ -1,18 +1,23 @@
 const nodemailer = require("nodemailer");
-
-const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 587,
-  secure: false,
-  family: 4,
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS.replace(/\s/g, ""),
-  },
-});
+const dns = require("dns").promises;
 
 const sendResetEmail = async (email, token) => {
   const resetLink = `https://medicalsafefrontend.vercel.app/reset-password/${token}`;
+
+  const [ipv4] = await dns.resolve4("smtp.gmail.com");
+
+  const transporter = nodemailer.createTransport({
+    host: ipv4,
+    port: 587,
+    secure: false,
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS.replace(/\s/g, ""),
+    },
+    tls: {
+      servername: "smtp.gmail.com",
+    },
+  });
 
   await transporter.sendMail({
     from: `"MedicalSafe" <${process.env.EMAIL_USER}>`,
