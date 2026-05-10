@@ -1,26 +1,20 @@
 const nodemailer = require("nodemailer");
-const dns = require("dns").promises;
 
 const sendResetEmail = async (email, token) => {
   const resetLink = `https://medicalsafefrontend.vercel.app/reset-password/${token}`;
 
-  const [ipv4] = await dns.resolve4("smtp.gmail.com");
-
   const transporter = nodemailer.createTransport({
-    host: ipv4,
+    host: "smtp-relay.brevo.com",
     port: 587,
     secure: false,
     auth: {
       user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS.replace(/\s/g, ""),
-    },
-    tls: {
-      servername: "smtp.gmail.com",
+      pass: process.env.EMAIL_PASS,
     },
   });
 
   await transporter.sendMail({
-    from: `"MedicalSafe" <${process.env.EMAIL_USER}>`,
+    from: `"MedicalSafe" <${process.env.EMAIL_FROM}>`,
     to: email,
     subject: "Reset Your Password",
     html: `
