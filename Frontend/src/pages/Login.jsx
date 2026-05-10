@@ -6,6 +6,7 @@ import doctorImg from "../assets/doctor2.png";
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const navigate = useNavigate();
 
@@ -84,15 +85,18 @@ export default function Login() {
 
             <div className="relative mb-4">
               <input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 placeholder="••••••••"
                 className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300 text-sm"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
 
-              <span className="absolute right-3 top-3 text-gray-400 text-sm cursor-pointer">
-                Show
+              <span
+                onClick={() => setShowPassword((prev) => !prev)}
+                className="absolute right-3 top-3 text-gray-400 text-sm cursor-pointer select-none"
+              >
+                {showPassword ? "Hide" : "Show"}
               </span>
             </div>
 
