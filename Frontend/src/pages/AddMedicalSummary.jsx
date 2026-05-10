@@ -14,6 +14,7 @@ export default function AddMedicalSummary() {
   const [treatment, setTreatment] = useState("");
   const [recommendations, setRecommendations] = useState("");
   const [notes, setNotes] = useState("");
+  const [files, setFiles] = useState([]);
   const [isDirty, setIsDirty] = useState(false);
 
   if (!appointment) {
@@ -42,21 +43,22 @@ export default function AddMedicalSummary() {
     try {
       const token = localStorage.getItem("token");
 
+      const formData = new FormData();
+      formData.append("patientId", appointment.patient._id);
+      formData.append("appointmentId", appointment._id);
+      formData.append("visitDate", new Date().toISOString());
+      formData.append("diagnosis", diagnosis);
+      formData.append("treatment", treatment);
+      formData.append("recommendations", recommendations);
+      formData.append("notes", notes);
+      files.forEach((f) => formData.append("files", f));
+
       const res = await fetch("https://medicalsafe-backend.onrender.com/api/medical-records", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          patientId: appointment.patient._id,
-          appointmentId: appointment._id,
-          visitDate: new Date(),
-          diagnosis,
-          treatment,
-          recommendations,
-          notes,
-        }),
+        body: formData,
       });
 
       const data = await res.json();
@@ -132,6 +134,21 @@ export default function AddMedicalSummary() {
               onChange={(v) => { setNotes(v); setIsDirty(true); }}
               placeholder="Additional notes (optional)..."
             />
+
+            <div>
+              <label className="block text-sm font-medium text-[#3e4c66] mb-1.5">
+                Attachments <span className="text-[#9aa6b8] font-normal">(optional)</span>
+              </label>
+              <input
+                type="file"
+                multiple
+                onChange={(e) => { setFiles(Array.from(e.target.files)); setIsDirty(true); }}
+                className="w-full border border-[#d1dce8] rounded-xl px-4 py-2.5 text-sm text-[#1f2a44] file:mr-3 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-sm file:bg-[#f0f4f9] file:text-[#3e4c66] hover:file:bg-[#e6edf5]"
+              />
+              {files.length > 0 && (
+                <p className="text-xs text-[#6b7a90] mt-1">{files.length} file(s) selected</p>
+              )}
+            </div>
 
             <div className="flex gap-3 pt-2">
               <button

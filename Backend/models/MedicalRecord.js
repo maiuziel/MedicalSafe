@@ -45,6 +45,13 @@ const medicalRecordSchema = new mongoose.Schema(
     default: ""
   },
 
+  files: [
+    {
+      filename: String,
+      originalName: String,
+    }
+  ],
+
   versions: [
     {
       diagnosis: String,

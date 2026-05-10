@@ -29,6 +29,11 @@ const createMedicalRecord = async (req, res) => {
       return res.status(404).json({ message: 'Appointment not found' });
     }
 
+    const files = (req.files || []).map((f) => ({
+      filename: f.filename,
+      originalName: f.originalname,
+    }));
+
     //  יצירת הסיכום
     const record = await MedicalRecord.create({
       patient: patientId,
@@ -38,7 +43,8 @@ const createMedicalRecord = async (req, res) => {
       diagnosis,
       treatment,
       recommendations,
-      notes
+      notes,
+      files,
     });
 
     //  Audit Log

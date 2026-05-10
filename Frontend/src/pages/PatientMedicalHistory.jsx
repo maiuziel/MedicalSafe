@@ -177,14 +177,34 @@ export default function PatientMedicalHistory() {
                           No medical record available for this visit.
                         </div>
                       ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <RecordField label="Diagnosis" value={record.diagnosis} />
-                          <RecordField label="Treatment" value={record.treatment} />
-                          <RecordField label="Recommendations" value={record.recommendations} />
-                          {record.notes && (
-                            <RecordField label="Notes" value={record.notes} />
+                        <>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <RecordField label="Diagnosis" value={record.diagnosis} />
+                            <RecordField label="Treatment" value={record.treatment} />
+                            <RecordField label="Recommendations" value={record.recommendations} />
+                            {record.notes && (
+                              <RecordField label="Notes" value={record.notes} />
+                            )}
+                          </div>
+                          {record.files && record.files.length > 0 && (
+                            <div className="mt-4">
+                              <p className="text-xs font-semibold text-[#5d95f7] uppercase tracking-wide mb-2">Attachments</p>
+                              <div className="flex flex-col gap-1">
+                                {record.files.map((f, i) => (
+                                  <a
+                                    key={i}
+                                    href={`https://medicalsafe-backend.onrender.com/uploads/${f.filename}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-sm text-[#5d95f7] hover:underline"
+                                  >
+                                    📎 {f.originalName}
+                                  </a>
+                                ))}
+                              </div>
+                            </div>
                           )}
-                        </div>
+                        </>
                       )}
 
                       {appt.status === "completed" && (

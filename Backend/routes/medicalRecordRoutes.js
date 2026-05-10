@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 
 const { authenticate, authorizeRoles } = require('../middleware/authMiddleware');
+const upload = require('../middleware/upload');
 
 const {
   createMedicalRecord,
@@ -17,6 +18,7 @@ router.post(
   '/',
   authenticate,
   authorizeRoles('doctor'),
+  upload.array('files', 10),
   createMedicalRecord
 );
 
