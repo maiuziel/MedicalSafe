@@ -22,6 +22,7 @@ const notificationSchema = new mongoose.Schema({
       "doctor_message",
       "follow_up_alert",
       "appointment_change_request",
+      "new_request",
     ],
     required: true,
   },
