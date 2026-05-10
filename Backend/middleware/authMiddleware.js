@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
 const tokenBlacklist = require('../utils/tokenBlacklist');
 
-const authenticate = (req, res, next) => {
+const authenticate = async (req, res, next) => {
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -10,13 +10,13 @@ const authenticate = (req, res, next) => {
 
   const token = authHeader.split(' ')[1];
 
-  if (tokenBlacklist.has(token)) {
+  if (await tokenBlacklist.has(token)) {
     return res.status(401).json({ message: 'Token has been invalidated' });
   }
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded; // { userId, role }
+    req.user = decoded;
     next();
   } catch (err) {
     return res.status(401).json({ message: 'Invalid token' });

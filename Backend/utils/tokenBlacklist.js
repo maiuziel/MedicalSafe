@@ -1,6 +1,11 @@
-const blacklist = new Set();
+const BlacklistedToken = require('../models/BlacklistedToken');
 
 module.exports = {
-  add: (token) => blacklist.add(token),
-  has: (token) => blacklist.has(token),
+  add: async (token, expiresAt) => {
+    await BlacklistedToken.create({ token, expiresAt });
+  },
+  has: async (token) => {
+    const found = await BlacklistedToken.findOne({ token });
+    return !!found;
+  },
 };

@@ -300,7 +300,8 @@ const logout = async (req, res) => {
   const authHeader = req.headers.authorization;
   if (authHeader && authHeader.startsWith('Bearer ')) {
     const token = authHeader.split(' ')[1];
-    tokenBlacklist.add(token);
+    const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // שעה אחת
+    await tokenBlacklist.add(token, expiresAt);
   }
 
   try {
