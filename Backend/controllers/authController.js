@@ -17,6 +17,26 @@ const register = async (req, res) => {
       });
     }
 
+    if (!/^[A-Z][a-z]+ [A-Z][a-z]+$/.test(fullName)) {
+      return res.status(400).json({ message: 'Name must be in English, include first and last name, and start with capital letters' });
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res.status(400).json({ message: 'Please enter a valid email address' });
+    }
+
+    if (!/^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%&*])[A-Za-z\d!@#$%&*]{6,12}$/.test(password)) {
+      return res.status(400).json({ message: 'Password must be 6-12 characters, include at least one uppercase letter and one special character' });
+    }
+
+    if (!/^05\d{8}$/.test(phone)) {
+      return res.status(400).json({ message: 'Phone must be a valid Israeli number (10 digits starting with 05)' });
+    }
+
+    if (idNumber && !/^\d{9}$/.test(idNumber)) {
+      return res.status(400).json({ message: 'ID must contain exactly 9 digits' });
+    }
+
     const userRole = 'patient';
 
     const existingUser = await User.findOne({ email });
