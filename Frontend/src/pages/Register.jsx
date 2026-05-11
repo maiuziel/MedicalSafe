@@ -70,7 +70,7 @@ export default function Register() {
     if (Object.keys(newErrors).length > 0) return;
 
     try {
-      const res = await fetch("https://medicalsafe-backend.onrender.com/api/auth/register", {
+      const res = await fetch("http://62.238.31.43:3000/api/auth/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

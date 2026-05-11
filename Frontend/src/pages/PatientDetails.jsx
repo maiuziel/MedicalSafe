@@ -29,7 +29,7 @@ export default function PatientDetails() {
       const token = localStorage.getItem("token");
 
       const resPatient = await fetch(
-        `https://medicalsafe-backend.onrender.com/api/patient/${id}`,
+        `http://62.238.31.43:3000/api/patient/${id}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -41,7 +41,7 @@ export default function PatientDetails() {
       setPatient(dataPatient);
 
       const resAppointments = await fetch(
-        `https://medicalsafe-backend.onrender.com/api/appointments/patient/${id}`,
+        `http://62.238.31.43:3000/api/appointments/patient/${id}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -52,7 +52,7 @@ export default function PatientDetails() {
       const dataAppointments = await resAppointments.json();
       setAppointments(dataAppointments);
       const resRecords = await fetch(
-        `https://medicalsafe-backend.onrender.com/api/medical-records/patient/${id}`,
+        `http://62.238.31.43:3000/api/medical-records/patient/${id}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -72,7 +72,7 @@ setMedicalRecords(dataRecords);
     try {
       const token = localStorage.getItem("token");
 
-      const res = await fetch("https://medicalsafe-backend.onrender.com/api/follow-up", {
+      const res = await fetch("http://62.238.31.43:3000/api/follow-up", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -92,7 +92,7 @@ setMedicalRecords(dataRecords);
       const token = localStorage.getItem("token");
   
       const res = await fetch(
-        `https://medicalsafe-backend.onrender.com/api/follow-up/logs/${id}`,
+        `http://62.238.31.43:3000/api/follow-up/logs/${id}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -115,7 +115,7 @@ setMedicalRecords(dataRecords);
       const method = isFollowUp ? "DELETE" : "PUT";
   
       const res = await fetch(
-        `https://medicalsafe-backend.onrender.com/api/follow-up/${id}`,
+        `http://62.238.31.43:3000/api/follow-up/${id}`,
         {
           method,
           headers: {
@@ -147,7 +147,7 @@ setMedicalRecords(dataRecords);
       const token = localStorage.getItem("token");
 
       const res = await fetch(
-        `https://medicalsafe-backend.onrender.com/api/doctor/patient/${id}/files`,
+        `http://62.238.31.43:3000/api/doctor/patient/${id}/files`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -165,7 +165,7 @@ setMedicalRecords(dataRecords);
   const handleSaveEdit = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch(`https://medicalsafe-backend.onrender.com/api/medical-records/${editingRecord}`, {
+      const res = await fetch(`http://62.238.31.43:3000/api/medical-records/${editingRecord}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify(editForm),
@@ -196,7 +196,7 @@ setMedicalRecords(dataRecords);
       formData.append("description", description);
 
       const res = await fetch(
-        `https://medicalsafe-backend.onrender.com/api/doctor/patient/${id}/files`,
+        `http://62.238.31.43:3000/api/doctor/patient/${id}/files`,
         {
           method: "POST",
           headers: {
@@ -329,7 +329,7 @@ setMedicalRecords(dataRecords);
                 </p>
 
                 <a
-                  href={`https://medicalsafe-backend.onrender.com/uploads/${f.file}`}
+                  href={`http://62.238.31.43:3000/uploads/${f.file}`}
                   target="_blank"
                   rel="noreferrer"
                   style={{ color: "blue" }}

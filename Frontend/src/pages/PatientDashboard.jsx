@@ -43,7 +43,7 @@ export default function PatientDashboard() {
   const fetchProfile = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch("https://medicalsafe-backend.onrender.com/api/patient/me", {
+      const res = await fetch("http://62.238.31.43:3000/api/patient/me", {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
@@ -56,7 +56,7 @@ export default function PatientDashboard() {
     try {
       const token = localStorage.getItem("token");
   
-      const res = await fetch("https://medicalsafe-backend.onrender.com/api/notifications", {
+      const res = await fetch("http://62.238.31.43:3000/api/notifications", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -72,7 +72,7 @@ export default function PatientDashboard() {
     try {
       const token = localStorage.getItem("token");
   
-      await fetch(`https://medicalsafe-backend.onrender.com/api/notifications/${id}/read`, {
+      await fetch(`http://62.238.31.43:3000/api/notifications/${id}/read`, {
         method: "PUT",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -99,7 +99,7 @@ export default function PatientDashboard() {
   const fetchAppointments = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch("https://medicalsafe-backend.onrender.com/api/appointments/my", {
+      const res = await fetch("http://62.238.31.43:3000/api/appointments/my", {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
@@ -112,7 +112,7 @@ export default function PatientDashboard() {
   const fetchMedicalRecords = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch("https://medicalsafe-backend.onrender.com/api/medical-records/my", {
+      const res = await fetch("http://62.238.31.43:3000/api/medical-records/my", {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
@@ -125,7 +125,7 @@ export default function PatientDashboard() {
   const fetchDoctors = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch("https://medicalsafe-backend.onrender.com/api/doctor", {
+      const res = await fetch("http://62.238.31.43:3000/api/doctor", {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
@@ -159,7 +159,7 @@ export default function PatientDashboard() {
 
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch("https://medicalsafe-backend.onrender.com/api/appointments", {
+      const res = await fetch("http://62.238.31.43:3000/api/appointments", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -193,7 +193,7 @@ export default function PatientDashboard() {
     try {
       const token = localStorage.getItem("token");
       const res = await fetch(
-        `https://medicalsafe-backend.onrender.com/api/doctor/availability?date=${selectedDate}&time=${selectedTime}&specialization=${encodeURIComponent(specialization)}`,
+        `http://62.238.31.43:3000/api/doctor/availability?date=${selectedDate}&time=${selectedTime}&specialization=${encodeURIComponent(specialization)}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -234,7 +234,7 @@ export default function PatientDashboard() {
     try {
       const token = localStorage.getItem("token");
       const res = await fetch(
-        `https://medicalsafe-backend.onrender.com/api/appointments/cancel/${appointmentId}`, 
+        `http://62.238.31.43:3000/api/appointments/cancel/${appointmentId}`, 
         {
           method: "PUT", // 🔥 שינוי METHOD
           headers: { Authorization: `Bearer ${token}` },

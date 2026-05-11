@@ -17,7 +17,7 @@ export default function DoctorFeedbacks() {
   const fetchFeedbacks = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch("https://medicalsafe-backend.onrender.com/api/feedback/doctor", {
+      const res = await fetch("http://62.238.31.43:3000/api/feedback/doctor", {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();

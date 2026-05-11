@@ -12,7 +12,7 @@ export default function Login() {
 
   const handleLogin = async () => {
     try {
-      const res = await fetch("https://medicalsafe-backend.onrender.com/api/auth/login", {
+      const res = await fetch("http://62.238.31.43:3000/api/auth/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

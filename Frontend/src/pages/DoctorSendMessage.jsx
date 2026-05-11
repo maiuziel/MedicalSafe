@@ -20,7 +20,7 @@ export default function DoctorSendMessage() {
 
   const fetchSecretaries = async () => {
     try {
-      const res = await fetch("https://medicalsafe-backend.onrender.com/api/messages/secretaries", {
+      const res = await fetch("http://62.238.31.43:3000/api/messages/secretaries", {
         headers: { Authorization: `Bearer ${token}` },
       });
   
@@ -39,7 +39,7 @@ export default function DoctorSendMessage() {
     }
   };
   const fetchHistory = async () => {
-    const res = await fetch("https://medicalsafe-backend.onrender.com/api/messages/sent", {
+    const res = await fetch("http://62.238.31.43:3000/api/messages/sent", {
       headers: { Authorization: `Bearer ${token}` },
     });
 
@@ -53,7 +53,7 @@ export default function DoctorSendMessage() {
       return;
     }
 
-    const res = await fetch("https://medicalsafe-backend.onrender.com/api/messages/doctor-to-secretary", {
+    const res = await fetch("http://62.238.31.43:3000/api/messages/doctor-to-secretary", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

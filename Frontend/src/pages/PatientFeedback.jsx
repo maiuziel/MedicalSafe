@@ -21,7 +21,7 @@ export default function PatientFeedback() {
       const token = localStorage.getItem("token");
 
       const res = await fetch(
-        `https://medicalsafe-backend.onrender.com/api/feedback/${appointmentId}`,
+        `http://62.238.31.43:3000/api/feedback/${appointmentId}`,
         {
           method: "POST",
           headers: {

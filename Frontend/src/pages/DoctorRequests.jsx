@@ -18,7 +18,7 @@ export default function DoctorRequests() {
     try {
       const token = localStorage.getItem("token");
 
-      const res = await fetch("https://medicalsafe-backend.onrender.com/api/doctor/requests", {
+      const res = await fetch("http://62.238.31.43:3000/api/doctor/requests", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -36,7 +36,7 @@ export default function DoctorRequests() {
       const token = localStorage.getItem("token");
 
       const res = await fetch(
-        `https://medicalsafe-backend.onrender.com/api/doctor/requests/${id}`,
+        `http://62.238.31.43:3000/api/doctor/requests/${id}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -70,7 +70,7 @@ export default function DoctorRequests() {
       }
   
       const res = await fetch(
-        `https://medicalsafe-backend.onrender.com/api/requests/${selectedRequest._id}/reply`,
+        `http://62.238.31.43:3000/api/requests/${selectedRequest._id}/reply`,
         {
           method: "POST",
           headers: {
@@ -97,7 +97,7 @@ export default function DoctorRequests() {
       const token = localStorage.getItem("token");
 
       const res = await fetch(
-        `https://medicalsafe-backend.onrender.com/api/requests/${selectedRequest._id}/status`,
+        `http://62.238.31.43:3000/api/requests/${selectedRequest._id}/status`,
         {
           method: "PUT",
           headers: {
