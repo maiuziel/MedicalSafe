@@ -14,7 +14,7 @@ export default function FollowUpPatients() {
     try {
       const token = localStorage.getItem("token");
 
-      const res = await fetch("http://62.238.31.43:3000/api/follow-up", {
+      const res = await fetch("https://medicalsafe.duckdns.org/api/follow-up", {
         headers: {
           Authorization: `Bearer ${token}`,
         },

@@ -19,7 +19,7 @@ export default function SecretaryDoctorsAvailability() {
 
   const fetchDoctorsList = async () => {
     try {
-      const res = await fetch("http://62.238.31.43:3000/api/secretary/doctors", {
+      const res = await fetch("https://medicalsafe.duckdns.org/api/secretary/doctors", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -35,7 +35,7 @@ export default function SecretaryDoctorsAvailability() {
 
   const fetchAvailability = async () => {
     try {
-      let url = "http://62.238.31.43:3000/api/secretary/doctors/availability";
+      let url = "https://medicalsafe.duckdns.org/api/secretary/doctors/availability";
 
       const params = new URLSearchParams();
 

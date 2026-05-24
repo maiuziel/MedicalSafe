@@ -22,7 +22,7 @@ export default function SecretaryPatientHistory() {
     setAppointments([]);
     try {
       const res = await fetch(
-        `http://62.238.31.43:3000/api/secretary/patients?q=${encodeURIComponent(query)}`,
+        `https://medicalsafe.duckdns.org/api/secretary/patients?q=${encodeURIComponent(query)}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       const data = await res.json();
@@ -40,7 +40,7 @@ export default function SecretaryPatientHistory() {
     setHistoryLoading(true);
     try {
       const res = await fetch(
-        `http://62.238.31.43:3000/api/secretary/patients/${patient._id}/appointments?sort=${order}`,
+        `https://medicalsafe.duckdns.org/api/secretary/patients/${patient._id}/appointments?sort=${order}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       const data = await res.json();

@@ -24,7 +24,7 @@ export default function SecretaryAppointments() {
     try {
       const token = localStorage.getItem("token");
 
-      const res = await fetch("http://62.238.31.43:3000/api/secretary/doctors", {
+      const res = await fetch("https://medicalsafe.duckdns.org/api/secretary/doctors", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -55,7 +55,7 @@ export default function SecretaryAppointments() {
         params.append("endDate", endDate);
       }
 
-      const url = `http://62.238.31.43:3000/api/secretary/appointments?${params.toString()}`;
+      const url = `https://medicalsafe.duckdns.org/api/secretary/appointments?${params.toString()}`;
 
       const res = await fetch(url, {
         headers: {

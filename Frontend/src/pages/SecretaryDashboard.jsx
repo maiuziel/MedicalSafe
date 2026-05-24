@@ -92,7 +92,7 @@ export default function SecretaryDashboard() {
     try {
       const token = localStorage.getItem("token");
 
-      const res = await fetch("http://62.238.31.43:3000/api/secretary/me", {
+      const res = await fetch("https://medicalsafe.duckdns.org/api/secretary/me", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -109,7 +109,7 @@ export default function SecretaryDashboard() {
     try {
       const token = localStorage.getItem("token");
 
-      const res = await fetch("http://62.238.31.43:3000/api/notifications", {
+      const res = await fetch("https://medicalsafe.duckdns.org/api/notifications", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -126,7 +126,7 @@ export default function SecretaryDashboard() {
     try {
       const token = localStorage.getItem("token");
 
-      const res = await fetch("http://62.238.31.43:3000/api/secretary/doctors", {
+      const res = await fetch("https://medicalsafe.duckdns.org/api/secretary/doctors", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -144,7 +144,7 @@ export default function SecretaryDashboard() {
       const token = localStorage.getItem("token");
       const today = new Date().toISOString().split("T")[0];
       const res = await fetch(
-        `http://62.238.31.43:3000/api/secretary/appointments?startDate=${today}&endDate=${today}`,
+        `https://medicalsafe.duckdns.org/api/secretary/appointments?startDate=${today}&endDate=${today}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       const data = await res.json();
@@ -158,7 +158,7 @@ export default function SecretaryDashboard() {
     try {
       const token = localStorage.getItem("token");
       const res = await fetch(
-        "http://62.238.31.43:3000/api/secretary/doctors/availability",
+        "https://medicalsafe.duckdns.org/api/secretary/doctors/availability",
         { headers: { Authorization: `Bearer ${token}` } }
       );
       const data = await res.json();
@@ -177,7 +177,7 @@ export default function SecretaryDashboard() {
       const token = localStorage.getItem("token");
 
       const res = await fetch(
-        `http://62.238.31.43:3000/api/secretary/patients?q=${patientSearch}`,
+        `https://medicalsafe.duckdns.org/api/secretary/patients?q=${patientSearch}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -215,7 +215,7 @@ export default function SecretaryDashboard() {
         params.append("endDate", endDate);
       }
 
-      const url = `http://62.238.31.43:3000/api/secretary/appointments?${params.toString()}`;
+      const url = `https://medicalsafe.duckdns.org/api/secretary/appointments?${params.toString()}`;
 
       const res = await fetch(url, {
         headers: {
@@ -255,7 +255,7 @@ export default function SecretaryDashboard() {
     try {
       const token = localStorage.getItem("token");
 
-      await fetch(`http://62.238.31.43:3000/api/notifications/${id}/read`, {
+      await fetch(`https://medicalsafe.duckdns.org/api/notifications/${id}/read`, {
         method: "PUT",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -272,7 +272,7 @@ export default function SecretaryDashboard() {
     try {
       const token = localStorage.getItem("token");
   
-      await fetch(`http://62.238.31.43:3000/api/notifications/${n._id}/read`, {
+      await fetch(`https://medicalsafe.duckdns.org/api/notifications/${n._id}/read`, {
         method: "PUT",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -281,7 +281,7 @@ export default function SecretaryDashboard() {
   
       if (n.type === "doctor_message" && n.relatedMessage) {
         const res = await fetch(
-          `http://62.238.31.43:3000/api/messages/${n.relatedMessage}/conversation`,
+          `https://medicalsafe.duckdns.org/api/messages/${n.relatedMessage}/conversation`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -312,7 +312,7 @@ export default function SecretaryDashboard() {
       const token = localStorage.getItem("token");
   
       const res = await fetch(
-        `http://62.238.31.43:3000/api/messages/${selectedMessage._id}/reply`,
+        `https://medicalsafe.duckdns.org/api/messages/${selectedMessage._id}/reply`,
         {
           method: "POST",
           headers: {
@@ -329,7 +329,7 @@ export default function SecretaryDashboard() {
         setTimeout(() => setMessageAlert(""), 3000);
   
         const convRes = await fetch(
-          `http://62.238.31.43:3000/api/messages/${selectedMessage._id}/conversation`,
+          `https://medicalsafe.duckdns.org/api/messages/${selectedMessage._id}/conversation`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -368,7 +368,7 @@ export default function SecretaryDashboard() {
       const token = localStorage.getItem("token");
   
       const res = await fetch(
-        `http://62.238.31.43:3000/api/secretary/doctors/${doctorId}/free-slots`,
+        `https://medicalsafe.duckdns.org/api/secretary/doctors/${doctorId}/free-slots`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -406,7 +406,7 @@ export default function SecretaryDashboard() {
       const newDateTime = new Date(`${editDate}T${editTime}`);
 
       const res = await fetch(
-        `http://62.238.31.43:3000/api/secretary/appointments/${editingAppointment._id}`,
+        `https://medicalsafe.duckdns.org/api/secretary/appointments/${editingAppointment._id}`,
         {
           method: "PUT",
           headers: {

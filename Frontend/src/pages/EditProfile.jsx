@@ -3,14 +3,14 @@ import Sidebar from "../components/patient/Sidebar";
 
 const getProfileEndpoint = (role) => {
   if (role === "doctor") {
-    return "http://62.238.31.43:3000/api/doctor/me";
+    return "https://medicalsafe.duckdns.org/api/doctor/me";
   }
 
   if (role === "secretary") {
-    return "http://62.238.31.43:3000/api/secretary/me";
+    return "https://medicalsafe.duckdns.org/api/secretary/me";
   }
 
-  return "http://62.238.31.43:3000/api/patient/me";
+  return "https://medicalsafe.duckdns.org/api/patient/me";
 };
 
 export default function EditProfile() {
@@ -85,7 +85,7 @@ export default function EditProfile() {
     }
     setResetLoading(true);
     try {
-      const res = await fetch("http://62.238.31.43:3000/api/auth/forgot-password", {
+      const res = await fetch("https://medicalsafe.duckdns.org/api/auth/forgot-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: form.email }),

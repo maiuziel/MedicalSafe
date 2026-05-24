@@ -16,7 +16,7 @@ export default function DoctorSearchPatients() {
     console.log("ROLE:", localStorage.getItem("role"));
     try {
       const res = await axios.get(
-        `http://62.238.31.43:3000/api/doctor/patients/search?query=${value}`,
+        `https://medicalsafe.duckdns.org/api/doctor/patients/search?query=${value}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,

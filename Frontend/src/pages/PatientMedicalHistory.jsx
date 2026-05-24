@@ -22,7 +22,7 @@ export default function PatientMedicalHistory() {
     setLoading(true);
     try {
       const res = await fetch(
-        `http://62.238.31.43:3000/api/appointments/my/history?sort=${order}`,
+        `https://medicalsafe.duckdns.org/api/appointments/my/history?sort=${order}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       const data = await res.json();
@@ -53,7 +53,7 @@ export default function PatientMedicalHistory() {
     setRecordLoading(appt._id);
     try {
       const res = await fetch(
-        `http://62.238.31.43:3000/api/medical-records/appointment/${appt._id}`,
+        `https://medicalsafe.duckdns.org/api/medical-records/appointment/${appt._id}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       if (res.status === 404) {
@@ -193,7 +193,7 @@ export default function PatientMedicalHistory() {
                                 {record.files.map((f, i) => (
                                   <a
                                     key={i}
-                                    href={`http://62.238.31.43:3000/uploads/${f.filename}`}
+                                    href={`https://medicalsafe.duckdns.org/uploads/${f.filename}`}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="text-sm text-[#5d95f7] hover:underline"

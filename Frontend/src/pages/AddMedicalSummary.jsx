@@ -53,7 +53,7 @@ export default function AddMedicalSummary() {
       formData.append("notes", notes);
       files.forEach((f) => formData.append("files", f));
 
-      const res = await fetch("http://62.238.31.43:3000/api/medical-records", {
+      const res = await fetch("https://medicalsafe.duckdns.org/api/medical-records", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,

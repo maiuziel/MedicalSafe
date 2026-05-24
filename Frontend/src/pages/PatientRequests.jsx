@@ -30,7 +30,7 @@ export default function PatientRequests() {
     try {
       const token = localStorage.getItem("token");
 
-      const res = await fetch("http://62.238.31.43:3000/api/doctor", {
+      const res = await fetch("https://medicalsafe.duckdns.org/api/doctor", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -48,7 +48,7 @@ export default function PatientRequests() {
     try {
       const token = localStorage.getItem("token");
 
-      const res = await fetch("http://62.238.31.43:3000/api/doctor/specializations", {
+      const res = await fetch("https://medicalsafe.duckdns.org/api/doctor/specializations", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -66,7 +66,7 @@ export default function PatientRequests() {
     try {
       const token = localStorage.getItem("token");
   
-      const res = await fetch("http://62.238.31.43:3000/api/patient/requests", {
+      const res = await fetch("https://medicalsafe.duckdns.org/api/patient/requests", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -107,7 +107,7 @@ export default function PatientRequests() {
     try {
       const token = localStorage.getItem("token");
 
-      const res = await fetch("http://62.238.31.43:3000/api/patient/requests", {
+      const res = await fetch("https://medicalsafe.duckdns.org/api/patient/requests", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

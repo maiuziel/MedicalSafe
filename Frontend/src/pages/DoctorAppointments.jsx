@@ -19,7 +19,7 @@ export default function DoctorAppointments() {
       if (statusFilter) params.append("status", statusFilter);
       if (sortBy) params.append("sortBy", sortBy);
 
-      const res = await fetch(`http://62.238.31.43:3000/api/doctor/appointments?${params.toString()}`, {
+      const res = await fetch(`https://medicalsafe.duckdns.org/api/doctor/appointments?${params.toString()}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 

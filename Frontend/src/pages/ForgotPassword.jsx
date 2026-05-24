@@ -10,7 +10,7 @@ export default function ForgotPassword() {
   const handleSubmit = async () => {
     setLoading(true);
     try {
-      const res = await fetch("http://62.238.31.43:3000/api/auth/forgot-password", {
+      const res = await fetch("https://medicalsafe.duckdns.org/api/auth/forgot-password", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

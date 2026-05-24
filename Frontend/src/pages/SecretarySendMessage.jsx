@@ -19,7 +19,7 @@ export default function SecretarySendMessage() {
   const token = localStorage.getItem("token");
 
   const fetchDoctors = async () => {
-    const res = await fetch("http://62.238.31.43:3000/api/secretary/doctors", {
+    const res = await fetch("https://medicalsafe.duckdns.org/api/secretary/doctors", {
       headers: { Authorization: `Bearer ${token}` },
     });
 
@@ -28,7 +28,7 @@ export default function SecretarySendMessage() {
   };
 
   const fetchHistory = async () => {
-    const res = await fetch("http://62.238.31.43:3000/api/secretary/messages/sent", {
+    const res = await fetch("https://medicalsafe.duckdns.org/api/secretary/messages/sent", {
       headers: { Authorization: `Bearer ${token}` },
     });
 
@@ -57,7 +57,7 @@ export default function SecretarySendMessage() {
       return;
     }
 
-    const res = await fetch("http://62.238.31.43:3000/api/secretary/messages", {
+    const res = await fetch("https://medicalsafe.duckdns.org/api/secretary/messages", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

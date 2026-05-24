@@ -66,7 +66,7 @@ const [messageAlert, setMessageAlert] = useState("");
     try {
       const token = localStorage.getItem("token");
 
-      const res = await fetch("http://62.238.31.43:3000/api/doctor/me", {
+      const res = await fetch("https://medicalsafe.duckdns.org/api/doctor/me", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -83,7 +83,7 @@ const [messageAlert, setMessageAlert] = useState("");
       const token = localStorage.getItem("token");
   
       const res = await fetch(
-        `http://62.238.31.43:3000/api/doctor/patients/search?query=${value}`,
+        `https://medicalsafe.duckdns.org/api/doctor/patients/search?query=${value}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -102,7 +102,7 @@ const [messageAlert, setMessageAlert] = useState("");
     try {
       const token = localStorage.getItem("token");
 
-      const res = await fetch("http://62.238.31.43:3000/api/doctor/appointments", {
+      const res = await fetch("https://medicalsafe.duckdns.org/api/doctor/appointments", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -136,7 +136,7 @@ const [messageAlert, setMessageAlert] = useState("");
     try {
       const token = localStorage.getItem("token");
 
-      const res = await fetch("http://62.238.31.43:3000/api/doctor/requests", {
+      const res = await fetch("https://medicalsafe.duckdns.org/api/doctor/requests", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -159,7 +159,7 @@ const [messageAlert, setMessageAlert] = useState("");
     try {
       const token = localStorage.getItem("token");
   
-      const res = await fetch("http://62.238.31.43:3000/api/notifications", {
+      const res = await fetch("https://medicalsafe.duckdns.org/api/notifications", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -177,7 +177,7 @@ const [messageAlert, setMessageAlert] = useState("");
   
       // 🔹 סימון כנקרא
       await fetch(
-        `http://62.238.31.43:3000/api/notifications/${n._id}/read`,
+        `https://medicalsafe.duckdns.org/api/notifications/${n._id}/read`,
         {
           method: "PUT",
           headers: {
@@ -202,7 +202,7 @@ const [messageAlert, setMessageAlert] = useState("");
       }
       if (n.type === "doctor_message" && n.relatedMessage) {
         const res = await fetch(
-          `http://62.238.31.43:3000/api/messages/${n.relatedMessage}/conversation`,
+          `https://medicalsafe.duckdns.org/api/messages/${n.relatedMessage}/conversation`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -234,7 +234,7 @@ const [messageAlert, setMessageAlert] = useState("");
     try {
       const token = localStorage.getItem("token");
   
-      await fetch(`http://62.238.31.43:3000/api/notifications/${id}/read`, {
+      await fetch(`https://medicalsafe.duckdns.org/api/notifications/${id}/read`, {
         method: "PUT",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -251,7 +251,7 @@ const [messageAlert, setMessageAlert] = useState("");
       const token = localStorage.getItem("token");
   
       const res = await fetch(
-        `http://62.238.31.43:3000/api/messages/${selectedMessage._id}/reply`,
+        `https://medicalsafe.duckdns.org/api/messages/${selectedMessage._id}/reply`,
         {
           method: "POST",
           headers: {
@@ -266,7 +266,7 @@ const [messageAlert, setMessageAlert] = useState("");
         setReplyText("");
       
         const convRes = await fetch(
-          `http://62.238.31.43:3000/api/messages/${selectedMessage._id}/conversation`,
+          `https://medicalsafe.duckdns.org/api/messages/${selectedMessage._id}/conversation`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -330,7 +330,7 @@ setTimeout(() => setMessageAlert(""), 3000);
       const token = localStorage.getItem("token");
 
       const res = await fetch(
-        `http://62.238.31.43:3000/api/requests/${selectedRequest._id}/reply`,
+        `https://medicalsafe.duckdns.org/api/requests/${selectedRequest._id}/reply`,
         {
           method: "POST",
           headers: {
@@ -359,7 +359,7 @@ setTimeout(() => setMessageAlert(""), 3000);
       const token = localStorage.getItem("token");
 
       await fetch(
-        `http://62.238.31.43:3000/api/doctor/requests/${selectedRequest._id}/status`,
+        `https://medicalsafe.duckdns.org/api/doctor/requests/${selectedRequest._id}/status`,
         {
           method: "PUT",
           headers: {
@@ -399,7 +399,7 @@ setTimeout(() => setMessageAlert(""), 3000);
         })
         .filter((day) => day.slots.length > 0);
 
-      const res = await fetch("http://62.238.31.43:3000/api/doctor/availability", {
+      const res = await fetch("https://medicalsafe.duckdns.org/api/doctor/availability", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -453,7 +453,7 @@ setTimeout(() => setMessageAlert(""), 3000);
       const token = localStorage.getItem("token");
   
       const res = await fetch(
-        `http://62.238.31.43:3000/api/doctor/appointments/${id}/status`,
+        `https://medicalsafe.duckdns.org/api/doctor/appointments/${id}/status`,
         {
           method: "PUT",
           headers: {

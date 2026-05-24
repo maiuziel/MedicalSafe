@@ -21,7 +21,7 @@ export default function PatientFeedback() {
       const token = localStorage.getItem("token");
 
       const res = await fetch(
-        `http://62.238.31.43:3000/api/feedback/${appointmentId}`,
+        `https://medicalsafe.duckdns.org/api/feedback/${appointmentId}`,
         {
           method: "POST",
           headers: {
