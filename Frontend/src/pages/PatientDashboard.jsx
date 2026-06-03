@@ -388,6 +388,9 @@ export default function PatientDashboard() {
         <p className="font-medium text-gray-800">
           {appointment?.doctor?.fullName || "Doctor"}
         </p>
+        <p className="text-xs text-gray-500">
+          {appointment?.doctor?.specialization || ""}
+        </p>
         <p className="text-xs text-gray-400">
           {new Date(appointment.date).toLocaleString()}
         </p>
