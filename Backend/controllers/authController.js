@@ -39,9 +39,12 @@ const register = async (req, res) => {
 
     const userRole = 'patient';
 
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({ $or: [{ email }, { idNumber }] });
 
     if (existingUser) {
+      if (existingUser.idNumber === idNumber) {
+        return res.status(409).json({ message: 'User with this ID number already exists' });
+      }
       return res.status(409).json({ message: 'User already exists' });
     }
 
