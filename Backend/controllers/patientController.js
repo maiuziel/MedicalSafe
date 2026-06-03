@@ -37,6 +37,18 @@ const updateMyProfile = async (req, res) => {
     const userId = req.user.userId;
     const { fullName, phone, email } = req.body;
 
+    if (fullName && !/^[A-Z][a-z]+ [A-Z][a-z]+$/.test(fullName)) {
+      return res.status(400).json({ message: 'Full name must be in format: Firstname Lastname' });
+    }
+
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res.status(400).json({ message: 'Invalid email address' });
+    }
+
+    if (phone && !/^05\d{8}$/.test(phone)) {
+      return res.status(400).json({ message: 'Phone must be a valid Israeli number (05XXXXXXXX)' });
+    }
+
     const updatedPatient = await User.findByIdAndUpdate(
       userId,
       { fullName, phone, email },
