@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Sidebar from "../components/patient/Sidebar";
 
 const getProfileEndpoint = (role) => {
@@ -14,6 +15,7 @@ const getProfileEndpoint = (role) => {
 };
 
 export default function EditProfile() {
+  const navigate = useNavigate();
   const [form, setForm] = useState({
     fullName: "",
     email: "",
@@ -124,6 +126,10 @@ export default function EditProfile() {
 
       if (res.ok) {
         alert("Profile updated successfully");
+        const role = localStorage.getItem("role");
+        if (role === "doctor") navigate("/doctor");
+        else if (role === "secretary") navigate("/secretary");
+        else navigate("/patient");
       } else {
         alert(data.message || "Update failed");
       }
