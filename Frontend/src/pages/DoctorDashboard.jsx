@@ -619,7 +619,7 @@ setTimeout(() => setMessageAlert(""), 3000);
                     {a.status === "scheduled" && (
                       <>
                         <button onClick={() => updateAppointmentStatus(a._id, "completed")} className="bg-green-500 text-white px-2 py-1 rounded text-xs">✔ Complete</button>
-                        <button onClick={() => updateAppointmentStatus(a._id, "cancelled")} className="bg-red-500 text-white px-2 py-1 rounded text-xs">✖ Cancel</button>
+                        <button onClick={() => { if (window.confirm("Are you sure you want to cancel this appointment?")) updateAppointmentStatus(a._id, "cancelled"); }} className="bg-red-500 text-white px-2 py-1 rounded text-xs">✖ Cancel</button>
                       </>
                     )}
                     {a.status === "completed" && (
