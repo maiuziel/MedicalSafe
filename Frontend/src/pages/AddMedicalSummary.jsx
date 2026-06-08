@@ -149,7 +149,19 @@ export default function AddMedicalSummary() {
               <input
                 type="file"
                 multiple
-                onChange={(e) => { setFiles(Array.from(e.target.files)); setIsDirty(true); }}
+                accept=".pdf,.jpg,.jpeg,.png,.gif,.doc,.docx"
+                onChange={(e) => {
+                  const selected = Array.from(e.target.files);
+                  const allowed = ['application/pdf','image/jpeg','image/png','image/gif','application/msword','application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+                  const invalid = selected.filter(f => !allowed.includes(f.type));
+                  if (invalid.length > 0) {
+                    alert(`Unsupported file type: ${invalid.map(f => f.name).join(', ')}. Allowed: PDF, JPG, PNG, GIF, DOC, DOCX`);
+                    e.target.value = '';
+                    return;
+                  }
+                  setFiles(selected);
+                  setIsDirty(true);
+                }}
                 className="w-full border border-[#d1dce8] rounded-xl px-4 py-2.5 text-sm text-[#1f2a44] file:mr-3 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-sm file:bg-[#f0f4f9] file:text-[#3e4c66] hover:file:bg-[#e6edf5]"
               />
               {files.length > 0 && (

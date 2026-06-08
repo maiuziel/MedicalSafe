@@ -9,6 +9,21 @@ const storage = multer.diskStorage({
   }
 });
 
-const upload = multer({ storage });
+const allowedMimeTypes = [
+  'image/jpeg', 'image/png', 'image/gif',
+  'application/pdf',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+];
+
+const fileFilter = (req, file, cb) => {
+  if (allowedMimeTypes.includes(file.mimetype)) {
+    cb(null, true);
+  } else {
+    cb(new Error('File type not supported. Allowed: PDF, JPG, PNG, GIF, DOC, DOCX'), false);
+  }
+};
+
+const upload = multer({ storage, fileFilter });
 
 module.exports = upload;
