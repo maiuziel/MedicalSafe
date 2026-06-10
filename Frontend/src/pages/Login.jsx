@@ -7,6 +7,9 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [otpStep, setOtpStep] = useState(false);
+  const [otp, setOtp] = useState("");
+  const [userId, setUserId] = useState(null);
 
   const navigate = useNavigate();
 
@@ -14,38 +17,47 @@ export default function Login() {
     try {
       const res = await fetch("https://medicalsafe.duckdns.org/api/auth/login", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
 
       const data = await res.json();
 
-      console.log("SERVER RESPONSE:", data);
-
-      if (res.ok) {
-        localStorage.setItem("token", data.token);
-        localStorage.setItem("role", data.role); // ✅ הוספה
-
-        const role = data.role;
-
-        if (role === "patient") {
-          navigate("/patient");
-        } else if (role === "doctor") {
-          navigate("/doctor");
-        } else if (role === "secretary") {
-          navigate("/secretary");
-        } else {
-          navigate("/");
-        }
-
+      if (res.ok && data.otpRequired) {
+        setUserId(data.userId);
+        setOtpStep(true);
       } else {
-        alert(data.message || "Login failed ");
+        alert(data.message || "Login failed");
       }
     } catch (error) {
       console.error(error);
-      alert("Server error ");
+      alert("Server error");
+    }
+  };
+
+  const handleVerifyOtp = async () => {
+    try {
+      const res = await fetch("https://medicalsafe.duckdns.org/api/auth/verify-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, otp }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("role", data.role);
+        if (data.role === "patient") navigate("/patient");
+        else if (data.role === "doctor") navigate("/doctor");
+        else if (data.role === "secretary") navigate("/secretary");
+        else navigate("/");
+      } else {
+        alert(data.message || "Invalid code");
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Server error");
     }
   };
 
@@ -59,7 +71,6 @@ export default function Login() {
           {/* צד שמאל */}
           <div className="w-1/2 p-10 flex flex-col justify-center">
 
-            {/* 🔥 לוגו חדש במקום הטקסט */}
             <div className="flex items-center gap-2 mb-6">
               <FaShieldAlt className="text-[#5d95f7] text-2xl" />
               <h1 className="text-[22px] font-semibold text-[#1f2a44]">
@@ -67,62 +78,82 @@ export default function Login() {
               </h1>
             </div>
 
-            <h2 className="text-xl font-semibold mb-2 text-gray-800">
-              Login
-            </h2>
+            {!otpStep ? (
+              <>
+                <h2 className="text-xl font-semibold mb-2 text-gray-800">Login</h2>
+                <p className="text-gray-400 mb-6 text-sm">Welcome back! Please login to your account.</p>
 
-            <p className="text-gray-400 mb-6 text-sm">
-              Welcome back! Please login to your account.
-            </p>
+                <input
+                  type="email"
+                  placeholder="example@medicalsafe.com"
+                  className="w-full mb-4 p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300 text-sm"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
 
-            <input
-              type="email"
-              placeholder="example@medicalsafe.com"
-              className="w-full mb-4 p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300 text-sm"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
+                <div className="relative mb-4">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    placeholder="••••••••"
+                    className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300 text-sm"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                  <span
+                    onClick={() => setShowPassword((prev) => !prev)}
+                    className="absolute right-3 top-3 text-gray-400 text-sm cursor-pointer select-none"
+                  >
+                    {showPassword ? "Hide" : "Show"}
+                  </span>
+                </div>
 
-            <div className="relative mb-4">
-              <input
-                type={showPassword ? "text" : "password"}
-                placeholder="••••••••"
-                className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300 text-sm"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
+                <p onClick={() => navigate("/forgot-password")} className="text-sm text-gray-400 cursor-pointer mb-4">
+                  Forgot password?
+                </p>
 
-              <span
-                onClick={() => setShowPassword((prev) => !prev)}
-                className="absolute right-3 top-3 text-gray-400 text-sm cursor-pointer select-none"
-              >
-                {showPassword ? "Hide" : "Show"}
-              </span>
-            </div>
+                <button
+                  onClick={handleLogin}
+                  className="w-full bg-gradient-to-r from-blue-400 to-blue-600 text-white p-3 rounded-lg text-sm shadow-md hover:opacity-90 transition"
+                >
+                  Login
+                </button>
 
-            <p
-              onClick={() => navigate("/forgot-password")}
-              className="text-sm text-gray-400 cursor-pointer"
-            >
-              Forgot password?
-            </p>
+                <p className="text-xs text-gray-400 mt-5 text-center">
+                  Don’t have an account?{" "}
+                  <span onClick={() => navigate("/register")} className="text-blue-500 cursor-pointer">Register</span>
+                </p>
+              </>
+            ) : (
+              <>
+                <h2 className="text-xl font-semibold mb-2 text-gray-800">Verify Your Identity</h2>
+                <p className="text-gray-400 mb-6 text-sm">
+                  A 6-digit code was sent to <strong>{email}</strong>. Enter it below.
+                </p>
 
-            <button
-              onClick={handleLogin}
-              className="w-full bg-gradient-to-r from-blue-400 to-blue-600 text-white p-3 rounded-lg text-sm shadow-md hover:opacity-90 transition"
-            >
-              Login
-            </button>
+                <input
+                  type="text"
+                  maxLength={6}
+                  placeholder="______"
+                  className="w-full mb-6 p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300 text-sm text-center tracking-widest text-lg"
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value)}
+                />
 
-            <p className="text-xs text-gray-400 mt-5 text-center">
-              Don’t have an account?{" "}
-              <span 
-                onClick={() => navigate("/register")}
-                className="text-blue-500 cursor-pointer"
-              >
-                Register
-              </span>
-            </p>
+                <button
+                  onClick={handleVerifyOtp}
+                  className="w-full bg-gradient-to-r from-blue-400 to-blue-600 text-white p-3 rounded-lg text-sm shadow-md hover:opacity-90 transition"
+                >
+                  Verify Code
+                </button>
+
+                <p
+                  onClick={() => { setOtpStep(false); setOtp(""); }}
+                  className="text-sm text-gray-400 cursor-pointer mt-4 text-center"
+                >
+                  ← Back to login
+                </p>
+              </>
+            )}
 
             <p className="text-[10px] text-gray-300 mt-6 text-center">
               Your information is secure and encrypted.

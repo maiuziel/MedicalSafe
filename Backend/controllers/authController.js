@@ -1,9 +1,11 @@
 const User = require('../models/User');
 const AuditLog = require('../models/AuditLog');
+const OTP = require('../models/OTP');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const crypto = require("crypto");
 const sendResetEmail = require("../utils/mailer");
+const sendOtpEmail = require("../utils/sendOtpEmail");
 const tokenBlacklist = require('../utils/tokenBlacklist');
 
 // REGISTER
@@ -97,27 +99,17 @@ const login = async (req, res) => {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
-    const token = jwt.sign(
-      {
-        userId: user._id,
-        role: user.role,
-      },
-      process.env.JWT_SECRET,
-      { expiresIn: '1h' }
-    );
-
-    await AuditLog.create({
+    // Generate OTP and send to email
+    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+    await OTP.deleteMany({ userId: user._id });
+    await OTP.create({
       userId: user._id,
-      action: 'USER_LOGIN',
-      resource: 'auth',
-      ipAddress: req.ip,
-      userAgent: req.headers['user-agent'],
+      code: otpCode,
+      expiresAt: new Date(Date.now() + 5 * 60 * 1000),
     });
+    await sendOtpEmail(user.email, otpCode);
 
-    return res.json({
-      token,
-      role: user.role,
-    });
+    return res.json({ otpRequired: true, userId: user._id });
 
   } catch (error) {
     console.error(error);
@@ -328,5 +320,41 @@ module.exports = {
   changePassword,
   createDoctor,
   createUserByAdmin,
-  logout
+  logout,
+  verifyOtp
 };
+
+async function verifyOtp(req, res) {
+  try {
+    const { userId, otp } = req.body;
+
+    const record = await OTP.findOne({ userId, code: otp });
+    if (!record || record.expiresAt < new Date()) {
+      return res.status(400).json({ message: 'Invalid or expired OTP' });
+    }
+
+    await OTP.deleteMany({ userId });
+
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    const token = jwt.sign(
+      { userId: user._id, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: '1h' }
+    );
+
+    await AuditLog.create({
+      userId: user._id,
+      action: 'USER_LOGIN',
+      resource: 'auth',
+      ipAddress: req.ip,
+      userAgent: req.headers['user-agent'],
+    });
+
+    return res.json({ token, role: user.role });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: 'Server error' });
+  }
+}

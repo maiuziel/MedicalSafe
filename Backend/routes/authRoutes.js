@@ -9,7 +9,8 @@ const {
   resetPassword,
   changePassword,
   createUserByAdmin,
-  logout
+  logout,
+  verifyOtp
 } = require("../controllers/authController");
 
 const { authenticate, authorizeRoles } = require("../middleware/authMiddleware");
@@ -39,5 +40,6 @@ router.post('/forgot-password', forgotPasswordLimiter, forgotPassword);
 router.post('/reset-password/:token', resetPassword);
 router.post('/change-password', authenticate, changePassword);
 router.post('/logout', authenticate, logout);
+router.post('/verify-otp', loginLimiter, verifyOtp);
 
 module.exports = router;
