@@ -24,10 +24,6 @@ export default function AddMedicalSummary() {
     return false;
   });
 
-  if (!appointment) {
-    return <p className="p-6 text-[#6b7a90]">No appointment data</p>;
-  }
-
   useEffect(() => {
     const handleBeforeUnload = (e) => {
       if (isDirty) {
@@ -38,6 +34,10 @@ export default function AddMedicalSummary() {
     window.addEventListener("beforeunload", handleBeforeUnload);
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, [isDirty]);
+
+  if (!appointment) {
+    return <p className="p-6 text-[#6b7a90]">No appointment data</p>;
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
