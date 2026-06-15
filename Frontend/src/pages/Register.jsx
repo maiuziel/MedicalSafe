@@ -120,6 +120,7 @@ export default function Register() {
               <input
                 type="text"
                 placeholder="Full Name"
+                autoComplete="off"
                 className="w-full p-3 border border-gray-200 rounded-lg"
                 onChange={(e) =>
                   setForm({ ...form, fullName: e.target.value })
@@ -151,6 +152,7 @@ export default function Register() {
               <input
                 type="text"
                 placeholder="ID Number"
+                autoComplete="off"
                 className="w-full p-3 border border-gray-200 rounded-lg"
                 onChange={(e) =>
                   setForm({
@@ -183,6 +185,7 @@ export default function Register() {
               <input
                 type="email"
                 placeholder="example@medicalsafe.com"
+                autoComplete="off"
                 className="w-full p-3 border border-gray-200 rounded-lg"
                 onChange={(e) =>
                   setForm({ ...form, email: e.target.value })
@@ -213,6 +216,7 @@ export default function Register() {
                 <input
                     type="text"
                     placeholder="Phone Number"
+                    autoComplete="off"
                     className="w-full p-3 border border-gray-200 rounded-lg"
                     onChange={(e) =>
                     setForm({
@@ -244,6 +248,7 @@ export default function Register() {
               <input
                 type="password"
                 placeholder="••••••••"
+                autoComplete="new-password"
                 className="w-full p-3 border border-gray-200 rounded-lg"
                 onChange={(e) =>
                   setForm({ ...form, password: e.target.value })
@@ -275,6 +280,7 @@ export default function Register() {
               <input
                 type="password"
                 placeholder="Confirm Password"
+                autoComplete="new-password"
                 className="w-full p-3 border border-gray-200 rounded-lg"
                 onChange={(e) =>
                   setForm({ ...form, confirmPassword: e.target.value })
