@@ -66,7 +66,6 @@ const createFeedback = async (req, res) => {
 const getDoctorFeedbacks = async (req, res) => {
     try {
       const feedbacks = await Feedback.find({ doctor: req.user.userId })
-        .populate('patient', 'fullName email')
         .populate('appointment', 'date status')
         .sort({ createdAt: -1 });
   

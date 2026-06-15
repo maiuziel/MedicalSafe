@@ -5,7 +5,6 @@ export default function DoctorFeedbacks() {
   const [feedbacks, setFeedbacks] = useState([]);
   const [averageRating, setAverageRating] = useState(0);
   const [totalFeedbacks, setTotalFeedbacks] = useState(0);
-  const [search, setSearch] = useState("");
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
   const [sortBy, setSortBy] = useState("dateDesc");
@@ -31,16 +30,14 @@ export default function DoctorFeedbacks() {
 
   const filteredFeedbacks = feedbacks
     .filter((f) => {
-      const matchesSearch = f.patient.fullName.toLowerCase().includes(search.toLowerCase());
       const date = new Date(f.createdAt);
       const matchesFrom = fromDate ? date >= new Date(fromDate) : true;
       const matchesTo = toDate ? date <= new Date(toDate + "T23:59:59") : true;
-      return matchesSearch && matchesFrom && matchesTo;
+      return matchesFrom && matchesTo;
     })
     .sort((a, b) => {
       if (sortBy === "dateDesc") return new Date(b.createdAt) - new Date(a.createdAt);
       if (sortBy === "dateAsc") return new Date(a.createdAt) - new Date(b.createdAt);
-      if (sortBy === "patient") return a.patient.fullName.localeCompare(b.patient.fullName);
       if (sortBy === "ratingDesc") return b.rating - a.rating;
       if (sortBy === "ratingAsc") return a.rating - b.rating;
       return 0;
@@ -81,13 +78,6 @@ export default function DoctorFeedbacks() {
         {/* Filters */}
         <div className="bg-white p-4 rounded-xl shadow-sm mb-6 flex flex-wrap gap-3 items-center">
           <input
-            type="text"
-            placeholder="Search by patient name..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="flex-1 min-w-[180px] p-2 border border-gray-200 rounded-lg text-sm"
-          />
-          <input
             type="date"
             value={fromDate}
             onChange={(e) => setFromDate(e.target.value)}
@@ -106,13 +96,12 @@ export default function DoctorFeedbacks() {
           >
             <option value="dateDesc">Date: Newest first</option>
             <option value="dateAsc">Date: Oldest first</option>
-            <option value="patient">Patient name A-Z</option>
             <option value="ratingDesc">Rating: High to Low</option>
             <option value="ratingAsc">Rating: Low to High</option>
           </select>
-          {(fromDate || toDate || search) && (
+          {(fromDate || toDate) && (
             <button
-              onClick={() => { setFromDate(""); setToDate(""); setSearch(""); }}
+              onClick={() => { setFromDate(""); setToDate(""); }}
               className="px-3 py-2 text-sm bg-gray-100 rounded-lg hover:bg-gray-200"
             >
               Clear
@@ -130,7 +119,7 @@ export default function DoctorFeedbacks() {
             filteredFeedbacks.map((f) => (
               <div key={f._id} className="bg-white p-5 rounded-xl shadow-sm">
                 <div className="flex justify-between mb-2">
-                  <p className="font-semibold text-gray-800">{f.patient.fullName}</p>
+                  <p className="font-semibold text-gray-500">Anonymous Patient</p>
                   <p className="text-sm text-gray-400">
                     {new Date(f.createdAt).toLocaleDateString()}
                   </p>
