@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useParams, useLocation, useBlocker } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import Sidebar from "../components/patient/Sidebar";
 import { Stethoscope } from "lucide-react";
 
@@ -16,13 +16,6 @@ export default function AddMedicalSummary() {
   const [notes, setNotes] = useState("");
   const [files, setFiles] = useState([]);
   const [isDirty, setIsDirty] = useState(false);
-
-  useBlocker(({ currentLocation, nextLocation }) => {
-    if (isDirty && currentLocation.pathname !== nextLocation.pathname) {
-      return !window.confirm("You have unsaved changes. Leave anyway?");
-    }
-    return false;
-  });
 
   useEffect(() => {
     const handleBeforeUnload = (e) => {
